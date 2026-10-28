@@ -48,7 +48,7 @@ alumnos ni asistencias.
    reabre la aplicación en el mismo dispositivo, retira la pulsera y vuelve
    a acercarla,
    **Then** se muestra exactamente el mismo identificador.
-5. **Given** una lectura fallida o una pulsera sin identificador legible,
+5. **Given** un fallo de lectura notificado o una pulsera detectada sin identificador legible,
    **When** termina el intento, **Then** se informa el error sin identificador
    para ese intento, el historial anterior sigue visible y diferenciado del
    resultado actual, y se puede intentar de nuevo.
@@ -62,8 +62,12 @@ alumnos ni asistencias.
 
 ### Edge Cases
 
-- Si se acerca una pulsera que el dispositivo no puede leer, se muestra un
-  error comprensible y se permite otro intento.
+- Si se notifica un fallo o se detecta una pulsera sin identificador, se muestra
+  un error comprensible y se permite otro intento. Una pulsera que no genera
+  ninguna detección no puede distinguirse de la ausencia de una pulsera: la
+  pantalla permanece sin un nuevo resultado y la prueba manual registra la
+  falta de detección como resultado no satisfactorio, sin inventar un error
+  ni un identificador. No se añade un temporizador de lectura.
 - Si un intento falla después de una lectura exitosa, se muestra el error
   actual sin identificador para ese intento; el historial de lecturas
   exitosas sigue visible, identificado como información anterior.
@@ -94,7 +98,7 @@ alumnos ni asistencias.
   reiniciarla y actualizar claramente el resultado de cada intento. DEBE
   contar como nueva lectura de una misma pulsera solo su retirada y posterior
   acercamiento, no su permanencia junto al dispositivo.
-- **FR-005**: Ante una lectura fallida o sin identificador, la aplicación DEBE
+- **FR-005**: Ante un fallo de lectura notificado o una detección sin identificador, la aplicación DEBE
   mostrar un error sin atribuirle ningún identificador anterior y permitir
   reintentar. El historial de lecturas exitosas DEBE permanecer visible y
   claramente identificado como anterior.
@@ -131,7 +135,7 @@ alumnos ni asistencias.
   distinguir cuál corresponde al intento actual.
 - **SC-003**: En cada lectura exitosa de la prueba, el resultado es visible
   en un máximo de cinco segundos desde que se acerca la pulsera al dispositivo.
-- **SC-004**: Ante una lectura fallida después de un éxito durante la prueba,
+- **SC-004**: Ante un fallo notificado o una detección sin identificador después de un éxito,
   el operador ve el error sin identificador para el intento fallido y el
   historial anterior permanece visible con una indicación clara de que
   corresponde a lecturas exitosas previas; puede reintentar sin reiniciar.
