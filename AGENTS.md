@@ -25,10 +25,11 @@ Las dependencias adicionales deben incorporarse únicamente cuando sean necesari
 
 Usar:
 
+- `docs/roadmap.md` para prioridades y orden aproximado de capacidades.
 - `docs/product.md` para el contexto estable del producto.
 - `docs/architecture.md` para la arquitectura actual del sistema.
 - `docs/decisions/` para decisiones arquitectónicas.
-- `specs/` para requisitos y planes específicos de cada feature.
+- `docs/specs/` para requisitos y planes específicos de cada feature.
 
 No asumir que documentación desactualizada sigue siendo correcta.
 
