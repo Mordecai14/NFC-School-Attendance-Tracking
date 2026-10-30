@@ -2,7 +2,7 @@
 
 **Branch**: `main` | **Date**: 2026-10-27 | **Spec**: [spec.md](spec.md)
 
-**Input**: Especificación en `specs/001-read-nfc-wristbands/spec.md`.
+**Input**: Especificación en `docs/specs/001-read-nfc-wristbands/spec.md`.
 El identificador de feature de Spec Kit es `001-read-nfc-wristbands`;
 `001-nfc-reading` en la solicitud se refiere a esta misma feature.
 
@@ -26,7 +26,7 @@ solo añadir su peer `@expo/config-plugins` si la instalación lo exige.
 **Storage**: Ninguno. Historial en memoria durante la sesión de la pantalla;
 no almacenar identificadores al cerrar la aplicación.
 
-**Testing**: Lint, `tsc --noEmit`, pruebas controladas del estado transitorio y
+**Testing**: ESLint, `tsc --noEmit`, pruebas controladas del estado transitorio y
 validación obligatoria en un Android físico con pulseras de muestra. No existe
 runner configurado: para lógica pura se puede usar el runner integrado de Node
 24 disponible en el entorno, sin añadir un framework para simular NFC.
@@ -103,7 +103,7 @@ validaciones físicas pendientes, no como requisitos a eludir.
 ### Documentation (this feature)
 
 ```text
-specs/001-read-nfc-wristbands/
+docs/specs/001-read-nfc-wristbands/
 ├── spec.md
 ├── plan.md
 ├── research.md
@@ -166,6 +166,19 @@ para que desaparezca la UI de muestra.
   copiar UIDs al repositorio ni a telemetría. Un spike con resultado negativo
   puede aportar una conclusión útil, pero no valida la feature como exitosa.
 
+## Resultados de implementación
+
+- La build Android y la aceptación manual en el dispositivo con dos pulseras
+  están documentadas en [validation.md](validation.md). Los UUID no se
+  reproducen en la documentación.
+- Las seis pruebas de estado pasan y `pnpm exec tsc --noEmit` termina sin errores.
+- ESLint 9 y la configuración flat de Expo quedaron instalados tras aprobación
+  posterior del operador. `pnpm lint` encuentra un issue preexistente en
+  `src/hooks/use-color-scheme.web.ts`; no pertenece al alcance NFC.
+- Se observó una lectura duplicada en una exposición sostenida inicial; no volvió
+  a ocurrir en dos ensayos posteriores. El comportamiento sigue registrado como
+  anomalía conocida, sin debounce temporal.
+
 ## Riesgos técnicos
 
 - El identificador de Android puede ser aleatorio o inexistente según la
@@ -175,11 +188,10 @@ para que desaparezca la UI de muestra.
 - La compilación nativa, el plugin y el peer opcional pueden requerir ajustes
   de compatibilidad con Expo 58; reconstruir tras cambios nativos y reportar
   cualquier bloqueo, sin añadir dependencias no justificadas.
-- La validación base ya falla antes de esta feature: `pnpm lint` intenta
-  instalar ESLint automáticamente por falta de configuración y pnpm bloquea
-  un script transitivo; `pnpm exec tsc --noEmit` detecta tres errores en
-  archivos de ejemplo existentes. Registrar estos fallos sin convertir su
-  corrección en una ampliación silenciosa del spike.
+- La validación base reportó errores de TypeScript en archivos de ejemplo;
+  actualmente `pnpm exec tsc --noEmit` pasa tras retirar la ruta de ejemplo y
+  corregir el tipo `ref`. El lint completo conserva un hallazgo en un hook web
+  preexistente; se registra como deuda separada, no como defecto de lectura NFC.
 - El simulador y Expo Go no sustituyen la prueba física; si no hay dispositivo
   o muestras, el estado del spike es «pendiente de validación», no «exitoso».
 

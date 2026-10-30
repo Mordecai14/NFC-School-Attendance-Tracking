@@ -1,98 +1,124 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
-
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+import { useNfcReader } from '@/hooks/use-nfc-reader';
 
 export default function HomeScreen() {
+  const state = useNfcReader();
+
+  const currentLabel =
+    state.availability === 'unavailable'
+      ? 'No es posible escanear. Activá NFC para continuar.'
+      : state.current.status === 'waiting'
+        ? 'Esperando una pulsera…'
+        : state.current.status === 'detected'
+          ? 'Pulsera detectada'
+          : state.current.message;
+
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <SafeAreaView style={styles.safeArea}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.title}>Lectura de pulseras NFC</Text>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+        <View
+          accessibilityLiveRegion="polite"
+          style={[
+            styles.resultCard,
+            state.current.status === 'error' && styles.errorCard,
+            state.availability === 'unavailable' && styles.unavailableCard,
+          ]}
+        >
+          <Text style={styles.sectionTitle}>Estado actual</Text>
+          <Text style={styles.resultText}>{currentLabel}</Text>
+          {state.availability === 'available' && state.current.status === 'detected' && (
+            <Text selectable style={styles.identifier}>
+              {state.current.identifier}
+            </Text>
+          )}
+        </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        <View style={styles.historySection}>
+          <Text style={styles.sectionTitle}>Historial de lecturas exitosas</Text>
+          {state.history.length === 0 ? (
+            <Text style={styles.secondaryText}>Todavía no hay lecturas.</Text>
+          ) : (
+            state.history.map((identifier, index) => (
+              <View key={`${index}-${identifier}`} style={styles.historyRow}>
+                <Text style={styles.historyLabel}>Lectura {index + 1}</Text>
+                <Text selectable style={styles.historyIdentifier}>
+                  {identifier}
+                </Text>
+              </View>
+            ))
+          )}
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    backgroundColor: '#f5f7fa',
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  content: {
+    flexGrow: 1,
+    padding: 24,
+    gap: 24,
   },
   title: {
-    textAlign: 'center',
+    color: '#17212b',
+    fontSize: 24,
+    fontWeight: '700',
   },
-  code: {
-    textTransform: 'uppercase',
+  resultCard: {
+    padding: 20,
+    borderRadius: 12,
+    backgroundColor: '#e8f4ed',
+    gap: 10,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  errorCard: {
+    backgroundColor: '#fff1f0',
+  },
+  unavailableCard: {
+    backgroundColor: '#fff6df',
+  },
+  sectionTitle: {
+    color: '#344454',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  resultText: {
+    color: '#17212b',
+    fontSize: 18,
+  },
+  identifier: {
+    color: '#17212b',
+    fontSize: 20,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+  historySection: {
+    gap: 12,
+  },
+  secondaryText: {
+    color: '#657384',
+    fontSize: 15,
+  },
+  historyRow: {
+    padding: 14,
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
+    gap: 6,
+  },
+  historyLabel: {
+    color: '#657384',
+    fontSize: 13,
+  },
+  historyIdentifier: {
+    color: '#17212b',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

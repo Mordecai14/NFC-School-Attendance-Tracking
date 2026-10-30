@@ -30,12 +30,10 @@ pnpm exec expo run:android --device
 pnpm exec tsc --noEmit
 ```
 
-Ejecutar también `pnpm lint` cuando exista una configuración de ESLint:
-actualmente `expo lint` intenta instalar dependencias por su cuenta y falla
-por la política de scripts de pnpm, modificando `package.json` y el lockfile
-en el proceso. La validación de TypeScript ya informa tres errores en
-archivos de ejemplo previos a la feature. Registrar ambos resultados y
-separar su corrección del alcance NFC salvo aprobación expresa.
+Ejecutar `pnpm lint` y `pnpm exec tsc --noEmit`. Este repositorio usa ESLint 9
+con la configuración flat de Expo en `eslint.config.js`. Registrar los errores
+que queden y distinguir los hallazgos preexistentes de los introducidos por la
+feature; no aceptar una instalación automática o silenciosa de dependencias.
 
 Prebuild genera o actualiza la configuración nativa local. Comprobar en
 `android/app/src/main/AndroidManifest.xml` y en el manifiesto fusionado de la
@@ -95,12 +93,31 @@ constancia y distinguirlo de la verificación controlada del manejo de errores.
 Comprobar la lógica pura de historial y resultado con el runner integrado de
 Node 24, si se extrae un módulo sin dependencias nativas: cinco éxitos recientes,
 relecturas válidas del mismo ID, error que borra solo el identificador actual,
-éxito después de error y estado inicial vacío. Documentar el comando concreto
-con las rutas de los tests al implementarlos; no añadir un framework ni una UI
-de simulación para este spike. La ausencia de eventos no debe crear resultados.
+éxito después de error y estado inicial vacío. Ejecutar:
+
+```sh
+node --test tests/nfc-reader-state.test.mjs
+```
+
+No añadir un framework ni una UI de simulación para este spike. La ausencia de
+eventos no debe crear resultados.
+
+### Entorno usado para esta validación
+
+| Componente | Versión/valor |
+|------------|---------------|
+| Node.js | 24.21.0 |
+| pnpm | 12.11.2 |
+| Expo | ~58.0.20 |
+| React Native | 0.88.0 |
+| `react-native-nfc-manager` | 4.2.0 |
+| ESLint | 9.39.5 |
+| `eslint-config-expo` | 58.0.4 |
+| Java | Zulu OpenJDK 17.0.20.1 |
+| Dispositivo | 25078PC3EG, Android 16 |
 
 Registrar tres conclusiones distintas: viabilidad NFC física, manejo de errores
-verificado (evidencia física o controlada) y calidad de implementación. No marcar
-la implementación terminada si lint/tipos siguen bloqueados o faltan pruebas;
-su corrección requiere alcance aprobado. Los ensayos controlados no demuestran
-compatibilidad, estabilidad del UID ni retirada física de las pulseras.
+verificado (evidencia física o controlada) y calidad de implementación. Dejar
+explícitos los bloqueos de lint/tipos que sean ajenos al alcance. Los ensayos
+controlados no demuestran compatibilidad, estabilidad del UID ni retirada física
+de las pulseras.
