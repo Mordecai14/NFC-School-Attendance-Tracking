@@ -13,7 +13,7 @@ Sync Impact Report
 ## Core Principles
 
 ### I. Especificación y aceptación
-Toda funcionalidad DEBE tener una especificación en `specs/` con alcance y criterios de
+Toda funcionalidad DEBE tener una especificación en `docs/specs/` con alcance y criterios de
 aceptación explícitos antes de implementarse. Los requisitos ambiguos DEBEN aclararse
 antes de escribir código; no se DEBEN inventar reglas de producto.
 
