@@ -2,7 +2,7 @@
 
 **Rama de la funcionalidad**: `[002-data-model]`
 **Creada**: 2026-10-29
-**Estado**: Borrador
+**Estado**: Completada el 2026-10-30. El entregable es el modelo conceptual documentado; no incluye implementación de código, almacenamiento ni sincronización.
 **Entrada**: Descripción del usuario: "Comprender y planifica lo necesario para poder realizar el desarrollo del paso 002 — Modelo de datos de la hoja de ruta."
 
 ## Aclaraciones

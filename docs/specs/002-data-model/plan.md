@@ -67,9 +67,9 @@ docs/specs/002-data-model/
 
 No se prevén cambios en `src/`, `tests/`, `android/`, configuración o dependencias. No se genera `contracts/`: esta funcionalidad no expone interfaces de programación de aplicaciones ni interfaces externas.
 
-### Discrepancia documental conocida
+### Discrepancia documental resuelta al cierre
 
-`docs/architecture.md` todavía indica que NFC no está implementado; el código actual contiene `useNfcReader` y la validación de 001 registra lectura física confirmada. Esta inconsistencia debe corregirse en una tarea documental apropiada, pero no se amplía 002 para modificar arquitectura o reabrir 001.
+Al iniciar este plan, `docs/architecture.md` indicaba que NFC no estaba implementado, aunque el código incluía `useNfcReader` y la validación de 001 registraba lectura física confirmada. Al cerrar 002, se actualizó la arquitectura para reflejar que la lectura NFC en Android fue validada con dos pulseras de muestra; la anomalía y los límites de esa validación permanecen documentados en `docs/specs/001-read-nfc-wristbands/validation.md`. La integración con backend y la persistencia offline siguen pendientes.
 
 ## Manejo de estados y errores
 
