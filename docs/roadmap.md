@@ -49,7 +49,7 @@ Modelo conceptual documentado en `docs/specs/002-data-model/data-model.md`, con 
 
 Objetivo:
 
-Crear la infraestructura mínima necesaria para almacenar y consultar los datos principales del sistema.
+Crear la base de datos y el acceso autenticado necesarios para almacenar y consultar los datos principales del sistema, con aislamiento entre escuelas.
 
 Incluye inicialmente:
 
@@ -57,7 +57,13 @@ Incluye inicialmente:
 - estructura de tablas;
 - relaciones;
 - restricciones;
-- configuración básica de seguridad.
+- configuración básica de seguridad y aislamiento de datos por escuela;
+- una cuenta compartida por escuela, creada manualmente;
+- pantalla de inicio y cierre de sesión, sin registro público.
+
+No incluye registro de entradas o salidas desde la aplicación, persistencia offline ni sincronización; corresponden a pasos posteriores de la hoja de ruta.
+
+Especificación: `docs/specs/003-supabase-foundation/spec.md`.
 
 ## Siguiente
 
