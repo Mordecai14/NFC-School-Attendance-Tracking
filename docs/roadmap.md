@@ -1,12 +1,12 @@
-# Roadmap
+# Hoja de ruta
 
-Este roadmap define el orden aproximado de las capacidades necesarias para completar el MVP.
+Esta hoja de ruta define el orden aproximado de las capacidades necesarias para completar el MVP.
 
 No es un contrato rígido.
 
 Puede cambiar conforme aparezcan nuevos aprendizajes técnicos o de producto.
 
-## Now
+## Completado
 
 ### 001 — Lectura NFC
 
@@ -16,7 +16,7 @@ Validar que un dispositivo Android pueda leer de forma confiable las pulseras NF
 
 Estado:
 
-En implementación.
+Completada; los resultados y límites de la validación están registrados en `docs/specs/001-read-nfc-wristbands/validation.md`.
 
 Criterio de salida:
 
@@ -27,23 +27,23 @@ Criterio de salida:
 
 ---
 
-## Next
-
 ### 002 — Modelo de datos
 
 Objetivo:
 
-Definir cómo representar:
+Definir cómo representar escuelas, alumnos, pulseras, tutores y eventos de asistencia.
 
-- escuelas;
-- alumnos;
-- pulseras;
-- tutores;
-- eventos de asistencia.
+Estado:
 
-Resultado esperado:
+Completada el 2026-10-30 como entregable documental. No incluye implementación de entidades, almacenamiento ni sincronización.
 
-Un modelo consistente que pueda soportar el flujo completo del MVP.
+Resultado:
+
+Modelo conceptual documentado en `docs/specs/002-data-model/data-model.md`, con atributos aprobados, relaciones, cardinalidades, invariantes, privacidad y límites pendientes.
+
+---
+
+## Ahora
 
 ### 003 — Base de Supabase
 
@@ -58,6 +58,8 @@ Incluye inicialmente:
 - relaciones;
 - restricciones;
 - configuración básica de seguridad.
+
+## Siguiente
 
 ### 004 — Identificación de alumno mediante pulsera
 
@@ -125,7 +127,7 @@ Validar especialmente:
 
 ---
 
-## Later
+## Más adelante
 
 Capacidades posteriores al MVP inicial:
 

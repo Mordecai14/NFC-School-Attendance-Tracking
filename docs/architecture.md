@@ -6,7 +6,7 @@ El proyecto actualmente es una aplicación React Native construida con Expo y Ty
 
 Todavía no se ha implementado integración con backend.
 
-Todavía no se ha implementado integración NFC.
+La lectura NFC en Android está implementada y validada con dos pulseras de muestra. La anomalía observada durante exposición sostenida y los límites de esa validación están documentados en [el registro de validación de 001](specs/001-read-nfc-wristbands/validation.md).
 
 Todavía no se ha implementado una capa de persistencia offline.
 

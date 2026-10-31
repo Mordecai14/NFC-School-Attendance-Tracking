@@ -38,9 +38,9 @@ La pulsera reemplazada conserva su registro histórico y deja de ser la activa. 
 ## Ejemplos de validación
 
 - **Tutor compartido**: dos alumnos de la misma escuela pueden estar relacionados con el mismo tutor; cada uno puede tener además otro tutor.
-- **Reemplazo**: el alumno conserva la pulsera anterior como histórica y recibe una nueva pulsera activa con identificador NFC único. Los eventos existentes siguen asociados al alumno.
+- **Reemplazo (ejemplo ficticio)**: el alumno ficticio A tiene la pulsera conceptual P1. Tras reemplazarla por daño, P1 queda como histórica y P2 pasa a ser la activa; un evento de entrada previo E1 sigue asociado al alumno A, sin alterarse ni reasignarse a P2.
 - **Reintento sin conexión**: un evento creado sin conexión mantiene la misma identidad y momento de ocurrencia al reenviarse. Una segunda entrada real es otro evento; la política para decidir si fue accidentalmente duplicada pertenece a otra funcionalidad.
-- **Eventos desde dispositivos distintos**: dos eventos creados sin conexión en dispositivos distintos conservan identidades globalmente únicas; un reintento del mismo evento conserva la identidad original.
+- **Eventos desde dispositivos distintos (ejemplo ficticio)**: el dispositivo D1 registra sin conexión el evento conceptual E1 en el momento T1 y el dispositivo D2 registra E2 en T2. E1 y E2 tienen identidades distintas y globalmente únicas; al reenviar E1, conserva su identidad y T1. Estas etiquetas son solo ilustrativas y no definen un formato ni un mecanismo de generación de identificadores.
 - **Privacidad**: personal autorizado de la escuela puede consultar el detalle del alumno y del tutor vinculado; una persona no autorizada o personal de otra escuela no debe recibir esos datos.
 
 ## No definido en 002

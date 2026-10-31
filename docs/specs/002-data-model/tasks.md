@@ -63,8 +63,8 @@ Esta funcionalidad es exclusivamente documental; no requiere inicializar el proy
 
 ### Desarrollo de la historia de usuario 2
 
-- [ ] T004 [US2] Definir en `docs/specs/002-data-model/data-model.md` la identidad globalmente única del evento de asistencia, su relación con el alumno, el tipo de entrada o salida, el momento de ocurrencia, su inmutabilidad y las reglas de reintento, de acuerdo con FR-005 y FR-006 de `docs/specs/002-data-model/spec.md`.
-- [ ] T005 [US2] Agregar a `docs/specs/002-data-model/data-model.md` ejemplos ficticios de reemplazo de pulseras y de eventos distintos creados sin conexión en dispositivos separados; indicar que la generación de identificadores, la política de duplicados y el mecanismo de sincronización quedan fuera del alcance.
+- [X] T004 [US2] Definir en `docs/specs/002-data-model/data-model.md` la identidad globalmente única del evento de asistencia, su relación con el alumno, el tipo de entrada o salida, el momento de ocurrencia, su inmutabilidad y las reglas de reintento, de acuerdo con FR-005 y FR-006 de `docs/specs/002-data-model/spec.md`.
+- [X] T005 [US2] Agregar a `docs/specs/002-data-model/data-model.md` ejemplos ficticios de reemplazo de pulseras y de eventos distintos creados sin conexión en dispositivos separados; indicar que la generación de identificadores, la política de duplicados y el mecanismo de sincronización quedan fuera del alcance.
 
 **Punto de control**: Los ejemplos de asistencia preservan el historial sin especificar una base de datos, almacenamiento local, sincronización ni implementación de prevención de duplicados.
 
@@ -74,8 +74,8 @@ Esta funcionalidad es exclusivamente documental; no requiere inicializar el proy
 
 **Propósito**: Verificar el conjunto completo de documentos respecto del alcance aprobado.
 
-- [ ] T006 Revisar el límite de visibilidad de datos y todos los escenarios de `docs/specs/002-data-model/quickstart.md` frente a `docs/specs/002-data-model/data-model.md` y `docs/specs/002-data-model/spec.md`; resolver cualquier contradicción en el modelo.
-- [ ] T007 Validar `docs/specs/002-data-model/checklists/requirements.md`, completar la revisión documental de `docs/specs/002-data-model/quickstart.md` y confirmar que `git diff --check` pasa sin cambios en código fuente, configuración ni dependencias.
+- [X] T006 Revisar el límite de visibilidad de datos y todos los escenarios de `docs/specs/002-data-model/quickstart.md` frente a `docs/specs/002-data-model/data-model.md` y `docs/specs/002-data-model/spec.md`; resolver cualquier contradicción en el modelo.
+- [X] T007 Validar `docs/specs/002-data-model/checklists/requirements.md`, completar la revisión documental de `docs/specs/002-data-model/quickstart.md` y confirmar que `git diff --check` pasa sin cambios en código fuente, configuración ni dependencias.
 
 ---
 
