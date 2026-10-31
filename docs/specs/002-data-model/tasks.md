@@ -48,8 +48,8 @@ Esta funcionalidad es exclusivamente documental; no requiere inicializar el proy
 
 ### Desarrollo de la historia de usuario 1
 
-- [ ] T002 [US1] Definir los propósitos y atributos aprobados de escuela, alumno, pulsera y tutor en `docs/specs/002-data-model/data-model.md`, incluido el nombre de la escuela y el límite de visibilidad para personal escolar autorizado establecido en FR-001 y FR-009 de `docs/specs/002-data-model/spec.md`.
-- [ ] T003 [US1] Documentar las cardinalidades escuela/alumno y alumno/tutor, el ciclo de vida de las pulseras activas y reemplazadas, y las reglas no definidas de reutilización o transferencia en `docs/specs/002-data-model/data-model.md`.
+- [X] T002 [US1] Definir los propósitos y atributos aprobados de escuela, alumno, pulsera y tutor en `docs/specs/002-data-model/data-model.md`, incluido el nombre de la escuela y el límite de visibilidad para personal escolar autorizado establecido en FR-001 y FR-009 de `docs/specs/002-data-model/spec.md`.
+- [X] T003 [US1] Documentar las cardinalidades escuela/alumno y alumno/tutor, el ciclo de vida de las pulseras activas y reemplazadas, y las reglas no definidas de reutilización o transferencia en `docs/specs/002-data-model/data-model.md`.
 
 **Punto de control**: La parte de entidades puede revisarse por separado, sin depender de la implementación del almacenamiento de asistencias o de la sincronización.
 
