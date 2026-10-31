@@ -45,4 +45,4 @@ La pulsera reemplazada conserva su registro histórico y deja de ser la activa. 
 
 ## No definido en 002
 
-Reutilización de pulseras retiradas, transferencias entre escuelas, roles de tutores, campos de contacto, retención legal, mecanismo y formato de generación del identificador de evento, almacenamiento físico, protocolo de sincronización y política de deduplicación. La regla conceptual de visibilidad no implementa controles de autorización.
+Reutilización de pulseras retiradas, transferencias entre escuelas, roles de tutores, campos de contacto, retención legal, mecanismo y formato de generación del identificador de evento, almacenamiento físico, protocolo de sincronización, política de deduplicación y escala operativa. La regla conceptual de visibilidad no implementa controles de autorización.

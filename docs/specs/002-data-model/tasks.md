@@ -34,7 +34,7 @@ Esta funcionalidad es exclusivamente documental; no requiere inicializar el proy
 
 **Propósito**: Establecer el vocabulario común y los límites que utilizarán ambas historias de usuario.
 
-- [ ] T001 Unificar la terminología de las entidades y señalar explícitamente las reglas no definidas, contrastando `docs/specs/002-data-model/research.md` con `docs/specs/002-data-model/data-model.md`, antes de revisar cada historia.
+- [X] T001 Unificar la terminología de las entidades y señalar explícitamente las reglas no definidas, contrastando `docs/specs/002-data-model/research.md` con `docs/specs/002-data-model/data-model.md`, antes de revisar cada historia.
 
 **Punto de control**: La terminología y los límites de alcance coinciden con la especificación; no se necesita una base de código.
 
