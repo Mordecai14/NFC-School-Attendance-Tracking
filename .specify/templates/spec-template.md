@@ -1,12 +1,14 @@
 # Feature Specification: [FEATURE NAME]
 
+<!-- Idioma: redactar el contenido generado en español profesional y natural según AGENTS.md, conservando el vocabulario habitual de desarrollo en inglés, los encabezados y campos estructurales de Spec Kit, los identificadores, NEEDS CLARIFICATION y Given/When/Then. Al regenerar esta plantilla, conservar esta indicación y revisar el diff. -->
+
 **Feature Branch**: `[###-feature-name]`
 
 **Created**: [DATE]
 
-**Status**: Draft
+**Status**: Borrador
 
-**Input**: User description: "$ARGUMENTS"
+**Input**: Descripción del usuario: "$ARGUMENTS"
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -25,48 +27,48 @@
 
 ### User Story 1 - [Brief Title] (Priority: P1)
 
-[Describe this user journey in plain language]
+[Describir este recorrido del usuario con lenguaje claro]
 
-**Why this priority**: [Explain the value and why it has this priority level]
+**Why this priority**: [Explicar el valor y el motivo de este nivel de prioridad]
 
-**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by [specific action] and delivers [specific value]"]
+**Independent Test**: [Describir cómo verificar esta user story de forma independiente; por ejemplo: "Se puede verificar por completo mediante [acción específica] y aporta [valor específico]"]
 
 **Acceptance Scenarios**:
 
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
-2. **Given** [initial state], **When** [action], **Then** [expected outcome]
+1. **Given** [estado inicial], **When** [acción], **Then** [resultado esperado]
+2. **Given** [estado inicial], **When** [acción], **Then** [resultado esperado]
 
 ---
 
 ### User Story 2 - [Brief Title] (Priority: P2)
 
-[Describe this user journey in plain language]
+[Describir este recorrido del usuario con lenguaje claro]
 
-**Why this priority**: [Explain the value and why it has this priority level]
+**Why this priority**: [Explicar el valor y el motivo de este nivel de prioridad]
 
-**Independent Test**: [Describe how this can be tested independently]
+**Independent Test**: [Describir cómo verificar esta user story de forma independiente]
 
 **Acceptance Scenarios**:
 
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+1. **Given** [estado inicial], **When** [acción], **Then** [resultado esperado]
 
 ---
 
 ### User Story 3 - [Brief Title] (Priority: P3)
 
-[Describe this user journey in plain language]
+[Describir este recorrido del usuario con lenguaje claro]
 
-**Why this priority**: [Explain the value and why it has this priority level]
+**Why this priority**: [Explicar el valor y el motivo de este nivel de prioridad]
 
-**Independent Test**: [Describe how this can be tested independently]
+**Independent Test**: [Describir cómo verificar esta user story de forma independiente]
 
 **Acceptance Scenarios**:
 
-1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+1. **Given** [estado inicial], **When** [acción], **Then** [resultado esperado]
 
 ---
 
-[Add more user stories as needed, each with an assigned priority]
+[Agregar las user stories necesarias, cada una con una prioridad asignada]
 
 ### Edge Cases
 
@@ -75,8 +77,8 @@
   Fill them out with the right edge cases.
 -->
 
-- What happens when [boundary condition]?
-- How does system handle [error scenario]?
+- ¿Qué sucede cuando [condición límite]?
+- ¿Cómo gestiona el sistema [escenario de error]?
 
 ## Requirements *(mandatory)*
 
@@ -87,21 +89,21 @@
 
 ### Functional Requirements
 
-- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
-- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]
-- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
-- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
-- **FR-005**: System MUST [behavior, e.g., "log all security events"]
+- **FR-001**: El sistema DEBE [capacidad específica; por ejemplo, "permitir que los usuarios creen cuentas"]
+- **FR-002**: El sistema DEBE [capacidad específica; por ejemplo, "validar direcciones de correo electrónico"]
+- **FR-003**: Los usuarios DEBEN poder [interacción principal; por ejemplo, "restablecer su contraseña"]
+- **FR-004**: El sistema DEBE [requisito de datos; por ejemplo, "persistir las preferencias del usuario"]
+- **FR-005**: El sistema DEBE [comportamiento; por ejemplo, "registrar todos los eventos de seguridad en logs"]
 
-*Example of marking unclear requirements:*
+*Ejemplo de cómo marcar requisitos ambiguos:*
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
-- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
+- **FR-006**: El sistema DEBE autenticar a los usuarios mediante [NEEDS CLARIFICATION: método de autenticación no especificado; ¿correo/contraseña, SSO u OAuth?]
+- **FR-007**: El sistema DEBE conservar los datos del usuario durante [NEEDS CLARIFICATION: plazo de retención no especificado]
 
 ### Key Entities *(include if feature involves data)*
 
-- **[Entity 1]**: [What it represents, key attributes without implementation]
-- **[Entity 2]**: [What it represents, relationships to other entities]
+- **[Entity 1]**: [Qué representa y sus atributos principales, sin detalles de implementación]
+- **[Entity 2]**: [Qué representa y sus relaciones con otras entidades]
 
 ## Success Criteria *(mandatory)*
 
@@ -112,10 +114,10 @@
 
 ### Measurable Outcomes
 
-- **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
-- **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
-- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
-- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+- **SC-001**: [Métrica medible; por ejemplo, "Los usuarios pueden crear una cuenta en menos de 2 minutos"]
+- **SC-002**: [Métrica medible; por ejemplo, "El sistema admite 1000 usuarios simultáneos sin degradación"]
+- **SC-003**: [Métrica de satisfacción; por ejemplo, "El 90% de los usuarios completa la tarea principal en el primer intento"]
+- **SC-004**: [Métrica de negocio; por ejemplo, "Reducir en un 50% las solicitudes de soporte relacionadas con [X]"]
 
 ## Assumptions
 
@@ -125,7 +127,7 @@
   chosen when the feature description did not specify certain details.
 -->
 
-- [Assumption about target users, e.g., "Users have stable internet connectivity"]
-- [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
-- [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
-- [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]
+- [Supuesto sobre los usuarios destinatarios; por ejemplo, "Los usuarios tienen conexión estable a Internet"]
+- [Supuesto sobre los límites del alcance; por ejemplo, "El soporte móvil queda fuera del alcance de v1"]
+- [Supuesto sobre los datos o el entorno; por ejemplo, "Se reutilizará el sistema de autenticación existente"]
+- [Dependencia de un sistema o servicio existente; por ejemplo, "Requiere acceso a la API existente de perfiles de usuario"]

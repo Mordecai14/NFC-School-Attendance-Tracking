@@ -1,13 +1,13 @@
-# Especificación de la funcionalidad: Modelo de datos del MVP
+# Feature Specification: Modelo de datos del MVP
 
-**Rama de la funcionalidad**: `[002-data-model]`
-**Creada**: 2026-10-29
-**Estado**: Completada el 2026-10-30. El entregable es el modelo conceptual documentado; no incluye implementación de código, almacenamiento ni sincronización.
-**Entrada**: Descripción del usuario: "Comprender y planifica lo necesario para poder realizar el desarrollo del paso 002 — Modelo de datos de la hoja de ruta."
+**Feature Branch**: `[002-data-model]`
+**Created**: 2026-10-29
+**Status**: Completada el 2026-10-30. El entregable es el modelo conceptual documentado; no incluye implementación de código, almacenamiento ni sincronización.
+**Input**: Descripción del usuario: "Comprender y planifica lo necesario para poder realizar el desarrollo del paso 002 — Modelo de datos de la hoja de ruta."
 
-## Aclaraciones
+## Clarifications
 
-### Sesión 2026-10-29
+### Session 2026-10-29
 
 - **Pregunta**: ¿Qué datos personales debe incluir el modelo conceptual para alumnos y tutores? → **Respuesta**: Nombre, grado y grupo visibles para la escuela; los datos completos, incluido el tutor, se documentan para una sección de detalle, sin implementar una pantalla en 002.
 - **Pregunta**: Al reemplazar una pulsera, ¿el modelo debe conservar la anterior como registro histórico además de asignar la nueva? → **Respuesta**: Sí; conservar la pulsera anterior como histórica y marcar la nueva como activa.
@@ -17,38 +17,38 @@
 - **Pregunta**: ¿Qué dato mínimo identifica conceptualmente a una escuela? → **Respuesta**: Su nombre; no se agregan otros datos escolares en 002.
 - **Pregunta**: ¿Qué unicidad requiere la identidad de un evento de asistencia? → **Respuesta**: Identidad única en todo el sistema y estable entre reintentos sin conexión.
 
-## Escenarios de usuario y pruebas
+## User Scenarios & Testing
 
-### Historia de usuario 1 - Comprender las entidades del MVP (Prioridad: P1)
+### User Story 1 - Comprender las entidades del MVP (Priority: P1)
 
 El responsable del producto y quienes desarrollen las siguientes capacidades necesitan una descripción compartida de los datos principales y de cómo se relacionan, para que las funciones posteriores usen un modelo coherente.
 
-**Por qué tiene esta prioridad**: Las relaciones entre escuela, alumno, pulsera, tutor y asistencia condicionan las siguientes capacidades de la hoja de ruta.
+**Why this priority**: Las relaciones entre escuela, alumno, pulsera, tutor y asistencia condicionan las siguientes capacidades del roadmap.
 
-**Prueba independiente**: Revisar el modelo junto con ejemplos ficticios y comprobar que cada entidad y relación se interpreta sin contradicciones.
+**Independent Test**: Revisar el modelo junto con ejemplos ficticios y comprobar que cada entidad y relación se interpreta sin contradicciones.
 
-**Escenarios de aceptación**:
+**Acceptance Scenarios**:
 
-1. **Dado** un alumno matriculado y una pulsera activa, **Cuando** se consulta el modelo, **Entonces** se puede identificar a qué escuela pertenece el alumno y qué pulsera tiene asignada.
-2. **Dado** hermanos vinculados a un mismo tutor, **Cuando** se representa el caso, **Entonces** el modelo permite varios alumnos por tutor y varios tutores por alumno.
-3. **Dado** el detalle de un alumno que incluye información de su tutor, **Cuando** se documentan los límites de visibilidad, **Entonces** el modelo indica que solo puede consultarlo personal autorizado de la escuela del alumno y que no debe exponerse a personas no autorizadas ni a otra escuela.
+1. **Given** un alumno matriculado y una pulsera activa, **When** se consulta el modelo, **Then** se puede identificar a qué escuela pertenece el alumno y qué pulsera tiene asignada.
+2. **Given** hermanos vinculados a un mismo tutor, **When** se representa el caso, **Then** el modelo permite varios alumnos por tutor y varios tutores por alumno.
+3. **Given** el detalle de un alumno que incluye información de su tutor, **When** se documentan los límites de visibilidad, **Then** el modelo indica que solo puede consultarlo personal autorizado de la escuela del alumno y que no debe exponerse a personas no autorizadas ni a otra escuela.
 
 ---
 
-### Historia de usuario 2 - Preservar el historial de asistencias (Prioridad: P1)
+### User Story 2 - Preservar el historial de asistencias (Priority: P1)
 
 El personal de la escuela necesita que cada entrada y salida quede representada como un registro histórico del alumno, incluso si después se reemplaza su pulsera o el dispositivo opera sin conexión.
 
-**Por qué tiene esta prioridad**: El producto exige conservar los eventos y poder registrarlos durante interrupciones de conectividad.
+**Why this priority**: El producto exige conservar los eventos y poder registrarlos durante interrupciones de conectividad.
 
-**Prueba independiente**: Seguir ejemplos de entrada, salida, reemplazo de pulsera y registro sin conexión; verificar que ningún evento previo se modifica o desaparece y que un reintento de envío puede reconocerse como el mismo evento.
+**Independent Test**: Seguir ejemplos de entrada, salida, reemplazo de pulsera y registro sin conexión; verificar que ningún evento previo se modifica o desaparece y que un reintento de envío puede reconocerse como el mismo evento.
 
-**Escenarios de aceptación**:
+**Acceptance Scenarios**:
 
-1. **Dado** que ya hay eventos de entrada y salida de un alumno, **Cuando** se reemplaza su pulsera, **Entonces** los eventos históricos permanecen asociados al alumno y no se sobrescriben.
-2. **Dado** eventos creados sin conexión en distintos dispositivos, **Cuando** se representan para su posterior sincronización, **Entonces** cada evento tiene una identidad única en todo el sistema y conserva su identidad y momento de ocurrencia en cada reintento.
+1. **Given** que ya hay eventos de entrada y salida de un alumno, **When** se reemplaza su pulsera, **Then** los eventos históricos permanecen asociados al alumno y no se sobrescriben.
+2. **Given** eventos creados sin conexión en distintos dispositivos, **When** se representan para su posterior sincronización, **Then** cada evento tiene una identidad única en todo el sistema y conserva su identidad y momento de ocurrencia en cada reintento.
 
-### Casos límite
+### Edge Cases
 
 - Intentar asignar una segunda pulsera activa al mismo alumno.
 - Reemplazar una pulsera por daño o extravío sin perder eventos históricos.
@@ -57,9 +57,9 @@ El personal de la escuela necesita que cada entrada y salida quede representada 
 - Representar un evento sin conexión cuyo envío se reintenta más de una vez.
 - Un alumno sin tutor vinculado o sin pulsera activa; el modelo debe permitir expresar la ausencia sin inventar datos.
 
-## Requisitos
+## Requirements
 
-### Requisitos funcionales
+### Functional Requirements
 
 - **FR-001**: La documentación DEBE definir escuela, alumno, pulsera, tutor y evento de asistencia, indicando qué representa cada entidad y sus datos mínimos de negocio. La escuela se identifica conceptualmente por su nombre. Para el alumno, debe incluir nombre, grado y grupo como datos visibles para la escuela; el perfil completo debe contemplar nombre del tutor y su vínculo con el alumno.
 - **FR-002**: La documentación DEBE definir que cada alumno pertenece a una sola escuela en el MVP y que una escuela puede tener varios alumnos.
@@ -72,7 +72,7 @@ El personal de la escuela necesita que cada entrada y salida quede representada 
 - **FR-009**: La documentación DEBE limitar los datos personales a los aprobados y establecer que el detalle del alumno, incluido el nombre y vínculo del tutor, solo es visible para personal autorizado de la escuela a la que pertenece. La documentación DEBE contemplar que esos datos no se expongan a personas no autorizadas ni a otra escuela. Este límite es conceptual: 002 no implementa pantallas ni controles de autorización.
 - **FR-010**: El resultado DEBE ser conceptual y agnóstico a tecnologías; no debe incluir implementación de tipos, tablas, políticas de base de datos, persistencia local ni sincronización.
 
-### Entidades principales
+### Key Entities
 
 - **Escuela**: organización identificada conceptualmente por su nombre, a la que pertenece el alumno durante el MVP.
 - **Alumno**: persona cuya asistencia registra la escuela; no es un usuario autenticado de la aplicación. El modelo incluye nombre, grado y grupo en los datos visibles para la escuela y contempla la información del tutor vinculado en el detalle completo.
@@ -80,9 +80,9 @@ El personal de la escuela necesita que cada entrada y salida quede representada 
 - **Tutor**: persona relacionada con uno o más alumnos; el dato personal incluido es su nombre y su vínculo con el alumno. No implica por sí mismo una cuenta autenticada ni acceso a una aplicación.
 - **Evento de asistencia**: hecho histórico de entrada o salida de un alumno, ocurrido en un momento determinado y con identidad única en todo el sistema, estable para soportar registro sin conexión y reintentos posteriores.
 
-## Criterios de éxito
+## Success Criteria
 
-### Resultados medibles
+### Measurable Outcomes
 
 - **SC-001**: Una revisión con al menos tres escenarios ficticios (asignación inicial, tutor compartido entre hermanos y reemplazo de pulsera con asistencias previas) puede determinar para cada registro su entidad y relaciones sin reglas contradictorias.
 - **SC-002**: El 100% de las cinco entidades del alcance tiene propósito, relaciones y datos mínimos descritos en el documento del modelo.
@@ -90,7 +90,7 @@ El personal de la escuela necesita que cada entrada y salida quede representada 
 - **SC-004**: En todos los ejemplos de reemplazo y reintento sin conexión, los eventos de asistencia previos permanecen identificables y no se sobrescriben ni se descartan.
 - **SC-005**: El modelo define explícitamente quién puede consultar los datos del alumno y tutor, y sus ejemplos no permiten exposición a personas no autorizadas ni a otra escuela.
 
-## Supuestos
+## Assumptions
 
 - El alcance de 002 es especificar y documentar el modelo conceptual; la implementación de dominio y la base de Supabase corresponden a pasos posteriores.
 - La distinción entre datos visibles para la escuela y el detalle completo orienta la documentación del modelo; no implica implementar una interfaz. No se agregan datos de contacto del tutor sin una necesidad aprobada.

@@ -1,14 +1,16 @@
 # Implementation Plan: [FEATURE]
 
+<!-- Idioma: redactar el contenido generado en español profesional y natural según AGENTS.md, conservando el vocabulario habitual de desarrollo en inglés, los encabezados y campos estructurales de Spec Kit, los identificadores y NEEDS CLARIFICATION. Al regenerar esta plantilla, conservar esta indicación y revisar el diff. -->
+
 **Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
 
-**Input**: Feature specification from `/docs/specs/[###-feature-name]/spec.md`
+**Input**: Especificación de la feature en `/docs/specs/[###-feature-name]/spec.md`
 
-**Note**: This template is filled in by the `/speckit.plan` command; its definition describes the execution workflow.
+**Note**: El comando `/speckit.plan` completa esta plantilla; su definición describe el workflow de ejecución.
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+[Extraer de la spec de la feature: requisito principal y enfoque técnico de la investigación]
 
 ## Technical Context
 
@@ -18,29 +20,29 @@
   the iteration process.
 -->
 
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]
+**Language/Version**: [Por ejemplo, Python 3.11, Swift 5.9, Rust 1.75 o NEEDS CLARIFICATION]
 
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]
+**Primary Dependencies**: [Por ejemplo, FastAPI, UIKit, LLVM o NEEDS CLARIFICATION]
 
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
+**Storage**: [Si corresponde; por ejemplo, PostgreSQL, CoreData, archivos o N/A]
 
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]
+**Testing**: [Por ejemplo, pytest, XCTest, cargo test o NEEDS CLARIFICATION]
 
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Target Platform**: [Por ejemplo, servidor Linux, iOS 15+, WASM o NEEDS CLARIFICATION]
 
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]
+**Project Type**: [Por ejemplo, biblioteca/CLI/servicio web/aplicación móvil/compilador/aplicación de escritorio o NEEDS CLARIFICATION]
 
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]
+**Performance Goals**: [Específicos del dominio; por ejemplo, 1000 solicitudes/s, 10 mil líneas/s, 60 fps o NEEDS CLARIFICATION]
 
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]
+**Constraints**: [Específicas del dominio; por ejemplo, <200 ms p95, <100 MB de memoria, funcionamiento offline o NEEDS CLARIFICATION]
 
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Scale/Scope**: [Específicos del dominio; por ejemplo, 10 mil usuarios, 1 millón de líneas de código, 50 pantallas o NEEDS CLARIFICATION]
 
 ## Constitution Check
 
-*GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
+*GATE: Debe aprobarse antes de la investigación de Phase 0. Repetir el check después del diseño de Phase 1.*
 
-[Gates determined based on constitution file]
+[Controles definidos según el archivo de la constitución]
 
 ## Project Structure
 
@@ -48,12 +50,12 @@
 
 ```text
 docs/specs/[###-feature]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+├── plan.md              # Este archivo (salida del comando /speckit.plan)
+├── research.md          # Salida de Phase 0 (comando /speckit.plan)
+├── data-model.md        # Salida de Phase 1 (comando /speckit.plan)
+├── quickstart.md        # Salida de Phase 1 (comando /speckit.plan)
+├── contracts/           # Salida de Phase 1 (comando /speckit.plan)
+└── tasks.md             # Salida de Phase 2 (comando /speckit.tasks; NO lo crea /speckit.plan)
 ```
 
 ### Source Code (repository root)
@@ -65,7 +67,7 @@ docs/specs/[###-feature]/
 -->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
+# [REMOVE IF UNUSED] Opción 1: Proyecto único (PREDETERMINADA)
 src/
 ├── models/
 ├── services/
@@ -77,7 +79,7 @@ tests/
 ├── integration/
 └── unit/
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
+# [REMOVE IF UNUSED] Opción 2: Aplicación web (cuando se detectan "frontend" + "backend")
 backend/
 ├── src/
 │   ├── models/
@@ -92,22 +94,22 @@ frontend/
 │   └── services/
 └── tests/
 
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
+# [REMOVE IF UNUSED] Opción 3: Aplicación móvil + API (cuando se detecta "iOS/Android")
 api/
-└── [same as backend above]
+└── [La misma estructura del backend anterior]
 
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+ios/ o android/
+└── [Estructura específica de la plataforma: módulos de feature, flujos de UI y tests de plataforma]
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: [Documentar la estructura seleccionada y hacer referencia a los
+directorios reales indicados arriba]
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
+> **Completar SOLO si Constitution Check identifica incumplimientos que deban justificarse**
 
 | Violation | Why Needed | Simpler Alternative Rejected Because |
 |-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+| [Por ejemplo, cuarto proyecto] | [Necesidad actual] | [Por qué tres proyectos no son suficientes] |
+| [Por ejemplo, patrón Repository] | [Problema específico] | [Por qué el acceso directo a la base no es suficiente] |

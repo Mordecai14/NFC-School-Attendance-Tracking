@@ -1,18 +1,18 @@
-# Plan técnico: Base de Supabase y acceso escolar
+# Implementation Plan: Base de Supabase y acceso escolar
 
-**Rama**: `docs/003-supabase-foundation` | **Fecha**: 2026-10-30 | **Especificación**: [spec.md](spec.md)
+**Branch**: `docs/003-supabase-foundation` | **Date**: 2026-10-30 | **Spec**: [spec.md](spec.md)
 
-**Entrada**: `docs/specs/003-supabase-foundation/spec.md`
+**Input**: `docs/specs/003-supabase-foundation/spec.md`
 
-## Resumen
+## Summary
 
 Agregar una base PostgreSQL administrada por Supabase, login con correo y contraseña para una cuenta compartida por escuela y aislamiento de datos mediante políticas de Row Level Security (RLS). El esquema se mantendrá mediante migraciones SQL versionadas; las cuentas se crearán manualmente fuera de la app. La aplicación no incluirá alta pública, administración de alumnos ni registro de asistencias en esta fase.
 
-## Contexto técnico
+## Technical Context
 
-**Lenguaje/versiones**: TypeScript 6.0, React Native 0.88, Expo SDK 58 y SQL de PostgreSQL.
+**Language/Version**: TypeScript 6.0, React Native 0.88, Expo SDK 58 y SQL de PostgreSQL.
 
-**Dependencias principales**:
+**Primary Dependencies**:
 
 - `@supabase/supabase-js` para Auth y acceso a datos desde la aplicación;
 - `expo-secure-store` en versión compatible con SDK 58 para conservar de forma cifrada la sesión nativa;
@@ -21,17 +21,17 @@ Agregar una base PostgreSQL administrada por Supabase, login con correo y contra
 
 Las dependencias móviles se instalarán con `pnpm exec expo install` cuando corresponda; el CLI quedará fijado en `pnpm-lock.yaml`.
 
-**Almacenamiento**: Supabase PostgreSQL. El esquema, las restricciones, permisos y políticas se definirán en migraciones SQL bajo `supabase/migrations/`.
+**Storage**: Supabase PostgreSQL. El schema, las restricciones, permisos y políticas se definirán en migraciones SQL bajo `supabase/migrations/`.
 
-**Pruebas**: pgTAP mediante `supabase test db` para restricciones y RLS; `node --test` para lógica TypeScript testeable siguiendo el patrón existente; ESLint, `tsc --noEmit`, Expo dependency checks y una comprobación de login en Android.
+**Testing**: pgTAP mediante `supabase test db` para restricciones y RLS; `node --test` para lógica TypeScript que pueda verificarse siguiendo el patrón existente; ESLint, `tsc --noEmit`, checks de dependencias de Expo y una comprobación de login en Android.
 
-**Plataforma objetivo**: Android. Se conserva la compilación Expo existente; autenticación web no es criterio de aceptación de 003.
+**Target Platform**: Android. Se conserva el build de Expo existente; la autenticación web no es criterio de aceptación de 003.
 
-**Tipo de proyecto**: Aplicación móvil Expo con acceso directo y autenticado a Supabase; no se agrega una API propia.
+**Project Type**: Aplicación móvil Expo con acceso directo y autenticado a Supabase; no se agrega una API propia.
 
-**Rendimiento**: No hay umbrales de latencia o concurrencia aprobados para el MVP. No se establecen SLO de disponibilidad en esta fase.
+**Performance Goals**: No hay umbrales de latencia o concurrencia aprobados para el MVP. No se establecen SLO de disponibilidad en esta fase.
 
-**Restricciones**:
+**Constraints**:
 
 - exactamente una cuenta compartida por escuela, creada manualmente; sin registro público ni cuentas individuales;
 - los datos de alumnos, pulseras, relaciones y asistencias quedan aislados por escuela en la base; la identidad global del tutor se comparte según FR-015 y solo se expone a través de vínculos con alumnos propios;
@@ -40,9 +40,9 @@ Las dependencias móviles se instalarán con `pnpm exec expo install` cuando cor
 - usar exclusivamente datos ficticios hasta que se apruebe la política de conservación y eliminación;
 - la captura offline, sincronización, pantallas de administración y operaciones de asistencia quedan fuera de 003.
 
-**Escala/alcance**: MVP escolar, sin número de escuelas, alumnos ni volumen transaccional aprobado. Registrar la necesidad de dimensionamiento antes de producción, sin anticipar optimización o infraestructura adicional.
+**Scale/Scope**: MVP escolar, sin número de escuelas, alumnos ni volumen transaccional aprobado. Registrar la necesidad de dimensionamiento antes de producción, sin anticipar optimización o infraestructura adicional.
 
-## Verificación de la constitución
+## Constitution Check
 
 ### Gate antes de investigación
 
@@ -67,9 +67,9 @@ Cumple. La cuenta se vincula a una escuela mediante una relación única en la b
 
 La interfaz autenticada consulta únicamente datos de su escuela. En 003, “guardar y consultar” significa que el esquema persiste las entidades y permite consultas; la carga inicial se limita a migraciones, fixtures sintéticos y aprovisionamiento administrativo confiable. El cliente recibe solo permisos de lectura; los flujos de alta/cambio desde la app se definirán en sus features correspondientes. No se conceden permisos genéricos de borrado. El evento de asistencia no se actualiza ni elimina.
 
-## Estructura del proyecto
+## Project Structure
 
-### Documentación de esta funcionalidad
+### Documentation (this feature)
 
 ```text
 docs/specs/003-supabase-foundation/
@@ -84,7 +84,7 @@ docs/specs/003-supabase-foundation/
 
 Decisión arquitectónica relacionada: `docs/decisions/supabase-auth-and-school-isolation.md`.
 
-### Código fuente previsto
+### Source Code (repository root)
 
 ```text
 src/
@@ -118,6 +118,6 @@ No se crea backend independiente ni pantalla de gestión de datos. El contrato d
 - **Sesiones persistentes**: el cierre de sesión debe borrar la sesión local; verificar restauración y vencimiento en un dispositivo Android real.
 - **Sin SLO ni volumen aprobado**: las métricas de escala, disponibilidad y monitoreo quedan para una revisión operativa previa a producción.
 
-## Complejidad
+## Complexity Tracking
 
 No se agrega un proyecto backend ni una abstracción de repositorio. RLS, migraciones y pruebas pgTAP son complejidad necesaria para cumplir aislamiento y reproducibilidad, no opciones intercambiables con filtros de UI.

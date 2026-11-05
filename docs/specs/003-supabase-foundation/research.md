@@ -7,7 +7,7 @@
 - **Decisión**: versionar esquema, restricciones, grants, RLS y políticas en `supabase/migrations/`; ejecutar y probar localmente antes de aplicar cambios a un proyecto remoto.
 - **Motivo**: las migraciones son revisables, reproducibles y permiten reconstruir la base desde cero.
 - **Alternativa descartada**: mantener el esquema únicamente con cambios manuales en Dashboard; provoca diferencias no registradas entre entornos.
-- **Fuentes**: [Database migrations](https://supabase.com/docs/guides/deployment/database-migrations), [Supabase CLI](https://supabase.com/docs/guides/cli).
+- **Fuentes**: [Migraciones de base de datos](https://supabase.com/docs/guides/deployment/database-migrations), [Supabase CLI](https://supabase.com/docs/guides/cli).
 
 ### Vincular cada cuenta a una escuela en datos confiables
 
@@ -15,7 +15,7 @@
 - **Motivo**: cumple una cuenta por escuela, es simple y evita confiar en información editable desde el cliente.
 - **Alternativas descartadas**: `user_metadata` como fuente de autorización (el usuario puede cambiarla); una clave privilegiada en la aplicación (omite RLS); y una API backend propia (fuera del alcance aprobado).
 - **Provisionamiento**: crear la cuenta por un flujo administrativo de Supabase y después asociarla a una escuela en un contexto confiable. Mantener desactivado el registro público, sin deshabilitar el proveedor de correo/contraseña usado para iniciar sesión.
-- **Fuentes**: [Auth users](https://supabase.com/docs/guides/auth/users), [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [API keys](https://supabase.com/docs/guides/getting-started/api-keys).
+- **Fuentes**: [Usuarios de Auth](https://supabase.com/docs/guides/auth/users), [RLS](https://supabase.com/docs/guides/database/postgres/row-level-security), [Claves de API](https://supabase.com/docs/guides/getting-started/api-keys).
 
 ### Aplicar aislamiento mediante grants y RLS
 
@@ -23,7 +23,7 @@
 - **Motivo**: la autorización se aplica en la base aunque una consulta del cliente omita filtros o manipule identificadores. Los grants son una barrera distinta de las políticas RLS y también deben revisarse.
 - **Alternativas descartadas**: filtrar únicamente desde React Native (no es una frontera de seguridad) y conceder privilegios amplios suponiendo que RLS los revoca (RLS no reemplaza grants).
 - **Advertencia**: `service_role`/secret tiene `BYPASSRLS`; no debe estar en el cliente ni en variables públicas.
-- **Fuentes**: [Securing your API](https://supabase.com/docs/guides/api/securing-your-api), [Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).
+- **Fuentes**: [Protección de la API](https://supabase.com/docs/guides/api/securing-your-api), [Row Level Security](https://supabase.com/docs/guides/database/postgres/row-level-security).
 
 ### Representar tutores compartidos con relaciones visibles por escuela
 
@@ -39,13 +39,13 @@
 - **Motivo**: la sesión persiste según FR-004 y contiene tokens; el almacenamiento cifrado nativo reduce exposición frente a almacenamiento plano.
 - **Alternativa considerada**: AsyncStorage, utilizado por algunos ejemplos de Supabase; es más simple pero no cifra el contenido. Se elige SecureStore por tratar datos de alumnos.
 - **Compatibilidad**: instalar módulos nativos con `expo install`. La matriz oficial de Expo consultada vincula SDK 58 con React Native 0.88 y lista `expo-secure-store ~58.0.2`; comprobar dependencias finales con `expo install --check`.
-- **Fuentes**: [Supabase React Native quickstart](https://supabase.com/docs/guides/auth/quickstarts/react-native), [Expo SecureStore](https://docs.expo.dev/versions/latest/sdk/securestore/), [Expo SDK mappings](https://github.com/expo/expo/blob/main/packages/install-expo-modules/src/utils/expoVersionMappings.ts).
+- **Fuentes**: [Guía de inicio de Supabase con React Native](https://supabase.com/docs/guides/auth/quickstarts/react-native), [Expo SecureStore](https://docs.expo.dev/versions/latest/sdk/securestore/), [Correspondencias de versiones del SDK de Expo](https://github.com/expo/expo/blob/main/packages/install-expo-modules/src/utils/expoVersionMappings.ts).
 
 ### Probar RLS y restricciones con fixtures sintéticos
 
 - **Decisión**: usar pgTAP en `supabase/tests/` y ejecutar `supabase test db`. Preparar dos escuelas, sus usuarios, alumnos, una pulsera duplicada inválida y un tutor compartido.
 - **Motivo**: las pruebas evalúan las reglas con roles y subjects Auth distintos, incluidas denegaciones de lectura y escritura, sin usar datos reales.
-- **Fuentes**: [Testing Row Level Security](https://supabase.com/docs/guides/database/postgres/testing-row-level-security), [Database testing](https://supabase.com/docs/guides/database/testing).
+- **Fuentes**: [Testing de Row Level Security](https://supabase.com/docs/guides/database/postgres/testing-row-level-security), [Testing de base de datos](https://supabase.com/docs/guides/database/testing).
 
 ## Restricciones conocidas
 

@@ -4,9 +4,9 @@
 
 **Created**: 2026-10-27
 
-**Status**: Completed; implementation and validation results are recorded in
-[validation.md](validation.md), including the known sustained-read anomaly and
-the unrelated repository-wide lint finding.
+**Status**: Completada; los resultados de implementación y validación están registrados en
+[validation.md](validation.md), incluida la anomalía conocida de lectura sostenida y
+el hallazgo de lint del repositorio ajeno a esta feature.
 
 **Input**: Validar en un dispositivo Android que las pulseras NFC de la escuela
 pueden leerse y distinguirse por un identificador estable, mediante una pantalla

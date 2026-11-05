@@ -1,12 +1,12 @@
 <!--
 Sync Impact Report
-- Version change: unversioned scaffold -> 1.0.0 (initial constitution).
-- Modified principles: template placeholders I-V -> I. Specification and acceptance;
-  II. Simplicity and scope; III. Strict types and verification;
-  IV. Reliable offline attendance; V. Student security and privacy.
-- Added sections: Project constraints; Development workflow.
-- Removed sections: none; placeholder sections replaced.
-- Follow-up TODOs: none.
+- Version change: estructura inicial sin versión -> 1.0.0 (constitución inicial).
+- Modified principles: marcadores de plantilla I-V -> I. Especificación y aceptación;
+  II. Simplicidad y alcance; III. Tipos estrictos y verificación;
+  IV. Asistencias confiables sin conexión; V. Seguridad y privacidad de alumnos.
+- Added sections: Restricciones del proyecto; Flujo de desarrollo.
+- Removed sections: ninguna; se reemplazaron las secciones de ejemplo.
+- Follow-up TODOs: ninguno.
 -->
 # Aplicación de Asistencia Escolar Constitution
 

@@ -1,6 +1,6 @@
-# Hoja de ruta
+# Roadmap
 
-Esta hoja de ruta define el orden aproximado de las capacidades necesarias para completar el MVP.
+Este roadmap define el orden aproximado de las capacidades necesarias para completar el MVP.
 
 No es un contrato rígido.
 
@@ -61,7 +61,7 @@ Incluye inicialmente:
 - una cuenta compartida por escuela, creada manualmente;
 - pantalla de inicio y cierre de sesión, sin registro público.
 
-No incluye registro de entradas o salidas desde la aplicación, persistencia offline ni sincronización; corresponden a pasos posteriores de la hoja de ruta.
+No incluye registro de entradas o salidas desde la aplicación, persistencia offline ni sincronización; corresponden a pasos posteriores del roadmap.
 
 Especificación: `docs/specs/003-supabase-foundation/spec.md`.
 

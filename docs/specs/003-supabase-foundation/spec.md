@@ -1,76 +1,79 @@
-# Especificación de la funcionalidad: Base de Supabase y acceso escolar
+# Feature Specification: Base de Supabase y acceso escolar
 
-**Rama de la funcionalidad**: `[003-supabase-foundation]`  
-**Creada**: 2026-10-30  
-**Estado**: Draft  
-**Entrada**: Descripción del usuario: "Comenzar a trabajar sobre el paso 003 — Base de Supabase, analizando los documentos necesarios para realizar la implementación". El alcance acordado incluye una cuenta compartida por escuela, login en la aplicación y creación manual de las cuentas, sin registro público.
+**Feature Branch**: `[003-supabase-foundation]`
 
-## Aclaraciones
+**Created**: 2026-10-30
 
-### Sesión 2026-10-30
+**Status**: Borrador
+
+**Input**: Descripción del usuario: "Comenzar a trabajar sobre el paso 003 — Base de Supabase, analizando los documentos necesarios para realizar la implementación". El alcance acordado incluye una cuenta compartida por escuela, login en la aplicación y creación manual de las cuentas, sin registro público.
+
+## Clarifications
+
+### Session 2026-10-30
 
 - Q: ¿Qué credenciales debe usar el personal para iniciar sesión con la cuenta compartida de su escuela? → A: Correo electrónico y contraseña.
 - Q: ¿La aplicación debe conservar la sesión al cerrarse y abrirse de nuevo, o pedir las credenciales cada vez? → A: Conservar la sesión hasta que el usuario cierre sesión o esta venza.
 - Q: ¿Qué regla de conservación debemos aplicar a los datos personales de alumnos y tutores? → A: Dejar el plazo pendiente y resolverlo antes de usar datos reales.
 - Q: ¿Un mismo tutor puede estar asociado a alumnos de escuelas distintas? → A: Sí, se comparte el registro del tutor y cada escuela solo ve sus propios vínculos.
 
-## Escenarios de usuario y pruebas
+## User Scenarios & Testing
 
-### Historia de usuario 1 — Ingresar a la aplicación como personal escolar (Prioridad: P1)
+### User Story 1 — Ingresar a la aplicación como personal escolar (Priority: P1)
 
 El personal de una escuela necesita ingresar con la cuenta compartida de su escuela para utilizar la aplicación.
 
-**Por qué tiene esta prioridad**: El acceso autenticado es el punto de entrada a las capacidades protegidas y permite comprobar que la cuenta corresponde a una escuela.
+**Why this priority**: El acceso autenticado es el punto de entrada a las capacidades protegidas y permite comprobar que la cuenta corresponde a una escuela.
 
-**Prueba independiente**: Con una cuenta escolar previamente habilitada, iniciar sesión, cerrar la sesión y volver a intentarlo; comprobar también que credenciales inválidas no habilitan el acceso.
+**Independent Test**: Con una cuenta escolar previamente habilitada, iniciar sesión, cerrar la sesión y volver a intentarlo; comprobar también que credenciales inválidas no habilitan el acceso.
 
-**Escenarios de aceptación**:
+**Acceptance Scenarios**:
 
-1. **Dado** que la escuela tiene una cuenta habilitada, **Cuando** un integrante del personal ingresa el correo electrónico y la contraseña válidos, **Entonces** accede al espacio protegido de esa escuela.
-2. **Dado** que las credenciales son incorrectas, **Cuando** se intenta iniciar sesión, **Entonces** la aplicación informa que no pudo autenticar y no muestra datos protegidos.
-3. **Dada** una sesión iniciada, **Cuando** el usuario cierra sesión, **Entonces** deja de acceder a las funciones y datos protegidos.
-4. **Dado** un dispositivo con una sesión válida, **Cuando** se cierra y vuelve a abrir la aplicación, **Entonces** la sesión continúa disponible hasta que se cierre o expire.
-5. **Dado** que una persona no tiene una cuenta escolar habilitada, **Cuando** abre la aplicación, **Entonces** no encuentra una opción para registrarse o crear una escuela.
-6. **Dada** una cuenta deshabilitada, una sesión vencida o falta de conexión, **Cuando** se intenta autenticar o solicitar datos protegidos, **Entonces** la aplicación informa que no pudo completar la operación y no presenta datos como si se hubieran recibido correctamente.
+1. **Given** que la escuela tiene una cuenta habilitada, **When** un integrante del personal ingresa el correo electrónico y la contraseña válidos, **Then** accede al espacio protegido de esa escuela.
+2. **Given** que las credenciales son incorrectas, **When** se intenta iniciar sesión, **Then** la aplicación informa que no pudo autenticar y no muestra datos protegidos.
+3. **Given** una sesión iniciada, **When** el usuario cierra sesión, **Then** deja de acceder a las funciones y datos protegidos.
+4. **Given** un dispositivo con una sesión válida, **When** se cierra y vuelve a abrir la aplicación, **Then** la sesión continúa disponible hasta que se cierre o expire.
+5. **Given** que una persona no tiene una cuenta escolar habilitada, **When** abre la aplicación, **Then** no encuentra una opción para registrarse o crear una escuela.
+6. **Given** una cuenta deshabilitada, una sesión vencida o falta de conexión, **When** se intenta autenticar o solicitar datos protegidos, **Then** la aplicación informa que no pudo completar la operación y no presenta datos como si se hubieran recibido correctamente.
 
 ---
 
-### Historia de usuario 2 — Mantener los datos de cada escuela aislados (Prioridad: P1)
+### User Story 2 — Mantener los datos de cada escuela aislados (Priority: P1)
 
 El personal necesita que el acceso compartido de su escuela permita consultar sus datos sin exponer los de otras escuelas.
 
-**Por qué tiene esta prioridad**: Los datos de alumnos y tutores son personales y la privacidad escolar es una restricción central del producto.
+**Why this priority**: Los datos de alumnos y tutores son personales y la privacidad escolar es una restricción central del producto.
 
-**Prueba independiente**: Preparar datos ficticios de dos escuelas y comprobar, con cada cuenta, que sus consultas solo revelan información de su propia escuela y que no puede modificar datos de la otra.
+**Independent Test**: Preparar datos ficticios de dos escuelas y comprobar, con cada cuenta, que sus consultas solo revelan información de su propia escuela y que no puede modificar datos de la otra.
 
-**Escenarios de aceptación**:
+**Acceptance Scenarios**:
 
-1. **Dada** una cuenta de la escuela A y datos de las escuelas A y B, **Cuando** el personal consulta alumnos, tutores, pulseras o asistencias, **Entonces** solo recibe los datos asociados a A.
-2. **Dada** una cuenta de la escuela A, **Cuando** intenta acceder o modificar datos de B, **Entonces** la operación es denegada y los datos de B permanecen sin cambios.
-3. **Dado** un intento de usar una cuenta no autenticada, **Cuando** solicita datos escolares protegidos, **Entonces** no recibe información personal ni puede modificarla.
-4. **Dado** un tutor compartido que tiene vínculos con alumnos de las escuelas A y B, **Cuando** cada escuela consulta sus datos, **Entonces** ambas pueden ver el tutor por su propio vínculo, pero ninguna puede ver el alumno ni el vínculo de la otra.
+1. **Given** una cuenta de la escuela A y datos de las escuelas A y B, **When** el personal consulta alumnos, tutores, pulseras o asistencias, **Then** solo recibe los datos asociados a A.
+2. **Given** una cuenta de la escuela A, **When** intenta acceder o modificar datos de B, **Then** la operación es denegada y los datos de B permanecen sin cambios.
+3. **Given** un intento de usar una cuenta no autenticada, **When** solicita datos escolares protegidos, **Then** no recibe información personal ni puede modificarla.
+4. **Given** un tutor compartido que tiene vínculos con alumnos de las escuelas A y B, **When** cada escuela consulta sus datos, **Then** ambas pueden ver el tutor por su propio vínculo, pero ninguna puede ver el alumno ni el vínculo de la otra.
 
 ---
 
-### Historia de usuario 3 — Conservar los datos principales del modelo escolar (Prioridad: P1)
+### User Story 3 — Conservar los datos principales del modelo escolar (Priority: P1)
 
 El sistema necesita guardar y consultar las escuelas, alumnos, pulseras, tutores y eventos de asistencia de acuerdo con el modelo conceptual aprobado.
 
 En 003, el almacenamiento se prepara en la base y la carga inicial se realiza mediante migraciones y aprovisionamiento administrativo confiable; esta historia no incluye pantallas ni escrituras de datos desde la aplicación.
 
-**Por qué tiene esta prioridad**: El almacenamiento coherente es la base de las funciones posteriores de identificación, registro y sincronización.
+**Why this priority**: El almacenamiento coherente es la base de las funciones posteriores de identificación, registro y sincronización.
 
-**Prueba independiente**: Con datos ficticios de una escuela, comprobar las relaciones aprobadas y que las reglas de integridad impiden combinaciones inválidas sin alterar el historial existente.
+**Independent Test**: Con datos ficticios de una escuela, comprobar las relaciones aprobadas y que las reglas de integridad impiden combinaciones inválidas sin alterar el historial existente.
 
-**Escenarios de aceptación**:
+**Acceptance Scenarios**:
 
-1. **Dado** un alumno, una escuela y uno o más tutores, **Cuando** se guardan sus relaciones, **Entonces** el alumno pertenece a una sola escuela y se pueden representar varios tutores por alumno y varios alumnos por tutor.
-2. **Dada** una pulsera asignada, **Cuando** se intenta repetir su identificador NFC en otra pulsera, **Entonces** el sistema rechaza la duplicación.
-3. **Dado** un alumno con una pulsera activa, **Cuando** se le asigna un reemplazo, **Entonces** la anterior queda conservada como histórica y no hay más de una pulsera activa para ese alumno.
-4. **Dado** un evento de asistencia guardado, **Cuando** se consulta o se reintenta registrar la misma identidad, **Entonces** el evento original conserva su identidad, alumno, tipo y momento, sin sobrescribirse ni duplicarse.
-5. **Dado** que aún no se aprobó una regla de conservación y eliminación, **Cuando** se prepara el uso del sistema con datos reales de alumnos o tutores, **Entonces** ese uso espera hasta que la regla quede definida y documentada.
+1. **Given** un alumno, una escuela y uno o más tutores, **When** se guardan sus relaciones, **Then** el alumno pertenece a una sola escuela y se pueden representar varios tutores por alumno y varios alumnos por tutor.
+2. **Given** una pulsera asignada, **When** se intenta repetir su identificador NFC en otra pulsera, **Then** el sistema rechaza la duplicación.
+3. **Given** un alumno con una pulsera activa, **When** se le asigna un reemplazo, **Then** la anterior queda conservada como histórica y no hay más de una pulsera activa para ese alumno.
+4. **Given** un evento de asistencia guardado, **When** se consulta o se reintenta registrar la misma identidad, **Then** el evento original conserva su identidad, alumno, tipo y momento, sin sobrescribirse ni duplicarse.
+5. **Given** que aún no se aprobó una regla de conservación y eliminación, **When** se prepara el uso del sistema con datos reales de alumnos o tutores, **Then** ese uso espera hasta que la regla quede definida y documentada.
 
-### Casos límite
+### Edge Cases
 
 - Credenciales incorrectas, cuenta deshabilitada o cuenta que aún no fue creada.
 - Sesión vencida al abrir la aplicación o al solicitar datos protegidos.
@@ -81,9 +84,9 @@ En 003, el almacenamiento se prepara en la base y la carga inicial se realiza me
 - Reemplazo de pulsera con eventos de asistencia previos.
 - Reintento de un evento con identidad ya existente y evento distinto con identidad propia.
 
-## Requisitos
+## Requirements
 
-### Requisitos funcionales
+### Functional Requirements
 
 - **FR-001**: La aplicación DEBE permitir que el personal inicie sesión con el correo electrónico y la contraseña de la cuenta compartida de su escuela.
 - **FR-002**: DEBE existir exactamente una cuenta escolar compartida por el personal de cada escuela; no DEBEN crearse cuentas individuales ni roles de personal dentro del alcance de esta funcionalidad.
@@ -101,7 +104,7 @@ En 003, el almacenamiento se prepara en la base y la carga inicial se realiza me
 - **FR-014**: Antes de usar datos reales de alumnos o tutores, DEBE definirse y documentarse el plazo y la regla de conservación y eliminación aplicables. Esta funcionalidad no fija por sí misma ese plazo.
 - **FR-015**: Un mismo tutor DEBE poder vincularse con alumnos de distintas escuelas. Cada escuela solo DEBE poder consultar los vínculos y alumnos que le pertenecen; compartir la entidad Tutor no autoriza acceso a datos de otra escuela.
 
-### Entidades principales
+### Key Entities
 
 - **Escuela**: organización a la que pertenece cada alumno y a la que corresponde una cuenta escolar.
 - **Cuenta escolar**: correo electrónico y contraseña compartidos por el personal de exactamente una escuela; su creación es manual y no está disponible mediante registro público.
@@ -110,9 +113,9 @@ En 003, el almacenamiento se prepara en la base y la carga inicial se realiza me
 - **Tutor**: persona relacionada con uno o más alumnos, incluso de distintas escuelas; su registro puede compartirse, pero cada escuela solo consulta sus propios vínculos y alumnos. Solo contempla los datos personales aprobados.
 - **Evento de asistencia**: registro histórico de entrada o salida, asociado a un alumno y con identidad y momento de ocurrencia estables.
 
-## Criterios de éxito
+## Success Criteria
 
-### Resultados medibles
+### Measurable Outcomes
 
 - **SC-001**: El personal con credenciales válidas puede completar el inicio de sesión y acceder a la aplicación; el 100% de los intentos con credenciales inválidas permanece sin acceso protegido.
 - **SC-002**: En pruebas con al menos dos escuelas, el 100% de las consultas autenticadas devuelve únicamente datos de la escuela correspondiente y el 100% de los intentos cruzados de lectura o modificación es denegado.
@@ -120,7 +123,7 @@ En 003, el almacenamiento se prepara en la base y la carga inicial se realiza me
 - **SC-004**: Después de cerrar y reabrir la aplicación con una sesión vigente, el usuario recupera el acceso sin volver a ingresar credenciales; después de cerrar sesión, no puede acceder a datos protegidos hasta iniciar sesión nuevamente.
 - **SC-005**: En todos los escenarios de reemplazo y reintento, los eventos previamente guardados permanecen identificables y sin cambios.
 
-## Supuestos
+## Assumptions
 
 - Una cuenta escolar puede ser utilizada por varios integrantes del personal de esa escuela; el producto no identifica cuál integrante realizó cada operación.
 - La creación manual de cuentas se realiza fuera de la aplicación por una persona administradora con acceso a la consola de Supabase; no se desarrolla un panel administrativo en esta funcionalidad.

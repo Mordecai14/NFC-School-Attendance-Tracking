@@ -27,9 +27,9 @@ Código en `src/app/` y `src/hooks/`; pruebas puras en `tests/` y documentación
 en `docs/specs/001-read-nfc-wristbands/`. `android/` es generado e ignorado por Git.
 No crear servidores, repositorios, modelos de alumnos ni almacenamiento.
 
-## Phase 1: Setup (Shared Infrastructure)
+## Phase 1: Setup (Infraestructura compartida)
 
-**Propósito**: Confirmar que el ensayo es realizable y registrar el estado base.
+**Purpose**: Confirmar que el ensayo es realizable y registrar el estado base.
 
 - [X] T001 Comprobar Node 24, JDK/SDK Android, autorización `adb devices`, teléfono físico con NFC y al menos dos pulseras reales; crear `docs/specs/001-read-nfc-wristbands/validation.md` con entorno, muestras A/B y prerrequisitos pendientes, siguiendo `quickstart.md`, sin copiar identificadores.
 - [X] T002 Registrar en `docs/specs/001-read-nfc-wristbands/validation.md` la validación base de `pnpm exec tsc --noEmit` y disponibilidad de configuración ESLint; ejecutar `pnpm lint` solo si configuración y dependencias ya están aprobadas, sin autoinstalar ni corregir fallos ajenos al alcance.
@@ -38,9 +38,9 @@ No crear servidores, repositorios, modelos de alumnos ni almacenamiento.
 la viabilidad física. Los fallos previos de calidad no autorizan una reparación
 automática ni bloquean redactar código, pero sí declarar la implementación terminada.
 
-## Phase 2: Foundational (Blocking Prerequisites)
+## Phase 2: Fundamentos (Prerrequisitos bloqueantes)
 
-**Propósito**: Preparar únicamente el acceso nativo necesario para US1.
+**Purpose**: Preparar únicamente el acceso nativo necesario para US1.
 
 - [X] T003 Instalar `react-native-nfc-manager` 4.2.0 en `package.json` y `pnpm-lock.yaml`, declarar su plugin y un `expo.android.package` válido en `app.json`; añadir `@expo/config-plugins` solo si se confirma que falta para resolver el plugin y documentar esa necesidad en `docs/specs/001-read-nfc-wristbands/validation.md`. No añadir otras dependencias funcionales.
 
@@ -75,9 +75,9 @@ comparar IDs, tiempo máximo de cinco segundos, lista, error y recuperación NFC
 **Checkpoint**: US1 funciona por sí sola únicamente si su evidencia satisface
 los criterios; escribir código o pasar tests de estado no demuestra viabilidad NFC.
 
-## Phase 4: Polish & Cross-Cutting Concerns
+## Phase 4: Pulido y aspectos transversales
 
-**Propósito**: Cerrar con evidencia y sin ampliar el spike.
+**Purpose**: Cerrar con evidencia y sin ampliar el spike.
 
 - [X] T014 Revisar `src/app/index.tsx`, `src/hooks/use-nfc-reader.ts` y `src/hooks/nfc-reader-state.ts` para confirmar ausencia de logs con IDs, transmisiones, almacenamiento e integración de asistencia; comprobar que las sustituciones de T012 se retiraron y documentarlo en `docs/specs/001-read-nfc-wristbands/validation.md`.
 - [X] T015 Ejecutar `node --test tests/nfc-reader-state.test.mjs`, `pnpm exec tsc --noEmit` y lint cuando su configuración/dependencias estén aprobadas; registrar en `docs/specs/001-read-nfc-wristbands/validation.md` resultados y errores nuevos frente a T002. Si siguen fallos base, dejarlos como bloqueo y solicitar alcance aparte, sin ampliar esta tarea para repararlos.

@@ -1,8 +1,10 @@
-# Lista de verificación de calidad de la especificación: Base de Supabase y acceso escolar
+# Checklist de calidad de la especificación: Base de Supabase y acceso escolar
 
-**Propósito**: Validar la completitud y calidad de la especificación antes de planificar  
-**Creado**: 2026-10-30  
-**Funcionalidad**: [spec.md](../spec.md)
+**Purpose**: Validar la integridad y calidad de la especificación antes de planificar
+
+**Created**: 2026-10-30
+
+**Feature**: [spec.md](../spec.md)
 
 ## Calidad del contenido
 
@@ -30,7 +32,7 @@
 - [x] Los resultados esperados están reflejados en criterios medibles.
 - [x] No se prescriben mecanismos técnicos de implementación en la especificación.
 
-## Notas
+## Notes
 
 - Las cuentas compartidas, su creación manual y la ausencia de registro público fueron confirmadas por el usuario.
 - La conservación de sesión está incluida como comportamiento esperado del login; no habilita operación offline de asistencias.

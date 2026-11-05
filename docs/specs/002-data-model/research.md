@@ -5,7 +5,7 @@
 ### Mantener 002 como modelo conceptual documental
 
 - **Decisión**: describir entidades, relaciones, datos mínimos e invariantes sin implementar tipos, tablas o persistencia.
-- **Motivo**: la especificación delimita 002 a documentación; Supabase, el almacenamiento sin conexión y la sincronización se encuentran en pasos posteriores de la hoja de ruta.
+- **Motivo**: la especificación delimita 002 a documentación; Supabase, el almacenamiento sin conexión y la sincronización se encuentran en pasos posteriores del roadmap.
 - **Alternativas consideradas**: crear tipos TypeScript o un esquema de Supabase en esta funcionalidad. Se descartan porque anticiparían trabajo de 003 o etapas posteriores y mezclarían responsabilidades.
 
 ### Documentar visibilidad de datos personales sin implementar autorización

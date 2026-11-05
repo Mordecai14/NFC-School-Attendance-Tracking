@@ -1,34 +1,34 @@
-# Plan de implementación: Modelo de datos del MVP
+# Implementation Plan: Modelo de datos del MVP
 
-**Rama**: `[002-data-model]` | **Fecha**: 2026-10-29 | **Especificación**: [spec.md](spec.md)
+**Branch**: `[002-data-model]` | **Date**: 2026-10-29 | **Spec**: [spec.md](spec.md)
 
-**Entrada**: Especificación de la funcionalidad en `docs/specs/002-data-model/spec.md`
+**Input**: Especificación de la feature en `docs/specs/002-data-model/spec.md`
 
-## Resumen
+## Summary
 
 Documentar un modelo conceptual para escuela, alumno, pulsera, tutor y evento de asistencia, con las cardinalidades y reglas confirmadas en la especificación. El resultado son documentos de diseño y una guía de revisión; no se implementan entidades TypeScript, pantallas, almacenamiento, sincronización ni esquema de Supabase.
 
-## Contexto técnico
+## Technical Context
 
-**Lenguaje/versión**: No aplica al entregable documental. La plataforma existente usa TypeScript con React Native y Expo.
+**Language/Version**: No aplica al entregable documental. La plataforma existente usa TypeScript con React Native y Expo.
 
-**Dependencias principales**: Ninguna dependencia nueva.
+**Primary Dependencies**: Ninguna dependencia nueva.
 
-**Almacenamiento**: No aplica a esta funcionalidad. La persistencia sin conexión y Supabase pertenecen a etapas posteriores.
+**Storage**: No aplica a esta feature. La persistencia sin conexión y Supabase pertenecen a etapas posteriores.
 
-**Pruebas**: Revisión documental contra la especificación y escenarios manuales de la guía `quickstart.md`; `git diff --check` para verificar el cambio. No se agrega un marco de trabajo ni código de pruebas.
+**Testing**: Revisión documental contra la especificación y escenarios manuales de la guía `quickstart.md`; `git diff --check` para verificar el cambio. No se agrega un framework ni código de tests.
 
-**Plataforma de destino**: Documentación del producto móvil; no hay cambios ejecutables específicos de una plataforma.
+**Target Platform**: Documentación del producto móvil; no hay cambios ejecutables específicos de una plataforma.
 
-**Tipo de proyecto**: Aplicación móvil con React Native y Expo; el entregable de esta funcionalidad es exclusivamente documental.
+**Project Type**: Aplicación móvil con React Native y Expo; el entregable de esta feature es exclusivamente documental.
 
-**Objetivos de rendimiento**: No aplica; no se introduce comportamiento ejecutable.
+**Performance Goals**: No aplica; no se introduce comportamiento ejecutable.
 
-**Restricciones**: Mantener el alcance conceptual; respetar la privacidad, el historial inmutable y los requisitos futuros de funcionamiento sin conexión; no inventar atributos, permisos ni políticas operativas.
+**Constraints**: Mantener el alcance conceptual; respetar la privacidad, el historial inmutable y los requisitos futuros de funcionamiento sin conexión; no inventar atributos, permisos ni políticas operativas.
 
-**Escala/alcance**: Las cinco entidades y relaciones del MVP definidas en la especificación. No hay volúmenes de datos ni métricas de capacidad aprobados o necesarios para este modelo conceptual.
+**Scale/Scope**: Las cinco entidades y relaciones del MVP definidas en la especificación. No hay volúmenes de datos ni métricas de capacidad aprobados o necesarios para este modelo conceptual.
 
-## Revisión de la constitución
+## Constitution Check
 
 ### Verificación previa al diseño
 
@@ -109,9 +109,9 @@ Al iniciar este plan, `docs/architecture.md` indicaba que NFC no estaba implemen
 
 Cumple — el diseño permanece documental, no añade dependencias ni infraestructura, define conceptualmente la visibilidad de datos personales y conserva los requisitos de identidad global de eventos e historial sin conexión. Los controles técnicos de autorización y sincronización quedan para fases posteriores. No se detectan violaciones que requieran justificación.
 
-## Estructura del proyecto
+## Project Structure
 
-### Documentación de esta funcionalidad
+### Documentation (this feature)
 
 ```text
 docs/specs/002-data-model/
@@ -122,12 +122,12 @@ docs/specs/002-data-model/
 └── tasks.md
 ```
 
-### Código fuente
+### Source Code (repository root)
 
 No se modifica código fuente ni pruebas automatizadas en esta funcionalidad.
 
-**Decisión de estructura**: Los artefactos se mantienen en el directorio de la especificación. El repositorio continúa siendo una única aplicación Expo; no se crean módulos de dominio ni proyectos adicionales para un modelo exclusivamente documental.
+**Structure Decision**: Los artefactos se mantienen en el directorio de la especificación. El repositorio continúa siendo una única aplicación Expo; no se crean módulos de dominio ni proyectos adicionales para un modelo exclusivamente documental.
 
-## Seguimiento de complejidad
+## Complexity Tracking
 
 No hay violaciones de la constitución ni complejidad adicional que justificar.

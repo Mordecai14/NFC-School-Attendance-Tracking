@@ -1,4 +1,5 @@
 # [PROJECT_NAME] Constitution
+<!-- Idioma: redactar el contenido generado en español profesional y natural según AGENTS.md, conservando el vocabulario habitual de desarrollo en inglés, los encabezados y campos estructurales y los marcadores de esta plantilla. Una traducción no autoriza enmiendas a la constitución. Al regenerar esta plantilla, conservar esta indicación y revisar el diff. -->
 <!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
 
 ## Core Principles

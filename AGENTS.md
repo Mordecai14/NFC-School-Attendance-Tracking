@@ -23,7 +23,13 @@ Las dependencias adicionales deben incorporarse únicamente cuando sean necesari
 
 ## Documentación
 
-Toda la documentación del proyecto debe estar escrita en español (con excepción de palabras clave como feature(s), palabras genericas como offline, Must, etc. O palabras y frases de terminal y desarrollo como build, run, etc). Se puede redactar
+- Escribir y actualizar la documentación del proyecto en español profesional y natural, conservando en inglés el vocabulario habitual de desarrollo. Esta regla también aplica a README, specs, planes, tasks, checklists y documentación generada por Spec Kit.
+- Mantener términos como feature, roadmap, bug/bugs, backlog, user story, sprint, stack, frontend, backend, layout, responsive, assets, schema/schemas, query/queries, dataset, build, deploy, preview, release, workflow, pipeline, job, CI/CD, setup, runtime, package manager, workspace, lockfile, script, test/tests, testing, check/checks, lint, fixture, mockup, refactor, rollback, handoff, commit, branch, push, pull request, hook, token, secrets y logs. Usarlos cuando aporten precisión, sin convertir la prosa completa al inglés ni forzar anglicismos en palabras comunes.
+- Traducir las explicaciones, los títulos descriptivos y las instrucciones; por ejemplo: «Feature: Foundation reproducible», «Validación del build» y «Bugs pendientes».
+- No traducir ni renombrar comandos, flags, rutas, archivos, identificadores, variables de entorno, valores de configuración, URLs, nombres de productos, IDs de requisitos/tasks ni marcadores de herramientas. Conservar los estados de los checkboxes y el significado de requisitos, decisiones y evidencias.
+- En Spec Kit, conservar los encabezados y campos estructurales que sus comandos usan como referencia (por ejemplo, `User Scenarios & Testing`, `Requirements`, `Success Criteria`, `Technical Context` y `Constitution Check`), los marcadores `NEEDS CLARIFICATION` y las palabras `Given`, `When`, `Then`. Redactar su contenido en español con los términos técnicos anteriores.
+- Las instrucciones internas de herramientas pueden conservar su inglés original por compatibilidad; sus documentos generados deben respetar esta convención. Al actualizar o regenerar las plantillas de Spec Kit, conservar la indicación de idioma y revisar el diff.
+- Esta convención se refiere a documentación, no cambia automáticamente el idioma del código, los mensajes de UI ni el contenido público del sitio. Una traducción no autoriza cambios de alcance, arquitectura, estados de validación ni enmiendas a la constitución.
 
 Usar:
 

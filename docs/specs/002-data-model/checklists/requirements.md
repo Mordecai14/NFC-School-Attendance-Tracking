@@ -1,8 +1,8 @@
-# Lista de verificación de calidad de la especificación: Modelo de datos del MVP
+# Checklist de calidad de la especificación: Modelo de datos del MVP
 
-**Propósito**: Validar la completitud y calidad de la especificación antes de planificar
-**Creado**: 2026-10-29
-**Funcionalidad**: [spec.md](../spec.md)
+**Purpose**: Validar la integridad y calidad de la especificación antes de planificar
+**Created**: 2026-10-29
+**Feature**: [spec.md](../spec.md)
 
 ## Calidad del contenido
 
@@ -30,7 +30,7 @@
 - [x] Los resultados esperados de la funcionalidad están reflejados en criterios medibles
 - [x] No se filtran detalles de implementación en la especificación
 
-## Notas
+## Notes
 
 - La cardinalidad y los reemplazos de pulseras, la pertenencia a una escuela y las relaciones alumno-tutor reflejan decisiones confirmadas por el usuario.
 - La reutilización de pulseras retiradas, las transferencias entre escuelas y los permisos de tutores quedan explícitamente fuera de lo definido.

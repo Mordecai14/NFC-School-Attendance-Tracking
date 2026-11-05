@@ -1,7 +1,7 @@
-# Lista de calidad de la especificación: Lectura de pulseras NFC
+# Checklist de calidad de la especificación: Lectura de pulseras NFC
 
-**Propósito**: Validar la integridad y calidad de la especificación antes de planificar
-**Creada**: 2026-10-27
+**Purpose**: Validar la integridad y calidad de la especificación antes de planificar
+**Created**: 2026-10-27
 **Feature**: [spec.md](../spec.md)
 
 ## Calidad del contenido
@@ -29,7 +29,7 @@
 - [x] La especificación define cómo comprobar los resultados medibles
 - [x] No se incluyen decisiones sobre bibliotecas, APIs ni estructura del código
 
-## Notas
+## Notes
 
 - Esta lista valida el documento, no afirma que las pulseras hayan sido probadas.
   La prueba física requiere un dispositivo Android y muestras reales de la escuela.
