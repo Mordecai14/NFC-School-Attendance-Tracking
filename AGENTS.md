@@ -10,6 +10,14 @@ Aplicación móvil para registrar la entrada y salida de alumnos mediante pulser
 
 Las dependencias adicionales deben incorporarse únicamente cuando sean necesarias para una funcionalidad aprobada.
 
+## Supabase
+
+- Desarrollar directamente contra un proyecto de Supabase en la nube con datos ficticios; no exigir Docker ni levantar una base Supabase local.
+- Conservar migraciones SQL versionadas en `supabase/migrations/`; usar la CLI para vincular el proyecto y revisar/aplicar migraciones remotas, no para iniciar servicios locales.
+- Configurar Auth en el Dashboard del proyecto remoto; `supabase/config.toml` no aplica esos ajustes al servicio hospedado.
+- Confirmar el proyecto destino antes de cualquier cambio remoto. No ejecutar `supabase db reset` en el proyecto en la nube ni usar datos reales antes de definir retención.
+- Esta elección de entorno no elimina la futura persistencia offline de asistencias en el dispositivo.
+
 ## Principios de ingeniería
 
 - Preferir soluciones simples antes que abstracciones prematuras.

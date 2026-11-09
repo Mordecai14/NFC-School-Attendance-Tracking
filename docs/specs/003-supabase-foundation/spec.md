@@ -1,6 +1,6 @@
 # Feature: Base de Supabase y acceso escolar
 
-**Status**: En curso; solo está completado el setup local. Todavía no hay schema escolar, RLS ni login implementados. Este documento reúne requisitos, diseño y validación de 003; el avance se sigue en [tasks.md](tasks.md).
+**Status**: En curso; están preparados la CLI y el ejemplo de variables. El desarrollo se realiza directamente con Supabase en la nube, sin Docker ni base Supabase local. No se ha seleccionado ni validado un proyecto remoto en esta tarea; todavía no hay schema escolar, RLS ni login implementados. El avance se sigue en [tasks.md](tasks.md).
 
 **Entregable**: el personal ingresa con la cuenta de su escuela, conserva la sesión al reabrir y puede cerrarla; la base conserva el modelo escolar y aísla los datos entre escuelas.
 
@@ -30,6 +30,30 @@ También quedan fuera recuperación/cambio de contraseña, distribución de cred
 
 Expo/React Native y TypeScript estricto; acceso directo a Supabase Auth y PostgreSQL, sin API propia ni repositorio genérico. Las migraciones SQL versionadas son la fuente del schema. Ver [la decisión arquitectónica](../../decisions/supabase-auth-and-school-isolation.md).
 
+### Entorno de desarrollo
+
+1. Crear o seleccionar un proyecto de desarrollo en Supabase Cloud, usando únicamente cuentas y datos ficticios. No reutilizar un proyecto con datos reales para estas pruebas.
+2. Copiar la Project URL y la publishable key del Dashboard a `.env.local`, con los nombres de `.env.example`. Ese archivo vive en la computadora, pero apunta a Supabase en la nube; no representa una base local. No incluir claves secret/service-role, contraseña de base ni tokens de la CLI en variables públicas o en Git.
+3. En Authentication del Dashboard, desactivar **Allow new users to sign up**, mantener el proveedor Email habilitado y crear una cuenta de prueba administrativamente. Verificar que signup público sea rechazado y que la cuenta creada pueda iniciar sesión. `supabase/config.toml` no aplica ajustes de Auth al proyecto hospedado.
+4. Vincular el workspace al proyecto elegido con la CLI instalada, sin levantar contenedores:
+
+   ```sh
+   pnpm exec supabase login
+   pnpm exec supabase link --project-ref <project-ref>
+   ```
+
+   Introducir credenciales por el flujo de la CLI; no pegarlas en comandos versionados ni en el chat. Revisar el destino vinculado antes de cambios remotos.
+5. Cuando existan migraciones en `supabase/migrations/`, revisar lo que se aplicaría y luego aplicar al proyecto de desarrollo confirmado:
+
+   ```sh
+   pnpm exec supabase db push --linked --dry-run --skip-vault
+   pnpm exec supabase db push --linked --skip-vault
+   ```
+
+   No forzar confirmaciones ni incluir fixtures automáticamente. Publicar tablas con RLS y grants mínimos desde su creación para que no haya exposición temporal de datos. Registrar cambios del schema en SQL versionado, no solo con ediciones manuales del Dashboard.
+
+No se usan `supabase start`, `supabase status` local ni `supabase db reset` en este workflow. Los resets de la base hospedada están prohibidos como paso de desarrollo. La CLI se conserva para migraciones; no se requiere Docker. Los comandos anteriores son instrucciones pendientes, no operaciones ya realizadas.
+
 ### Schema previsto
 
 | Tabla | Campos principales | Restricciones |
@@ -50,7 +74,7 @@ FKs en todas las relaciones, identidades y relaciones no nulas, sin cascadas que
 - Escuelas, alumnos, pulseras y eventos visibles solo para la propia escuela. `student_tutors` se filtra por la escuela del alumno; `tutors` por la existencia de un vínculo visible.
 - Crear y editar tutores globales y vínculos solo en el entorno administrativo confiable. Compartir tutor no comparte sus otras relaciones.
 - En la app solo `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. La publishable key requiere RLS; ninguna clave secret/service-role ni credencial administrativa se empaqueta en el cliente.
-- Desactivar signup con `[auth].enable_signup = false` y aplicar/verificar la configuración equivalente en remoto, manteniendo el login por correo/contraseña. Ocultar el botón no alcanza.
+- Desactivar signup en el Dashboard del proyecto hospedado, manteniendo el proveedor Email y el login por correo/contraseña. Ocultar el botón no alcanza; comprobar el rechazo en la API pública.
 
 ### Login y sesión
 
@@ -68,22 +92,16 @@ Las tareas y sus dependencias técnicas mínimas están en [tasks.md](tasks.md),
 
 ### Base y seguridad
 
-Una vez implementados schema, fixtures y tests, con Docker en ejecución:
+Validar contra el proyecto de desarrollo hospedado, después de aplicar las migraciones y sin reconstruir la base. Conservar tests SQL de integridad y RLS en `supabase/tests/`, ejecutables en el SQL Editor del Dashboard mediante transacciones que reviertan sus datos de prueba. Si se usa pgTAP, habilitarlo en ese proyecto antes de ejecutar sus scripts; no exigir `supabase test db` ni un runner con Docker. No hacer borrados generales para limpiar tests.
 
-```sh
-pnpm exec supabase start
-pnpm exec supabase db reset
-pnpm exec supabase test db
-```
-
-**Solo local**: `db reset` reconstruye la base y aplica migraciones/fixtures; no agregar `--linked` ni apuntar a remoto. Los fixtures se cargan después del schema, sin datos reales ni credenciales de login versionadas. Usar pgTAP para relaciones/campos, UID único, una activa, historial, tipo/identidad de eventos, inmutabilidad y permisos.
+Los tests automatizados deben cubrir relaciones/campos, UID único, una pulsera activa, historial, tipo/identidad de eventos, inmutabilidad y permisos. En el SQL Editor, que opera con privilegios administrativos, simular explícitamente roles `anon`/`authenticated` e identidades JWT para probar RLS; consultar solo como administrador no demuestra aislamiento. Las pruebas por API usan la publishable key y sesiones de prueba, nunca service-role para verificar permisos de usuario.
 
 Con dos escuelas sintéticas A/B, comprobar lecturas propias y que los accesos cruzados —incluyendo referencias manipuladas—, anónimos y sin asociación no exponen datos ni modifican filas. Ambas ven el tutor compartido solo por su relación; no pueden mutarlo ni ver vínculos ajenos. Verificar signup rechazado y login existente permitido.
 
 ### Android
 
-1. Obtener URL y publishable key locales con `pnpm exec supabase status`; copiarlas a `.env.local`, no al repositorio.
-2. Crear cuentas de prueba desde el Dashboard local y asociarlas administrativamente a escuelas sintéticas: `insert into public.schools (name, auth_user_id) values ('Escuela de prueba A', '<auth-user-uuid>');`. Preparar además una cuenta sin escuela.
+1. Usar URL y publishable key del proyecto hospedado desde `.env.local`, no desde una instancia Supabase local.
+2. Crear cuentas de prueba desde el Dashboard del proyecto de desarrollo y asociarlas administrativamente a escuelas sintéticas cuando exista el schema: `insert into public.schools (name, auth_user_id) values ('Escuela de prueba A', '<auth-user-uuid>');`. Preparar además una cuenta sin escuela; no versionar credenciales.
 3. Con SDK y dispositivo/emulador, ejecutar `pnpm exec expo run:android --device`. Comprobar login válido/inválido, cuenta deshabilitada, ausencia de signup, cuenta sin escuela, restauración al reabrir, logout, vencimiento y fallo de conexión sin contenido protegido indebido.
 4. Ejecutar los checks de código: `pnpm lint`, `pnpm exec tsc --noEmit`, `node --test tests/*.test.mjs` y `pnpm exec expo install --check`; registrar fallos propios y preexistentes por separado. No ampliar el alcance para reparar bugs ajenos.
 
@@ -97,4 +115,4 @@ Con dos escuelas sintéticas A/B, comprobar lecturas propias y que los accesos c
 
 ### Evidencia disponible
 
-Solo se validó el setup: CLI ejecutable, variables locales ignoradas y `git diff --check` correcto. TypeScript y las seis pruebas existentes pasaron; lint reportó un fallo preexistente en `src/hooks/use-color-scheme.web.ts:11`. `pnpm add` informó `ERR_PNPM_IGNORED_BUILDS` por `unrs-resolver`, aunque la CLI quedó instalada y ejecutable. Estos son resultados previos, no checks reejecutados al consolidar documentación. Base, RLS y login siguen sin validar.
+Solo se validó el setup del repositorio: CLI ejecutable, variables locales ignoradas y `git diff --check` correcto. TypeScript y las seis pruebas existentes pasaron previamente; lint reportó un fallo preexistente en `src/hooks/use-color-scheme.web.ts:11`. `pnpm add` informó `ERR_PNPM_IGNORED_BUILDS` por `unrs-resolver`, aunque la CLI quedó instalada y ejecutable. Estos son resultados históricos, no una validación remota. Proyecto hospedado, configuración de Auth, schema, RLS y login siguen sin comprobar.

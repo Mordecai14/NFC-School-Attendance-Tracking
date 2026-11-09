@@ -17,7 +17,13 @@ pnpm exec tsc --noEmit
 node --test tests/*.test.mjs
 ```
 
-El último resultado registrado tiene un fallo de lint preexistente en `src/hooks/use-color-scheme.web.ts:11`; no implica que los checks actuales hayan sido ejecutados. La [spec 003](docs/specs/003-supabase-foundation/spec.md) explica el setup y la validación previstos para Supabase. Usar datos ficticios; no cargar datos personales reales hasta definir retención.
+El último resultado registrado tiene un fallo de lint preexistente en `src/hooks/use-color-scheme.web.ts:11`; no implica que los checks actuales hayan sido ejecutados.
+
+## Supabase en la nube
+
+Se trabaja directamente con un proyecto hospedado, sin Docker ni base Supabase local. Crear o seleccionar un proyecto de desarrollo con datos ficticios; copiar su URL y publishable key del Dashboard a `.env.local` usando `.env.example` como referencia. No agregar claves secret/service-role a la app ni al repositorio.
+
+La CLI se conserva para aplicar migraciones SQL versionadas al proyecto vinculado. El setup, los ajustes de Auth y la validación están en [003](docs/specs/003-supabase-foundation/spec.md#entorno-de-desarrollo). No ejecutar `supabase db reset` contra la nube ni cargar datos personales reales hasta definir retención. La creación/configuración del proyecto remoto sigue pendiente, no está hecha por actualizar estos archivos.
 
 ## Dónde mirar
 

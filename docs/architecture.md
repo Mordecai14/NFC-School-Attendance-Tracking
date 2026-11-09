@@ -4,7 +4,7 @@
 
 El proyecto actualmente es una aplicación React Native construida con Expo y TypeScript.
 
-La CLI de Supabase y `supabase/config.toml` están preparados. Todavía no hay integración de la app con backend, schema escolar, RLS ni login; el diseño y los pendientes se reúnen en [003](specs/003-supabase-foundation/spec.md).
+La CLI de Supabase está instalada y `supabase/config.toml` conserva solo el identificador del workspace. El desarrollo usará directamente un proyecto de Supabase en la nube, sin Docker ni stack local. Todavía no se ha validado un proyecto remoto ni hay integración de la app con backend, schema escolar, RLS o login; el diseño y los pendientes se reúnen en [003](specs/003-supabase-foundation/spec.md).
 
 La lectura NFC en Android está implementada y validada con dos pulseras de muestra. La anomalía observada durante exposición sostenida y los límites de esa validación están documentados en [el registro de validación de 001](specs/001-read-nfc-wristbands/validation.md).
 
@@ -17,7 +17,7 @@ La arquitectura prevista actualmente para el MVP incluye:
 - React Native con Expo;
 - lectura NFC en Android;
 - persistencia local para asistencias offline;
-- sincronización con Supabase.
+- sincronización con Supabase hospedado.
 
 Estos componentes se incorporan progresivamente en incrementos observables dentro del alcance acordado. El [modelo conceptual](specs/002-data-model/spec.md) y la [decisión de Supabase](decisions/supabase-auth-and-school-isolation.md) son las referencias de diseño; no describen capacidades ya implementadas.
 
@@ -32,5 +32,7 @@ Estos componentes se incorporan progresivamente en incrementos observables dentr
 ## Restricciones
 
 No introducir servicios backend ni infraestructura de forma prematura.
+
+La base remota de desarrollo usa únicamente datos ficticios. La elección de Supabase en la nube no reemplaza la persistencia local futura de asistencias en el dispositivo; son responsabilidades distintas.
 
 Las decisiones que afecten materialmente la arquitectura del sistema deben documentarse mediante ADRs dentro de `docs/decisions/`.
