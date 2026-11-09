@@ -41,11 +41,11 @@ Las dependencias adicionales deben incorporarse únicamente cuando sean necesari
 
 Usar:
 
-- `docs/roadmap.md` para prioridades y orden aproximado de capacidades.
+- `docs/roadmap.md` para el avance, las prioridades, los siguientes resultados y sus comprobaciones.
 - `docs/product.md` para el contexto estable del producto.
 - `docs/architecture.md` para la arquitectura actual del sistema.
 - `docs/decisions/` para decisiones arquitectónicas.
-- `docs/specs/<feature>/spec.md` para requisitos, enfoque y validación, y `tasks.md` en el mismo directorio para el seguimiento del trabajo. Conservar evidencia separada solo cuando aporte información que no convenga resumir.
+- Conservar documentación o evidencia separada solo cuando aporte información importante que no convenga resumir.
 
 No asumir que documentación desactualizada sigue siendo correcta.
 
@@ -56,13 +56,12 @@ Si la implementación y la documentación se contradicen, reportar el conflicto.
 - Trabajar en incrementos pequeños que produzcan un resultado observable; usar el roadmap como dirección, no como una secuencia rígida de fases.
 - Acordar el alcance del incremento una vez y avanzar hasta su validación sin pedir aprobación por cada task, archivo, función o decisión técnica reversible.
 - Consultar únicamente si falta una decisión de producto que afecta el resultado, cambia materialmente la arquitectura, se amplía el alcance o hay una operación con riesgo de pérdida o exposición de datos. Las acciones de Git mantienen su autorización independiente.
-- Usar la spec existente. Para una feature nueva, registrar en `docs/specs/` una descripción breve del resultado, los límites y unos pocos criterios verificables; no exigir un conjunto completo de artefactos.
+- Definir el resultado, los límites y cómo comprobarlo directamente en la conversación o en el roadmap cuando convenga. No crear specs, planes ni archivos de tareas por rutina.
 - Para bugs y refactors dentro del comportamiento aprobado, usar la descripción del problema y su comprobación sin crear una spec nueva por rutina.
 - Leer el plan existente y el código relacionado cuando sean pertinentes. Resolver ambigüedades de producto reales; los detalles técnicos reversibles pueden decidirse y comunicarse al cierre.
-- Spec Kit es opcional: usar sus comandos cuando aporten valor o se soliciten, no como una cadena obligatoria. Si se invoca un comando explícitamente, respetar sus instrucciones y gates.
+- No restaurar Spec Kit ni sus artefactos por rutina. Si se solicita explícitamente una herramienta o documentación adicional, ajustar el flujo al alcance pedido.
 - Mantener una sola fuente por tema; consolidar duplicados conservando requisitos, decisiones y evidencia. Registrar decisiones arquitectónicas materiales, no cada detalle de implementación.
-- Mantener `tasks.md` como una lista corta de entregables con checkboxes; actualizar el avance sin duplicarlo en la spec. Ajustar o combinar pasos técnicos dentro del alcance sin pedir aprobación por cada task ni imponer gates, TDD o fases rígidas. Respetar dependencias técnicas y validaciones de seguridad reales.
-- Las specs 001–003 están simplificadas: no recrear `plan.md`, research, contratos ni checklists por rutina. Los comandos opcionales de Spec Kit que exijan esos archivos o un formato de tasks más detallado requieren adaptar el flujo o una solicitud explícita, no ejecutarlos como prerequisito del desarrollo.
+- Mantener el roadmap suficientemente detallado para orientar el desarrollo, sin duplicar listas de trabajo en otros archivos por rutina. Ajustar o combinar pasos técnicos dentro del alcance sin pedir aprobación por cada task ni imponer gates, TDD o fases rígidas. Respetar dependencias técnicas y validaciones de seguridad reales.
 - No imponer TDD, porcentajes de cobertura, capas ni patrones por rutina. Preferir la solución directa que cumpla el alcance.
 
 ## Validación
@@ -77,5 +76,7 @@ Antes de considerar terminado un incremento:
 - Cerrar con un resumen breve: qué funciona ahora, cómo comprobarlo y qué quedó pendiente. No presentar como validado lo que no se ejecutó.
 
 ## Git
+
+Trabajar únicamente en la branch `main`; no crear ni usar otras branches para el desarrollo.
 
 No hacer commit, push, rebase ni modificar el historial de Git a menos que se solicite explícitamente.

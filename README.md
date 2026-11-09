@@ -9,7 +9,7 @@ pnpm install
 pnpm exec expo run:android --device
 ```
 
-La lectura física requiere un Android con NFC, SDK/JDK configurados y un build nativo; no se prueba con Expo Go. Para repetir el ensayo, ver [001](docs/specs/001-read-nfc-wristbands/spec.md#cómo-comprobarlo).
+La lectura física requiere un Android con NFC, SDK/JDK configurados y un build nativo; no se prueba con Expo Go. El [roadmap](docs/roadmap.md#01--lectura-nfc) resume lo comprobado y sus límites.
 
 ```sh
 pnpm lint
@@ -23,15 +23,13 @@ El último resultado registrado tiene un fallo de lint preexistente en `src/hook
 
 Se trabaja directamente con un proyecto hospedado, sin Docker ni base Supabase local. Crear o seleccionar un proyecto de desarrollo con datos ficticios; copiar su URL y publishable key del Dashboard a `.env.local` usando `.env.example` como referencia. No agregar claves secret/service-role a la app ni al repositorio.
 
-La CLI se conserva para aplicar migraciones SQL versionadas al proyecto vinculado. El setup, los ajustes de Auth y la validación están en [003](docs/specs/003-supabase-foundation/spec.md#entorno-de-desarrollo). No ejecutar `supabase db reset` contra la nube ni cargar datos personales reales hasta definir retención. La creación/configuración del proyecto remoto sigue pendiente, no está hecha por actualizar estos archivos.
+La CLI se conserva para aplicar migraciones SQL versionadas al proyecto vinculado. El setup, los ajustes de Auth y las validaciones pendientes están en el [roadmap](docs/roadmap.md#03--acceso-escolar-y-datos-con-supabase). No ejecutar `supabase db reset` contra la nube ni cargar datos personales reales hasta definir retención. La creación/configuración del proyecto remoto sigue pendiente, no está hecha por actualizar estos archivos.
 
 ## Dónde mirar
 
 - [Roadmap](docs/roadmap.md): estado y siguiente entregable.
 - [Producto](docs/product.md): propósito y límites del MVP.
 - [Arquitectura](docs/architecture.md): qué existe y qué está previsto.
-- Specs: [001 — NFC](docs/specs/001-read-nfc-wristbands/spec.md), [002 — Modelo](docs/specs/002-data-model/spec.md), [003 — Acceso escolar](docs/specs/003-supabase-foundation/spec.md).
+- [Decisión de Supabase](docs/decisions/supabase-auth-and-school-isolation.md): acceso y aislamiento propuestos.
 
-Cada feature tiene `spec.md` para requisitos, enfoque y validación, y `tasks.md` para una lista corta de trabajo. El avance actual está en [las tareas de 003](docs/specs/003-supabase-foundation/tasks.md). Se conserva aparte la [evidencia física de NFC](docs/specs/001-read-nfc-wristbands/validation.md) y la [decisión de Supabase](docs/decisions/supabase-auth-and-school-isolation.md). No hace falta recorrer planes, research, contratos y checklists para desarrollar.
-
-Las instrucciones de colaboración están en [AGENTS.md](AGENTS.md). Spec Kit sigue disponible como herramienta opcional; sus comandos que exigen `plan.md` o un formato de tasks más detallado no aplican directamente a este flujo ligero. No regenerar artefactos por rutina.
+El roadmap concentra el avance y los próximos resultados; no se crean specs, planes ni archivos de tareas por rutina. Las instrucciones de colaboración están en [AGENTS.md](AGENTS.md).

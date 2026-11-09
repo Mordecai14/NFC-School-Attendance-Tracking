@@ -4,9 +4,9 @@
 
 El proyecto actualmente es una aplicación React Native construida con Expo y TypeScript.
 
-La CLI de Supabase está instalada y `supabase/config.toml` conserva solo el identificador del workspace. El desarrollo usará directamente un proyecto de Supabase en la nube, sin Docker ni stack local. Todavía no se ha validado un proyecto remoto ni hay integración de la app con backend, schema escolar, RLS o login; el diseño y los pendientes se reúnen en [003](specs/003-supabase-foundation/spec.md).
+La CLI de Supabase está instalada y `supabase/config.toml` conserva solo el identificador del workspace. El desarrollo usará directamente un proyecto de Supabase en la nube, sin Docker ni stack local. Todavía no se ha validado un proyecto remoto ni hay integración de la app con backend, schema escolar, RLS o login; el avance está en el [roadmap](roadmap.md).
 
-La lectura NFC en Android está implementada y validada con dos pulseras de muestra. La anomalía observada durante exposición sostenida y los límites de esa validación están documentados en [el registro de validación de 001](specs/001-read-nfc-wristbands/validation.md).
+La lectura NFC en Android está implementada y validada con dos pulseras de muestra. El [roadmap](roadmap.md) resume la anomalía observada durante exposición sostenida y los límites de esa validación.
 
 Todavía no se ha implementado una capa de persistencia offline.
 
@@ -19,7 +19,7 @@ La arquitectura prevista actualmente para el MVP incluye:
 - persistencia local para asistencias offline;
 - sincronización con Supabase hospedado.
 
-Estos componentes se incorporan progresivamente en incrementos observables dentro del alcance acordado. El [modelo conceptual](specs/002-data-model/spec.md) y la [decisión de Supabase](decisions/supabase-auth-and-school-isolation.md) son las referencias de diseño; no describen capacidades ya implementadas.
+Estos componentes se incorporan progresivamente en incrementos observables dentro del alcance acordado. El [modelo conceptual resumido](roadmap.md#02--modelo-conceptual) y la [decisión de Supabase](decisions/supabase-auth-and-school-isolation.md) son referencias de diseño; no describen capacidades ya implementadas.
 
 ## Prioridades arquitectónicas
 
