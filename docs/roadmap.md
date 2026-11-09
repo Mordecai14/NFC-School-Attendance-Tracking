@@ -16,7 +16,7 @@ Dirección del MVP, no una secuencia rígida de fases. Cada incremento debe deja
 | 008 — Duplicados y conflictos | Evitar duplicados por lecturas, reintentos y sincronización repetida. | Pendiente. |
 | 009 — Jornada de prueba | Probar múltiples alumnos, offline, reconexión, errores y reapertura. | Pendiente. |
 
-**Ahora**: completar 003 con cuentas y datos ficticios. El detalle técnico y los pendientes están en su spec, no en otra lista de tasks.
+**Ahora**: completar 003 con cuentas y datos ficticios. El detalle técnico está en su spec y el avance en [tasks.md](specs/003-supabase-foundation/tasks.md).
 
 **Antes de datos reales**: definir retención y eliminación. La carga inicial es administrativa; los flujos de alta/asignación desde la app necesitan su alcance antes de implementarse.
 

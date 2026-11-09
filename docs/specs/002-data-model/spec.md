@@ -1,6 +1,6 @@
 # Feature: Modelo de datos del MVP
 
-**Status**: Completada el 2026-10-30 como entregable conceptual. No implementa código, tablas, almacenamiento, autorización ni sincronización. Las antiguas T001–T007 estaban completadas; el resultado se reúne aquí.
+**Status**: Completada el 2026-10-30 como entregable conceptual. No implementa código, tablas, almacenamiento, autorización ni sincronización. El resultado se reúne aquí y el resumen de tareas en [tasks.md](tasks.md).
 
 ## Modelo conceptual
 

@@ -1,6 +1,6 @@
 # Feature Specification: Lectura de pulseras NFC
 
-**Status**: Completada el 2026-10-29 con límites explícitos en [validation.md](validation.md).
+**Status**: Completada el 2026-10-29 con límites explícitos en [validation.md](validation.md). Resumen de tareas en [tasks.md](tasks.md).
 
 Validar en Android físico que dos pulseras pueden distinguirse mediante un identificador estable. Este documento reúne el alcance, el enfoque y la comprobación; no requiere planes ni checklists separados.
 

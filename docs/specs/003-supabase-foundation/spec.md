@@ -1,6 +1,6 @@
 # Feature: Base de Supabase y acceso escolar
 
-**Status**: En curso; solo está completado el setup local. Todavía no hay schema escolar, RLS ni login implementados. Este documento reúne requisitos, diseño, pendientes y validación de 003.
+**Status**: En curso; solo está completado el setup local. Todavía no hay schema escolar, RLS ni login implementados. Este documento reúne requisitos, diseño y validación de 003; el avance se sigue en [tasks.md](tasks.md).
 
 **Entregable**: el personal ingresa con la cuenta de su escuela, conserva la sesión al reabrir y puede cerrarla; la base conserva el modelo escolar y aísla los datos entre escuelas.
 
@@ -60,23 +60,9 @@ FKs en todas las relaciones, identidades y relaciones no nulas, sin cascadas que
 - `src/app/_layout.tsx` espera restauración y asociación escolar antes de mostrar contenido protegido. Sin sesión: `/login`; sin escuela: acceso no configurado, sin abrir el área protegida. Comprobar la asociación requiere la política RLS de lectura de la propia escuela.
 - Logout elimina la sesión local y vuelve a `/login`, sin borrar la cuenta ni sus datos. Vencimiento retira el acceso; los fallos de conexión nunca se presentan como consultas remotas confirmadas.
 
-## Trabajo pendiente
+## Seguimiento
 
-El desglose anterior se consolida en resultados, sin gates por archivo ni TDD obligatorio. Los IDs se conservan solo como referencia a trabajo previo; no hay que mantener otro `tasks.md`.
-
-| Resultado | Estado | Referencia anterior |
-|---|---|---|
-| CLI 2.122.0 en desarrollo y lockfile | Completado | T001 |
-| `.env.example` con variables públicas, sin valores reales | Completado | T002 |
-| `.env*` ignorados salvo el ejemplo | Completado | T003 |
-| `supabase init` y configuración local | Completado | T004 |
-| Base local reproducible, extensiones necesarias y signup desactivado local/remoto | Pendiente | T005–T008 |
-| Schema, restricciones, inmutabilidad y fixtures sintéticos de dos escuelas | Pendiente | T019–T026 |
-| Grants/RLS y tests de acceso propio, cruzado, anónimo y tutor compartido | Pendiente | T027–T034 |
-| Login, sesión persistente, asociación escolar y logout comprobados en Android | Pendiente | T009–T018 |
-| Revisión de secrets, coherencia, checks y bloqueo de datos reales | Pendiente | T035–T038 |
-
-**Orden técnico**: crear schema antes de fixtures y RLS. El formulario/login puede avanzar en paralelo; el guard escolar y la validación integrada esperan a la política de escuela propia (antes T031). No habilitar consultas de datos escolares antes de validar RLS. No es necesario completar pantallas de consulta o CRUD para demostrar 003.
+Las tareas y sus dependencias técnicas mínimas están en [tasks.md](tasks.md), sin repetir aquí la lista de avance.
 
 ## User Scenarios & Testing
 

@@ -26,6 +26,6 @@ El último resultado registrado tiene un fallo de lint preexistente en `src/hook
 - [Arquitectura](docs/architecture.md): qué existe y qué está previsto.
 - Specs: [001 — NFC](docs/specs/001-read-nfc-wristbands/spec.md), [002 — Modelo](docs/specs/002-data-model/spec.md), [003 — Acceso escolar](docs/specs/003-supabase-foundation/spec.md).
 
-Cada feature tiene un único documento activo con requisitos, enfoque y validación. Solo se conserva aparte la [evidencia física de NFC](docs/specs/001-read-nfc-wristbands/validation.md) y la [decisión de Supabase](docs/decisions/supabase-auth-and-school-isolation.md). No hace falta recorrer planes, research, contratos y checklists para desarrollar.
+Cada feature tiene `spec.md` para requisitos, enfoque y validación, y `tasks.md` para una lista corta de trabajo. El avance actual está en [las tareas de 003](docs/specs/003-supabase-foundation/tasks.md). Se conserva aparte la [evidencia física de NFC](docs/specs/001-read-nfc-wristbands/validation.md) y la [decisión de Supabase](docs/decisions/supabase-auth-and-school-isolation.md). No hace falta recorrer planes, research, contratos y checklists para desarrollar.
 
-Las instrucciones de colaboración están en [AGENTS.md](AGENTS.md). Spec Kit sigue disponible como herramienta opcional; sus comandos que exigen `plan.md` o `tasks.md` ya no aplican directamente a estas specs consolidadas. No regenerar esos archivos por rutina.
+Las instrucciones de colaboración están en [AGENTS.md](AGENTS.md). Spec Kit sigue disponible como herramienta opcional; sus comandos que exigen `plan.md` o un formato de tasks más detallado no aplican directamente a este flujo ligero. No regenerar artefactos por rutina.

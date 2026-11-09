@@ -37,7 +37,7 @@ Usar:
 - `docs/product.md` para el contexto estable del producto.
 - `docs/architecture.md` para la arquitectura actual del sistema.
 - `docs/decisions/` para decisiones arquitectónicas.
-- `docs/specs/<feature>/spec.md` como único documento activo de cada feature: requisitos, enfoque, estado y validación. Conservar evidencia separada solo cuando aporte información que no convenga resumir.
+- `docs/specs/<feature>/spec.md` para requisitos, enfoque y validación, y `tasks.md` en el mismo directorio para el seguimiento del trabajo. Conservar evidencia separada solo cuando aporte información que no convenga resumir.
 
 No asumir que documentación desactualizada sigue siendo correcta.
 
@@ -53,7 +53,8 @@ Si la implementación y la documentación se contradicen, reportar el conflicto.
 - Leer el plan existente y el código relacionado cuando sean pertinentes. Resolver ambigüedades de producto reales; los detalles técnicos reversibles pueden decidirse y comunicarse al cierre.
 - Spec Kit es opcional: usar sus comandos cuando aporten valor o se soliciten, no como una cadena obligatoria. Si se invoca un comando explícitamente, respetar sus instrucciones y gates.
 - Mantener una sola fuente por tema; consolidar duplicados conservando requisitos, decisiones y evidencia. Registrar decisiones arquitectónicas materiales, no cada detalle de implementación.
-- Las specs 001–003 están consolidadas: no recrear `plan.md`, `tasks.md`, research, contratos ni checklists por rutina. Los comandos opcionales de Spec Kit que los exijan requieren adaptar el flujo o una solicitud explícita, no ejecutarlos como prerequisito del desarrollo.
+- Mantener `tasks.md` como una lista corta de entregables con checkboxes; actualizar el avance sin duplicarlo en la spec. Ajustar o combinar pasos técnicos dentro del alcance sin pedir aprobación por cada task ni imponer gates, TDD o fases rígidas. Respetar dependencias técnicas y validaciones de seguridad reales.
+- Las specs 001–003 están simplificadas: no recrear `plan.md`, research, contratos ni checklists por rutina. Los comandos opcionales de Spec Kit que exijan esos archivos o un formato de tasks más detallado requieren adaptar el flujo o una solicitud explícita, no ejecutarlos como prerequisito del desarrollo.
 - No imponer TDD, porcentajes de cobertura, capas ni patrones por rutina. Preferir la solución directa que cumpla el alcance.
 
 ## Validación
