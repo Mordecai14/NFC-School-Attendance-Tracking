@@ -1,0 +1,5 @@
+# CLI workspace identifier, not the hosted project ref.
+# Development uses hosted Supabase; no local services are configured here.
+# Select the remote target with `supabase link --project-ref <project-ref>`.
+# Configure hosted Auth in the Dashboard, not in this file.
+project_id = "NFC-School-Attendance-Tracking"

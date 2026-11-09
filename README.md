@@ -1,56 +1,35 @@
-# Welcome to your Expo app 👋
+# Asistencia escolar con NFC
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+App Android con React Native, Expo y TypeScript. Hoy lee pulseras NFC; el acceso escolar con Supabase está en desarrollo. El registro de asistencias y la sincronización todavía no están implementados.
 
-## Get started
+## Desarrollo
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **src/app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```sh
+pnpm install
+pnpm exec expo run:android --device
 ```
 
-This command will move the starter code to the **example** directory and create a blank **src/app** directory where you can start developing.
+La lectura física requiere un Android con NFC, SDK/JDK configurados y un build nativo; no se prueba con Expo Go. El [roadmap](docs/roadmap.md#01--lectura-nfc) resume lo comprobado y sus límites.
 
-### Other setup steps
+```sh
+pnpm lint
+pnpm exec tsc --noEmit
+node --test tests/*.test.mjs
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+El último resultado registrado tiene un fallo de lint preexistente en `src/hooks/use-color-scheme.web.ts:11`; no implica que los checks actuales hayan sido ejecutados.
 
-## Learn more
+## Supabase en la nube
 
-To learn more about developing your project with Expo, look at the following resources:
+Se trabaja directamente con un proyecto hospedado, sin Docker ni base Supabase local. Crear o seleccionar un proyecto de desarrollo con datos ficticios; copiar su URL y publishable key del Dashboard a `.env.local` usando `.env.example` como referencia. No agregar claves secret/service-role a la app ni al repositorio.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+La CLI se conserva para aplicar migraciones SQL versionadas al proyecto vinculado. El setup, los ajustes de Auth y las validaciones pendientes están en el [roadmap](docs/roadmap.md#03--acceso-escolar-y-datos-con-supabase). No ejecutar `supabase db reset` contra la nube ni cargar datos personales reales hasta definir retención. La creación/configuración del proyecto remoto sigue pendiente, no está hecha por actualizar estos archivos.
 
-## Join the community
+## Dónde mirar
 
-Join our community of developers creating universal apps.
+- [Roadmap](docs/roadmap.md): estado y siguiente entregable.
+- [Producto](docs/product.md): propósito y límites del MVP.
+- [Arquitectura](docs/architecture.md): qué existe y qué está previsto.
+- [Decisión de Supabase](docs/decisions/supabase-auth-and-school-isolation.md): acceso y aislamiento propuestos.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+El roadmap concentra el avance y los próximos resultados; no se crean specs, planes ni archivos de tareas por rutina. Las instrucciones de colaboración están en [AGENTS.md](AGENTS.md).

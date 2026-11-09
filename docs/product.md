@@ -35,12 +35,7 @@ Una pulsera pertenece a un alumno.
 
 Un alumno no es un usuario autenticado de la aplicación.
 
-La relación conceptual es:
-
-Pulsera NFC  
-→ Alumno  
-→ Padre, madre o tutor  
-→ Usuario autenticado
+La pulsera identifica al alumno, que pertenece a una escuela y puede tener varios tutores. Un tutor puede vincularse con varios alumnos. En el acceso escolar previsto, quien se autentica es el personal con una cuenta compartida por escuela, no el tutor ni el alumno. El [roadmap](roadmap.md#02--modelo-conceptual) resume el modelo conceptual; el acceso para tutores sigue fuera del MVP inicial.
 
 ## Restricciones importantes del producto
 
