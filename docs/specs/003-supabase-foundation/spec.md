@@ -1,147 +1,114 @@
-# Feature Specification: Base de Supabase y acceso escolar
+# Feature: Base de Supabase y acceso escolar
 
-**Feature Branch**: `[003-supabase-foundation]`
+**Status**: En curso; solo está completado el setup local. Todavía no hay schema escolar, RLS ni login implementados. Este documento reúne requisitos, diseño, pendientes y validación de 003.
 
-**Created**: 2026-10-30
+**Entregable**: el personal ingresa con la cuenta de su escuela, conserva la sesión al reabrir y puede cerrarla; la base conserva el modelo escolar y aísla los datos entre escuelas.
 
-**Status**: Borrador
-
-**Input**: Descripción del usuario: "Comenzar a trabajar sobre el paso 003 — Base de Supabase, analizando los documentos necesarios para realizar la implementación". El alcance acordado incluye una cuenta compartida por escuela, login en la aplicación y creación manual de las cuentas, sin registro público.
-
-## Clarifications
-
-### Session 2026-10-30
-
-- Q: ¿Qué credenciales debe usar el personal para iniciar sesión con la cuenta compartida de su escuela? → A: Correo electrónico y contraseña.
-- Q: ¿La aplicación debe conservar la sesión al cerrarse y abrirse de nuevo, o pedir las credenciales cada vez? → A: Conservar la sesión hasta que el usuario cierre sesión o esta venza.
-- Q: ¿Qué regla de conservación debemos aplicar a los datos personales de alumnos y tutores? → A: Dejar el plazo pendiente y resolverlo antes de usar datos reales.
-- Q: ¿Un mismo tutor puede estar asociado a alumnos de escuelas distintas? → A: Sí, se comparte el registro del tutor y cada escuela solo ve sus propios vínculos.
-
-## User Scenarios & Testing
-
-### User Story 1 — Ingresar a la aplicación como personal escolar (Priority: P1)
-
-El personal de una escuela necesita ingresar con la cuenta compartida de su escuela para utilizar la aplicación.
-
-**Why this priority**: El acceso autenticado es el punto de entrada a las capacidades protegidas y permite comprobar que la cuenta corresponde a una escuela.
-
-**Independent Test**: Con una cuenta escolar previamente habilitada, iniciar sesión, cerrar la sesión y volver a intentarlo; comprobar también que credenciales inválidas no habilitan el acceso.
-
-**Acceptance Scenarios**:
-
-1. **Given** que la escuela tiene una cuenta habilitada, **When** un integrante del personal ingresa el correo electrónico y la contraseña válidos, **Then** accede al espacio protegido de esa escuela.
-2. **Given** que las credenciales son incorrectas, **When** se intenta iniciar sesión, **Then** la aplicación informa que no pudo autenticar y no muestra datos protegidos.
-3. **Given** una sesión iniciada, **When** el usuario cierra sesión, **Then** deja de acceder a las funciones y datos protegidos.
-4. **Given** un dispositivo con una sesión válida, **When** se cierra y vuelve a abrir la aplicación, **Then** la sesión continúa disponible hasta que se cierre o expire.
-5. **Given** que una persona no tiene una cuenta escolar habilitada, **When** abre la aplicación, **Then** no encuentra una opción para registrarse o crear una escuela.
-6. **Given** una cuenta deshabilitada, una sesión vencida o falta de conexión, **When** se intenta autenticar o solicitar datos protegidos, **Then** la aplicación informa que no pudo completar la operación y no presenta datos como si se hubieran recibido correctamente.
-
----
-
-### User Story 2 — Mantener los datos de cada escuela aislados (Priority: P1)
-
-El personal necesita que el acceso compartido de su escuela permita consultar sus datos sin exponer los de otras escuelas.
-
-**Why this priority**: Los datos de alumnos y tutores son personales y la privacidad escolar es una restricción central del producto.
-
-**Independent Test**: Preparar datos ficticios de dos escuelas y comprobar, con cada cuenta, que sus consultas solo revelan información de su propia escuela y que no puede modificar datos de la otra.
-
-**Acceptance Scenarios**:
-
-1. **Given** una cuenta de la escuela A y datos de las escuelas A y B, **When** el personal consulta alumnos, tutores, pulseras o asistencias, **Then** solo recibe los datos asociados a A.
-2. **Given** una cuenta de la escuela A, **When** intenta acceder o modificar datos de B, **Then** la operación es denegada y los datos de B permanecen sin cambios.
-3. **Given** un intento de usar una cuenta no autenticada, **When** solicita datos escolares protegidos, **Then** no recibe información personal ni puede modificarla.
-4. **Given** un tutor compartido que tiene vínculos con alumnos de las escuelas A y B, **When** cada escuela consulta sus datos, **Then** ambas pueden ver el tutor por su propio vínculo, pero ninguna puede ver el alumno ni el vínculo de la otra.
-
----
-
-### User Story 3 — Conservar los datos principales del modelo escolar (Priority: P1)
-
-El sistema necesita guardar y consultar las escuelas, alumnos, pulseras, tutores y eventos de asistencia de acuerdo con el modelo conceptual aprobado.
-
-En 003, el almacenamiento se prepara en la base y la carga inicial se realiza mediante migraciones y aprovisionamiento administrativo confiable; esta historia no incluye pantallas ni escrituras de datos desde la aplicación.
-
-**Why this priority**: El almacenamiento coherente es la base de las funciones posteriores de identificación, registro y sincronización.
-
-**Independent Test**: Con datos ficticios de una escuela, comprobar las relaciones aprobadas y que las reglas de integridad impiden combinaciones inválidas sin alterar el historial existente.
-
-**Acceptance Scenarios**:
-
-1. **Given** un alumno, una escuela y uno o más tutores, **When** se guardan sus relaciones, **Then** el alumno pertenece a una sola escuela y se pueden representar varios tutores por alumno y varios alumnos por tutor.
-2. **Given** una pulsera asignada, **When** se intenta repetir su identificador NFC en otra pulsera, **Then** el sistema rechaza la duplicación.
-3. **Given** un alumno con una pulsera activa, **When** se le asigna un reemplazo, **Then** la anterior queda conservada como histórica y no hay más de una pulsera activa para ese alumno.
-4. **Given** un evento de asistencia guardado, **When** se consulta o se reintenta registrar la misma identidad, **Then** el evento original conserva su identidad, alumno, tipo y momento, sin sobrescribirse ni duplicarse.
-5. **Given** que aún no se aprobó una regla de conservación y eliminación, **When** se prepara el uso del sistema con datos reales de alumnos o tutores, **Then** ese uso espera hasta que la regla quede definida y documentada.
-
-### Edge Cases
-
-- Credenciales incorrectas, cuenta deshabilitada o cuenta que aún no fue creada.
-- Sesión vencida al abrir la aplicación o al solicitar datos protegidos.
-- Pérdida de conexión durante el inicio de sesión o una consulta remota; no se debe presentar un resultado remoto como confirmado si no se recibió.
-- Intento de acceder a un registro de otra escuela mediante una referencia conocida o manipulada.
-- Alumno sin tutor o sin pulsera activa.
-- Identificador NFC ya usado, segunda pulsera activa para un alumno o relación con una entidad inexistente.
-- Reemplazo de pulsera con eventos de asistencia previos.
-- Reintento de un evento con identidad ya existente y evento distinto con identidad propia.
+**Límite**: la app solo consulta datos en 003. La carga inicial es administrativa; no hay CRUD escolar, registro de asistencias, identificación del alumno desde NFC, persistencia offline ni sincronización. Usar exclusivamente datos ficticios hasta definir retención y eliminación.
 
 ## Requirements
 
-### Functional Requirements
+- **FR-001**: Login por correo y contraseña con la cuenta compartida de la escuela.
+- **FR-002**: Exactamente una cuenta por escuela, compartida por su personal; sin cuentas individuales ni roles de personal.
+- **FR-003**: Cuentas creadas manualmente por una persona administradora fuera de la app; sin registro público ni creación de escuelas desde la app.
+- **FR-004**: Conservar la sesión válida al reabrir hasta logout o vencimiento; permitir cerrar sesión y retirar el acceso protegido.
+- **FR-005**: Informar credenciales inválidas, cuenta deshabilitada, sesión vencida y falta de conexión sin revelar datos ni afirmar éxitos remotos no confirmados.
+- **FR-006**: Asociar cada cuenta a exactamente una escuela y limitar el acceso a sus datos. Una cuenta sin escuela no abre rutas protegidas.
+- **FR-007**: Personas no autenticadas y cuentas de otras escuelas no pueden consultar ni modificar datos personales ajenos.
+- **FR-008**: Conservar y consultar escuelas, alumnos, pulseras, tutores, vínculos y eventos según [002](../002-data-model/spec.md). La carga inicial usa migraciones y aprovisionamiento administrativo confiable; las escrituras de datos desde la app quedan para otra feature aprobada.
+- **FR-009**: Un alumno pertenece a una escuela y admite cero o más tutores y cero o una pulsera activa.
+- **FR-010**: UID NFC globalmente único; reemplazar una pulsera conserva la anterior como histórica y no altera las asistencias del alumno.
+- **FR-011**: Cada evento distingue entrada/salida, alumno, identidad global única y momento; no se sobrescribe ni descarta silenciosamente un evento previo.
+- **FR-012**: Repetir la identidad de un evento no crea otro registro ni cambia el original. La deduplicación de eventos con identidades distintas queda fuera de 003.
+- **FR-013**: Rechazar relaciones inexistentes y estados contrarios a cardinalidades e invariantes.
+- **FR-014**: Definir y documentar plazo y regla de conservación/eliminación antes de usar datos reales; 003 no fija el plazo.
+- **FR-015**: Un tutor puede vincularse con alumnos de distintas escuelas. Cada escuela ve su identidad/nombre mediante sus propios vínculos, nunca alumnos ni vínculos ajenos.
 
-- **FR-001**: La aplicación DEBE permitir que el personal inicie sesión con el correo electrónico y la contraseña de la cuenta compartida de su escuela.
-- **FR-002**: DEBE existir exactamente una cuenta escolar compartida por el personal de cada escuela; no DEBEN crearse cuentas individuales ni roles de personal dentro del alcance de esta funcionalidad.
-- **FR-003**: Las cuentas escolares DEBEN ser creadas manualmente por una persona administradora fuera de la aplicación. La aplicación NO DEBE ofrecer registro público ni creación de cuentas escolares.
-- **FR-004**: La aplicación DEBE permitir cerrar sesión y conservar una sesión válida al cerrar y volver a abrir la aplicación, hasta que el usuario cierre sesión o la sesión venza.
-- **FR-005**: Ante credenciales inválidas, cuenta deshabilitada, sesión vencida o falta de conexión, la aplicación DEBE comunicar el resultado sin revelar datos protegidos ni afirmar que una operación remota tuvo éxito cuando no fue confirmado.
-- **FR-006**: El acceso autenticado DEBE quedar asociado a exactamente una escuela y limitar las consultas y modificaciones a los datos de esa escuela.
-- **FR-007**: Las personas no autenticadas y las cuentas de otras escuelas NO DEBEN poder consultar ni modificar datos personales de alumnos o tutores.
-- **FR-008**: La base DEBE permitir conservar y consultar escuelas, alumnos, pulseras, tutores, relaciones alumno-tutor y eventos de asistencia conforme a `docs/specs/002-data-model/data-model.md`. En 003, la carga y asociación inicial se realiza mediante migraciones y aprovisionamiento administrativo confiable; la aplicación solo consulta estos datos. Las escrituras de datos desde la aplicación requieren una funcionalidad posterior aprobada.
-- **FR-009**: Cada alumno DEBE pertenecer a una sola escuela; un alumno DEBE poder tener cero o más tutores y cero o una pulsera activa.
-- **FR-010**: El identificador NFC de cada pulsera DEBE ser único en todo el sistema. El reemplazo DEBE conservar la pulsera anterior como histórica y no alterar los eventos asociados al alumno.
-- **FR-011**: Cada evento de asistencia DEBE distinguir entrada o salida, referirse al alumno, conservar identidad única y momento de ocurrencia, y no sobrescribir ni descartar silenciosamente un evento previo.
-- **FR-012**: Una repetición de la identidad de un mismo evento DEBE poder reconocerse como el mismo evento, sin crear un segundo registro. La política para decidir si dos eventos con identidades distintas son duplicados accidentales queda fuera de esta funcionalidad.
-- **FR-013**: El sistema DEBE rechazar relaciones a entidades inexistentes y estados que contradigan las cardinalidades e invariantes aprobadas.
-- **FR-014**: Antes de usar datos reales de alumnos o tutores, DEBE definirse y documentarse el plazo y la regla de conservación y eliminación aplicables. Esta funcionalidad no fija por sí misma ese plazo.
-- **FR-015**: Un mismo tutor DEBE poder vincularse con alumnos de distintas escuelas. Cada escuela solo DEBE poder consultar los vínculos y alumnos que le pertenecen; compartir la entidad Tutor no autoriza acceso a datos de otra escuela.
+También quedan fuera recuperación/cambio de contraseña, distribución de credenciales, auditoría por integrante, acceso para tutores, notificaciones y administración avanzada. Compartir cuenta no permite identificar al integrante que actúa. No se agregan datos de contacto, SLO, volúmenes ni infraestructura sin una necesidad aprobada.
 
-### Key Entities
+## Diseño acordado
 
-- **Escuela**: organización a la que pertenece cada alumno y a la que corresponde una cuenta escolar.
-- **Cuenta escolar**: correo electrónico y contraseña compartidos por el personal de exactamente una escuela; su creación es manual y no está disponible mediante registro público.
-- **Alumno**: persona cuya asistencia registra la escuela; incluye únicamente los atributos aprobados en el modelo conceptual.
-- **Pulsera**: identificador NFC asociado al alumno, con asignación activa o histórica.
-- **Tutor**: persona relacionada con uno o más alumnos, incluso de distintas escuelas; su registro puede compartirse, pero cada escuela solo consulta sus propios vínculos y alumnos. Solo contempla los datos personales aprobados.
-- **Evento de asistencia**: registro histórico de entrada o salida, asociado a un alumno y con identidad y momento de ocurrencia estables.
+Expo/React Native y TypeScript estricto; acceso directo a Supabase Auth y PostgreSQL, sin API propia ni repositorio genérico. Las migraciones SQL versionadas son la fuente del schema. Ver [la decisión arquitectónica](../../decisions/supabase-auth-and-school-isolation.md).
+
+### Schema previsto
+
+| Tabla | Campos principales | Restricciones |
+|---|---|---|
+| `schools` | `id uuid`, `name text`, `auth_user_id uuid` | PK; nombre y cuenta requeridos; FK única a `auth.users(id)`, `ON DELETE RESTRICT`. |
+| `students` | `id uuid`, `school_id uuid`, `name text`, `grade text`, `group_name text` | PK; escuela requerida; solo atributos personales aprobados. |
+| `bracelets` | `id uuid`, `student_id uuid`, `nfc_uid text`, `status text` | PK y FK al alumno; UID requerido, no vacío y único global, incluso si está reemplazada; estado `active`/`replaced`. Índice único parcial por `student_id` donde `status = 'active'`. |
+| `tutors` | `id uuid`, `name text` | PK; identidad global compartible; solo nombre, sin datos de contacto. |
+| `student_tutors` | `student_id uuid`, `tutor_id uuid`, `relationship text` | PK compuesta; ambas FKs y vínculo requeridos. |
+| `attendance_events` | `id uuid`, `student_id uuid`, `event_type text`, `occurred_at timestamptz` | PK global; alumno, tipo `entry`/`exit` y momento requeridos; trigger que rechaza `UPDATE` y `DELETE`. |
+
+FKs en todas las relaciones, identidades y relaciones no nulas, sin cascadas que borren historial. Los eventos futuros offline aceptan IDs generados en el dispositivo y conservan identidad y momento en cada reintento; repetir la PK se rechaza sin alterar la fila original. La sincronización decidirá cómo tratar ese conflicto. Una obligación legal de borrado necesitará una decisión específica compatible con el historial; por ahora no se cargan datos reales. No se define reutilización de pulseras reemplazadas.
+
+### Acceso escolar
+
+- RLS en las seis tablas; `anon` sin acceso y `authenticated` con solo `SELECT`. No conceder mutaciones de datos al cliente en 003.
+- Derivar la escuela de `auth.uid()` y `schools.auth_user_id`, no de `user_metadata` editable ni de filtros de UI. Una cuenta sin asociación no recibe filas.
+- Escuelas, alumnos, pulseras y eventos visibles solo para la propia escuela. `student_tutors` se filtra por la escuela del alumno; `tutors` por la existencia de un vínculo visible.
+- Crear y editar tutores globales y vínculos solo en el entorno administrativo confiable. Compartir tutor no comparte sus otras relaciones.
+- En la app solo `EXPO_PUBLIC_SUPABASE_URL` y `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. La publishable key requiere RLS; ninguna clave secret/service-role ni credencial administrativa se empaqueta en el cliente.
+- Desactivar signup con `[auth].enable_signup = false` y aplicar/verificar la configuración equivalente en remoto, manteniendo el login por correo/contraseña. Ocultar el botón no alcanza.
+
+### Login y sesión
+
+- Cliente único en `src/lib/supabase.ts`, con `@supabase/supabase-js`, `expo-secure-store` y `react-native-url-polyfill` cuando se implementen; instalar versiones compatibles con Expo mediante `pnpm exec expo install`.
+- SecureStore para tokens Android por su almacenamiento cifrado, en lugar de AsyncStorage plano; `persistSession: true`, `autoRefreshToken: true`, `detectSessionInUrl: false`. Centralizar `AppState` para refrescar en foreground y detener en background, sin listeners duplicados. Web no es criterio de aceptación; no romper su inicialización si requiere un adaptador.
+- `src/auth/AuthProvider.tsx` concentra restauración, login, logout y errores. `/login` valida campos, muestra envío/errores y evita envíos repetidos; no ofrece signup.
+- `src/app/_layout.tsx` espera restauración y asociación escolar antes de mostrar contenido protegido. Sin sesión: `/login`; sin escuela: acceso no configurado, sin abrir el área protegida. Comprobar la asociación requiere la política RLS de lectura de la propia escuela.
+- Logout elimina la sesión local y vuelve a `/login`, sin borrar la cuenta ni sus datos. Vencimiento retira el acceso; los fallos de conexión nunca se presentan como consultas remotas confirmadas.
+
+## Trabajo pendiente
+
+El desglose anterior se consolida en resultados, sin gates por archivo ni TDD obligatorio. Los IDs se conservan solo como referencia a trabajo previo; no hay que mantener otro `tasks.md`.
+
+| Resultado | Estado | Referencia anterior |
+|---|---|---|
+| CLI 2.122.0 en desarrollo y lockfile | Completado | T001 |
+| `.env.example` con variables públicas, sin valores reales | Completado | T002 |
+| `.env*` ignorados salvo el ejemplo | Completado | T003 |
+| `supabase init` y configuración local | Completado | T004 |
+| Base local reproducible, extensiones necesarias y signup desactivado local/remoto | Pendiente | T005–T008 |
+| Schema, restricciones, inmutabilidad y fixtures sintéticos de dos escuelas | Pendiente | T019–T026 |
+| Grants/RLS y tests de acceso propio, cruzado, anónimo y tutor compartido | Pendiente | T027–T034 |
+| Login, sesión persistente, asociación escolar y logout comprobados en Android | Pendiente | T009–T018 |
+| Revisión de secrets, coherencia, checks y bloqueo de datos reales | Pendiente | T035–T038 |
+
+**Orden técnico**: crear schema antes de fixtures y RLS. El formulario/login puede avanzar en paralelo; el guard escolar y la validación integrada esperan a la política de escuela propia (antes T031). No habilitar consultas de datos escolares antes de validar RLS. No es necesario completar pantallas de consulta o CRUD para demostrar 003.
+
+## User Scenarios & Testing
+
+### Base y seguridad
+
+Una vez implementados schema, fixtures y tests, con Docker en ejecución:
+
+```sh
+pnpm exec supabase start
+pnpm exec supabase db reset
+pnpm exec supabase test db
+```
+
+**Solo local**: `db reset` reconstruye la base y aplica migraciones/fixtures; no agregar `--linked` ni apuntar a remoto. Los fixtures se cargan después del schema, sin datos reales ni credenciales de login versionadas. Usar pgTAP para relaciones/campos, UID único, una activa, historial, tipo/identidad de eventos, inmutabilidad y permisos.
+
+Con dos escuelas sintéticas A/B, comprobar lecturas propias y que los accesos cruzados —incluyendo referencias manipuladas—, anónimos y sin asociación no exponen datos ni modifican filas. Ambas ven el tutor compartido solo por su relación; no pueden mutarlo ni ver vínculos ajenos. Verificar signup rechazado y login existente permitido.
+
+### Android
+
+1. Obtener URL y publishable key locales con `pnpm exec supabase status`; copiarlas a `.env.local`, no al repositorio.
+2. Crear cuentas de prueba desde el Dashboard local y asociarlas administrativamente a escuelas sintéticas: `insert into public.schools (name, auth_user_id) values ('Escuela de prueba A', '<auth-user-uuid>');`. Preparar además una cuenta sin escuela.
+3. Con SDK y dispositivo/emulador, ejecutar `pnpm exec expo run:android --device`. Comprobar login válido/inválido, cuenta deshabilitada, ausencia de signup, cuenta sin escuela, restauración al reabrir, logout, vencimiento y fallo de conexión sin contenido protegido indebido.
+4. Ejecutar los checks de código: `pnpm lint`, `pnpm exec tsc --noEmit`, `node --test tests/*.test.mjs` y `pnpm exec expo install --check`; registrar fallos propios y preexistentes por separado. No ampliar el alcance para reparar bugs ajenos.
 
 ## Success Criteria
 
-### Measurable Outcomes
+- **SC-001**: Credenciales válidas permiten acceder; todos los intentos inválidos permanecen sin acceso protegido.
+- **SC-002**: Con al menos dos escuelas, todas las consultas muestran solo datos autorizados y todos los intentos cruzados de lectura/modificación son denegados.
+- **SC-003**: Casos válidos e inválidos verifican todas las restricciones confirmadas: pertenencia escolar, relaciones, UID, pulsera activa e identidad del evento.
+- **SC-004**: Reabrir con sesión vigente recupera acceso sin credenciales; tras logout no hay acceso hasta un nuevo login.
+- **SC-005**: Reemplazos y reintentos dejan los eventos previos identificables y sin cambios.
 
-- **SC-001**: El personal con credenciales válidas puede completar el inicio de sesión y acceder a la aplicación; el 100% de los intentos con credenciales inválidas permanece sin acceso protegido.
-- **SC-002**: En pruebas con al menos dos escuelas, el 100% de las consultas autenticadas devuelve únicamente datos de la escuela correspondiente y el 100% de los intentos cruzados de lectura o modificación es denegado.
-- **SC-003**: El 100% de las restricciones confirmadas del modelo —pertenencia escolar, relaciones alumno-tutor, unicidad NFC, una pulsera activa por alumno e identidad de asistencia— se verifica con casos válidos e inválidos.
-- **SC-004**: Después de cerrar y reabrir la aplicación con una sesión vigente, el usuario recupera el acceso sin volver a ingresar credenciales; después de cerrar sesión, no puede acceder a datos protegidos hasta iniciar sesión nuevamente.
-- **SC-005**: En todos los escenarios de reemplazo y reintento, los eventos previamente guardados permanecen identificables y sin cambios.
+### Evidencia disponible
 
-## Assumptions
-
-- Una cuenta escolar puede ser utilizada por varios integrantes del personal de esa escuela; el producto no identifica cuál integrante realizó cada operación.
-- La creación manual de cuentas se realiza fuera de la aplicación por una persona administradora con acceso a la consola de Supabase; no se desarrolla un panel administrativo en esta funcionalidad.
-- La escuela y su cuenta deben quedar vinculadas de forma no controlable por el usuario final para aplicar el aislamiento entre escuelas.
-- Un tutor puede estar relacionado con alumnos de escuelas distintas; compartir la identidad del tutor no comparte los datos de esos alumnos ni sus vínculos escolares.
-- Las credenciales se distribuyen al personal por un proceso externo a la aplicación; recuperación o cambio de credenciales no se incluye hasta contar con un requisito aprobado.
-- La retención de sesión habilita el acceso autenticado, pero no implica captura de asistencias ni almacenamiento offline; esos comportamientos pertenecen a etapas posteriores.
-- El plazo legal de conservación de datos queda sin definir en 003; debe resolverse y documentarse antes de usar datos reales de alumnos o tutores.
-- Se aplican únicamente los atributos personales aprobados en el modelo conceptual; no se agregan datos de contacto.
-- La funcionalidad prepara el almacenamiento de eventos de asistencia, pero no incorpora el flujo de lectura NFC para identificar alumnos ni pantallas para registrar entradas o salidas.
-- En 003, conservar datos no implica habilitar altas o modificaciones desde la app: el esquema se prepara y los datos iniciales se aprovisionan de forma administrativa; las operaciones de escritura del cliente se especificarán en sus funcionalidades correspondientes.
-
-## Fuera de alcance
-
-- Registro público de escuelas, alta de usuarios o panel de administración.
-- Cuentas individuales, roles y auditoría de acciones por integrante del personal.
-- Recuperación de contraseña y políticas operativas de rotación de credenciales.
-- Identificación del alumno desde una lectura NFC y registro de entrada o salida desde la interfaz.
-- Captura offline, cola local, sincronización y resolución de conflictos.
-- Detección de eventos distintos que representen una duplicación accidental.
-- Aplicación o acceso para tutores, notificaciones y administración avanzada.
+Solo se validó el setup: CLI ejecutable, variables locales ignoradas y `git diff --check` correcto. TypeScript y las seis pruebas existentes pasaron; lint reportó un fallo preexistente en `src/hooks/use-color-scheme.web.ts:11`. `pnpm add` informó `ERR_PNPM_IGNORED_BUILDS` por `unrs-resolver`, aunque la CLI quedó instalada y ejecutable. Estos son resultados previos, no checks reejecutados al consolidar documentación. Base, RLS y login siguen sin validar.

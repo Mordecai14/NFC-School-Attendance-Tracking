@@ -1,21 +1,28 @@
 <!--
 Sync Impact Report
-- Version change: estructura inicial sin versión -> 1.0.0 (constitución inicial).
-- Modified principles: marcadores de plantilla I-V -> I. Especificación y aceptación;
-  II. Simplicidad y alcance; III. Tipos estrictos y verificación;
-  IV. Asistencias confiables sin conexión; V. Seguridad y privacidad de alumnos.
-- Added sections: Restricciones del proyecto; Flujo de desarrollo.
-- Removed sections: ninguna; se reemplazaron las secciones de ejemplo.
-- Follow-up TODOs: ninguno.
+- Version change: 1.0.0 -> 2.0.0 (flexibilización de obligaciones del workflow).
+- Motivo: reducir ceremonia en un proyecto personal y priorizar incrementos observables.
+- Aprobación: el responsable aprobó el flujo propuesto en la conversación del 2026-11-08.
+- Modified principles: I. Especificación y aceptación; III. Tipos y verificación;
+  Flujo de desarrollo. Se permiten specs breves y validación proporcional al cambio.
+- Sin cambios: alcance explícito, privacidad, aislamiento y preservación de asistencias.
+- Sincronizado: AGENTS.md. Spec Kit queda opcional; sus comandos explícitos conservan sus gates.
+- Aclaración 2.0.0 -> 2.0.1: a pedido del responsable, se consolidan los documentos de
+  001–003 en una spec por feature, conservando requisitos, decisiones y estado real.
+  No se marca trabajo pendiente como completado ni se cambian requisitos de producto.
+  La evidencia física NFC permanece separada; no se regeneran plantillas.
 -->
 # Aplicación de Asistencia Escolar Constitution
 
 ## Core Principles
 
 ### I. Especificación y aceptación
-Toda funcionalidad DEBE tener una especificación en `docs/specs/` con alcance y criterios de
-aceptación explícitos antes de implementarse. Los requisitos ambiguos DEBEN aclararse
-antes de escribir código; no se DEBEN inventar reglas de producto.
+Toda feature nueva DEBE tener una especificación en `docs/specs/` con resultado esperado,
+alcance y criterios de aceptación explícitos antes de implementarse; puede ser breve y
+evolucionar por incrementos. No se exige un plan, research, contratos ni tasks separados
+para cada cambio. Los bugs y refactors dentro del comportamiento aprobado no requieren
+una spec nueva. Las ambigüedades que alteren el comportamiento de producto DEBEN aclararse;
+no se DEBEN inventar reglas de producto.
 
 ### II. Simplicidad y alcance
 Cada cambio DEBE limitarse al alcance aprobado y mantenerse pequeño y revisable. Las
@@ -23,10 +30,14 @@ abstracciones, servicios e infraestructura adicionales DEBEN justificarse por un
 necesidad concreta; no se DEBE anticipar funcionalidad no especificada.
 
 ### III. Tipos y verificación
-TypeScript DEBE permanecer en modo estricto. Antes de dar un cambio por terminado,
-se DEBEN ejecutar lint, validación de tipos y pruebas relevantes; los fallos y las
-desviaciones del plan aprobado DEBEN reportarse. Las reglas críticas DEBEN contar
-con validación automatizada cuando sea razonable.
+TypeScript DEBE permanecer en modo estricto. Antes de dar por terminado un incremento
+de código o dependencias, se DEBEN ejecutar lint, validación de tipos y tests relevantes.
+Los cambios solo documentales requieren revisión del diff, referencias afectadas y formato,
+no checks de la app sin relación con el cambio. La validación DEBE ser proporcional al riesgo:
+comprobación visual de UI y tests enfocados para lógica relevante, sin TDD ni porcentajes
+de cobertura obligatorios. Los cambios en autorización, aislamiento por escuela, preservación
+de eventos o sincronización DEBEN contar con tests automatizados de sus reglas críticas.
+Los fallos, checks no ejecutados y desviaciones del alcance aprobado DEBEN reportarse.
 
 ### IV. Asistencias confiables sin conexión
 El registro de entradas y salidas DEBE funcionar sin Internet. Los eventos de
@@ -50,11 +61,19 @@ la arquitectura DEBEN registrarse en `docs/decisions/`; una dirección planifica
 
 ## Flujo de desarrollo
 
-Antes de implementar, se DEBEN leer la especificación y el plan existente, contrastar
-el código relacionado y resolver los requisitos faltantes. Cada revisión DEBE
-comprobar los criterios de aceptación, el alcance y el resultado de las validaciones.
-Las discrepancias entre documentación e implementación DEBEN reportarse, no asumirse
-resueltas.
+El desarrollo DEBE organizarse en incrementos pequeños con resultados observables, usando
+el roadmap como dirección y la arquitectura como referencia, no como fases rígidas.
+Antes de implementar, se DEBEN consultar la spec y el plan existentes cuando sean pertinentes,
+contrastar el código relacionado y resolver decisiones de producto faltantes.
+Una vez acordado el alcance, se avanza sin aprobaciones por cada task o detalle técnico
+reversible. Se DEBE consultar ante cambios de producto, ampliaciones de alcance, cambios
+materiales de arquitectura u operaciones con riesgo de pérdida o exposición de datos.
+Las acciones de Git siguen requiriendo autorización explícita según AGENTS.md.
+Spec Kit es opcional; invocar explícitamente un comando exige respetar sus instrucciones.
+Se DEBEN actualizar solo los documentos afectados por cambios reales, sin regenerar un
+conjunto de artefactos por rutina. Cada cierre DEBE indicar el resultado, cómo comprobarlo
+y las validaciones o limitaciones pendientes. Las discrepancias entre documentación e
+implementación DEBEN reportarse, no asumirse resueltas.
 
 ## Governance
 
@@ -66,4 +85,4 @@ MINOR para principios o secciones nuevos o ampliaciones sustanciales y PATCH par
 aclaraciones sin cambio normativo. Toda revisión de cambios DEBE verificar el
 cumplimiento de esta constitución o señalar la excepción para aprobación explícita.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-10-27
+**Version**: 2.0.1 | **Ratified**: 2026-10-27 | **Last Amended**: 2026-11-08

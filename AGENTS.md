@@ -37,29 +37,35 @@ Usar:
 - `docs/product.md` para el contexto estable del producto.
 - `docs/architecture.md` para la arquitectura actual del sistema.
 - `docs/decisions/` para decisiones arquitectónicas.
-- `docs/specs/` para requisitos y planes específicos de cada funcionalidad.
+- `docs/specs/<feature>/spec.md` como único documento activo de cada feature: requisitos, enfoque, estado y validación. Conservar evidencia separada solo cuando aporte información que no convenga resumir.
 
 No asumir que documentación desactualizada sigue siendo correcta.
 
 Si la implementación y la documentación se contradicen, reportar el conflicto.
 
-## Antes de implementar
+## Flujo de desarrollo personal
 
-1. Leer la especificación correspondiente.
-2. Leer el plan de implementación si existe.
-3. Inspeccionar el código existente relacionado.
-4. Identificar supuestos o requisitos faltantes.
-5. No ampliar el alcance solicitado sin una justificación clara.
+- Trabajar en incrementos pequeños que produzcan un resultado observable; usar el roadmap como dirección, no como una secuencia rígida de fases.
+- Acordar el alcance del incremento una vez y avanzar hasta su validación sin pedir aprobación por cada task, archivo, función o decisión técnica reversible.
+- Consultar únicamente si falta una decisión de producto que afecta el resultado, cambia materialmente la arquitectura, se amplía el alcance o hay una operación con riesgo de pérdida o exposición de datos. Las acciones de Git mantienen su autorización independiente.
+- Usar la spec existente. Para una feature nueva, registrar en `docs/specs/` una descripción breve del resultado, los límites y unos pocos criterios verificables; no exigir un conjunto completo de artefactos.
+- Para bugs y refactors dentro del comportamiento aprobado, usar la descripción del problema y su comprobación sin crear una spec nueva por rutina.
+- Leer el plan existente y el código relacionado cuando sean pertinentes. Resolver ambigüedades de producto reales; los detalles técnicos reversibles pueden decidirse y comunicarse al cierre.
+- Spec Kit es opcional: usar sus comandos cuando aporten valor o se soliciten, no como una cadena obligatoria. Si se invoca un comando explícitamente, respetar sus instrucciones y gates.
+- Mantener una sola fuente por tema; consolidar duplicados conservando requisitos, decisiones y evidencia. Registrar decisiones arquitectónicas materiales, no cada detalle de implementación.
+- Las specs 001–003 están consolidadas: no recrear `plan.md`, `tasks.md`, research, contratos ni checklists por rutina. Los comandos opcionales de Spec Kit que los exijan requieren adaptar el flujo o una solicitud explícita, no ejecutarlos como prerequisito del desarrollo.
+- No imponer TDD, porcentajes de cobertura, capas ni patrones por rutina. Preferir la solución directa que cumpla el alcance.
 
 ## Validación
 
-Antes de considerar terminado un cambio:
+Antes de considerar terminado un incremento:
 
-- ejecutar lint;
-- ejecutar validación de TypeScript;
-- ejecutar las pruebas relevantes;
-- reportar fallos de validación;
-- reportar desviaciones respecto al plan aprobado.
+- Para cambios de código o dependencias, ejecutar lint, validación de TypeScript y los tests relevantes; no repetir toda la suite por cada edición intermedia.
+- Para cambios solo documentales, revisar el diff, los enlaces o referencias afectados y el formato; no ejecutar checks de la app sin relación con el cambio.
+- Validar visualmente los cambios de UI; agregar tests enfocados cuando haya lógica relevante. Si no se puede comprobar en dispositivo o emulador, indicarlo.
+- Mantener tests automatizados de las reglas críticas de autorización, aislamiento por escuela, preservación de eventos y sincronización cuando se modifiquen esas capacidades.
+- No exigir suites amplias ni cobertura artificial para cambios triviales. Reportar los checks ejecutados, fallos, validaciones pendientes y desviaciones de alcance; no corregir bugs ajenos sin autorización.
+- Cerrar con un resumen breve: qué funciona ahora, cómo comprobarlo y qué quedó pendiente. No presentar como validado lo que no se ejecutó.
 
 ## Git
 

@@ -1,26 +1,8 @@
 # Feature Specification: Lectura de pulseras NFC
 
-**Feature Branch**: `main` (no se creó una rama para esta especificación)
+**Status**: Completada el 2026-10-29 con límites explícitos en [validation.md](validation.md).
 
-**Created**: 2026-10-27
-
-**Status**: Completada; los resultados de implementación y validación están registrados en
-[validation.md](validation.md), incluida la anomalía conocida de lectura sostenida y
-el hallazgo de lint del repositorio ajeno a esta feature.
-
-**Input**: Validar en un dispositivo Android que las pulseras NFC de la escuela
-pueden leerse y distinguirse por un identificador estable, mediante una pantalla
-funcional mínima que sustituya la interfaz de ejemplo.
-
-## Clarifications
-
-### Session 2026-10-27
-
-- Q: ¿Durante cuánto tiempo debe conservarse el mismo identificador al volver a leer una pulsera? → A: En el mismo dispositivo, incluso tras cerrar y reabrir la aplicación.
-- Q: Si falla una lectura después de una exitosa, ¿debe seguir visible el identificador anterior? → A: El resultado actual no muestra un identificador anterior; el historial de lecturas exitosas permanece visible y claramente diferenciado del error actual.
-- Q: Si NFC no está disponible al abrir la pantalla y luego vuelve a estarlo, ¿cuándo debe indicar la aplicación que ya puede esperar una pulsera? → A: Sin cerrar la aplicación, al volver a estar disponible.
-- Q: Al escanear varias pulseras, ¿debe la pantalla mostrar solo el resultado del último intento o también identificadores anteriores para compararlos? → A: Mantener una lista visible de al menos las últimas cinco lecturas exitosas, incluso tras un error, identificada claramente como historial y separada del resultado actual.
-- Q: Para contar un nuevo escaneo de la misma pulsera, ¿debe el operador retirarla y volver a acercarla? → A: Sí; cada nueva lectura requiere retirar la pulsera y volverla a acercar.
+Validar en Android físico que dos pulseras pueden distinguirse mediante un identificador estable. Este documento reúne el alcance, el enfoque y la comprobación; no requiere planes ni checklists separados.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -29,57 +11,9 @@ funcional mínima que sustituya la interfaz de ejemplo.
 Como operador, quiero acercar una pulsera compatible al dispositivo y ver su
 identificador para comprobar que puede reconocerse.
 
-**Why this priority**: La lectura visible de una pulsera es la prueba básica de
-viabilidad antes de construir el sistema de asistencia.
+**Acceptance Scenarios**: Los casos verificables se concentran en SC-001–SC-005, sin repetirlos como una segunda lista.
 
-**Independent Test**: Abrir la aplicación en un dispositivo Android con lectura
-NFC, acercar una pulsera de prueba y observar el identificador sin registrar
-alumnos ni asistencias.
-
-**Acceptance Scenarios**:
-
-1. **Given** la pantalla abierta y ninguna pulsera detectada, **When** el lector
-   está listo, **Then** se indica claramente que espera una pulsera.
-2. **Given** el lector listo y una pulsera compatible, **When** el operador la
-   acerca, **Then** se indica la detección y se muestra su identificador.
-3. **Given** un identificador mostrado, **When** el operador acerca otra pulsera
-   compatible, **Then** se muestra el identificador de la nueva lectura y se
-   puede distinguir del anterior en un historial de al menos cinco lecturas
-   exitosas recientes.
-4. **Given** una pulsera leída previamente, **When** el operador cierra y
-   reabre la aplicación en el mismo dispositivo, retira la pulsera y vuelve
-   a acercarla,
-   **Then** se muestra exactamente el mismo identificador.
-5. **Given** un fallo de lectura notificado o una pulsera detectada sin identificador legible,
-   **When** termina el intento, **Then** se informa el error sin identificador
-   para ese intento, el historial anterior sigue visible y diferenciado del
-   resultado actual, y se puede intentar de nuevo.
-6. **Given** un dispositivo sin lectura disponible, **When** se abre la pantalla,
-   **Then** se muestra que no es posible escanear en lugar de indicar que está
-   esperando una pulsera; **When** vuelve a estar disponible, **Then** se
-   indica que espera una pulsera sin cerrar la aplicación.
-7. **Given** cualquier lectura exitosa, **When** se muestra el resultado,
-   **Then** no se solicitan datos de alumnos ni se registra una asistencia y
-   el identificador no queda guardado al cerrar la aplicación.
-
-### Edge Cases
-
-- Si se notifica un fallo o se detecta una pulsera sin identificador, se muestra
-  un error comprensible y se permite otro intento. Una pulsera que no genera
-  ninguna detección no puede distinguirse de la ausencia de una pulsera: la
-  pantalla permanece sin un nuevo resultado y la prueba manual registra la
-  falta de detección como resultado no satisfactorio, sin inventar un error
-  ni un identificador. No se añade un temporizador de lectura.
-- Si un intento falla después de una lectura exitosa, se muestra el error
-  actual sin identificador para ese intento; el historial de lecturas
-  exitosas sigue visible, identificado como información anterior.
-- Si dos pulseras distintas producen el mismo identificador, la prueba no
-  permite considerarlas distinguibles y debe reportarse como fallo de validación.
-- Si la lectura no está disponible en el dispositivo, la pantalla no indica
-  falsamente que está preparada para escanear; al recuperarse la disponibilidad
-  muestra que está lista sin requerir cerrar la aplicación.
-- Mantener una pulsera cerca del dispositivo no genera nuevas lecturas en el
-  historial; cada nuevo intento requiere retirarla y volverla a acercar.
+**Límite de observabilidad**: sin evento de descubrimiento ni fallo notificado no se inventa un resultado ni un timeout. Una falta de detección se registra como fallo del ensayo físico. Una colisión de identificadores no valida las muestras.
 
 ## Requirements *(mandatory)*
 
@@ -145,17 +79,29 @@ alumnos ni asistencias.
   durante la prueba, el operador ve el estado de espera y puede leer una
   pulsera sin cerrar la aplicación.
 
-## Assumptions
+## Implementación y límites
 
-- La validación se realiza en un dispositivo Android con capacidad de lectura
-  NFC y con acceso a por lo menos dos pulseras de muestra de las que usará la
-  escuela; sin esas muestras no se puede concluir que sean aptas.
-- «Compatible» significa que el dispositivo de prueba puede leer la pulsera y
-  obtener un identificador; no se presupone compatibilidad con todas las
-  pulseras NFC existentes.
-- Cinco lecturas por pulsera y cinco segundos por lectura son umbrales de
-  validación iniciales para esta prueba, no garantías para un sistema futuro.
-- El historial reúne lecturas exitosas de la sesión actual; no se requiere
-  persistencia entre aperturas de la aplicación. El diseño visual definitivo,
-  alumnos, asistencias, entrada o salida, Supabase, funcionamiento offline,
-  sincronización, autenticación y asignación de pulseras quedan fuera de alcance.
+- `react-native-nfc-manager@4.2.0`, plugin Expo y permiso `android.permission.NFC`; no se mantiene un puente nativo propio.
+- `src/hooks/use-nfc-reader.ts` controla disponibilidad, reader mode y limpieza al salir. Usa NFC-A/B/F/V y `FLAG_READER_SKIP_NDEF_CHECK`; se busca el UID, no contenido NDEF.
+- `src/hooks/nfc-reader-state.ts` conserva en memoria el resultado actual y las cinco lecturas exitosas más recientes. Los errores no entran al historial ni lo borran. `src/app/index.tsx` presenta ambos por separado.
+- No hay alumnos, asistencias, autenticación, red ni almacenamiento de identificadores. Sin logs de UIDs, simulador visible, timeout o debounce arbitrario.
+- Los IDs pueden ser ausentes o variables según la etiqueta; el éxito con dos muestras no demuestra compatibilidad universal ni autenticación resistente a clonación.
+
+## Cómo comprobarlo
+
+Requiere Android físico con NFC, SDK/JDK y dos pulseras A/B. Expo Go y un emulador no validan NFC físico.
+
+```sh
+pnpm exec expo prebuild --platform android
+pnpm exec expo run:android --device
+node --test tests/nfc-reader-state.test.mjs
+```
+
+Tras cambiar plugins o configuración nativa, repetir prebuild sin regeneración destructiva rutinaria. Comprobar el permiso NFC en el manifiesto generado.
+
+1. Hacer cuatro lecturas separadas de cada pulsera; cerrar y reabrir, y hacer una más por pulsera. Comparar IDs iguales por muestra y distintos entre A/B, con el historial anterior vacío tras reabrir.
+2. Comprobar cinco éxitos recientes, resultado actual separado y cada lectura dentro de cinco segundos. Son umbrales iniciales, no garantías futuras.
+3. Mantener una pulsera cerca y luego retirarla/reacercarla; registrar cualquier detección duplicada sin ocultarla.
+4. Verificar error sin ID actual y con historial anterior, reintento y recuperación al desactivar/reactivar NFC. Distinguir un error controlado de un fallo RF real.
+
+**Evidencia conservada**: [validation.md](validation.md), sin cambios en sus resultados ni limitaciones. Las antiguas T001–T016 estaban completadas; se retira su desglose operativo, no la evidencia. Se conserva la anomalía de exposición sostenida y el fallo de lint ajeno al lector.
