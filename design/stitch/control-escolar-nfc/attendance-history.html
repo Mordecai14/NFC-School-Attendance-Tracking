@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script><script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-primary-fixed": "#0f0069",
+          "tertiary-fixed": "#ffdbca",
+          "on-error": "#ffffff",
+          "surface-container-low": "#f2f3ff",
+          "surface-tint": "#4d44e3",
+          "inverse-primary": "#c3c0ff",
+          "primary-fixed": "#e2dfff",
+          "on-secondary-container": "#006f66",
+          "on-primary": "#ffffff",
+          "secondary-container": "#86f2e4",
+          "surface-container-highest": "#dae2fd",
+          "on-surface": "#131b2e",
+          "surface-variant": "#dae2fd",
+          "on-tertiary-fixed": "#341100",
+          "secondary-fixed-dim": "#6bd8cb",
+          "on-primary-container": "#dad7ff",
+          "secondary": "#006a61",
+          "surface": "#faf8ff",
+          "inverse-surface": "#283044",
+          "on-primary-fixed-variant": "#3323cc",
+          "tertiary-container": "#a04500",
+          "surface-dim": "#d2d9f4",
+          "tertiary": "#7b3300",
+          "primary-fixed-dim": "#c3c0ff",
+          "on-surface-variant": "#464555",
+          "inverse-on-surface": "#eef0ff",
+          "on-tertiary-fixed-variant": "#783200",
+          "primary": "#4f46e5",
+          "error-container": "#ffdad6",
+          "error": "#ba1a1a",
+          "outline-variant": "#c7c4d8",
+          "outline": "#777587",
+          "surface-container": "#eaedff",
+          "on-secondary": "#ffffff",
+          "on-secondary-fixed": "#00201d",
+          "primary-container": "#4f46e5",
+          "surface-container-high": "#e2e7ff",
+          "on-error-container": "#93000a",
+          "on-tertiary": "#ffffff",
+          "secondary-fixed": "#89f5e7",
+          "on-background": "#131b2e",
+          "surface-bright": "#faf8ff",
+          "surface-container-lowest": "#ffffff",
+          "on-tertiary-container": "#ffd2bd",
+          "on-secondary-fixed-variant": "#005049",
+          "background": "#faf8ff",
+          "tertiary-fixed-dim": "#ffb690"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "gutter-mobile": "0.75rem",
+          "space-md": "1rem",
+          "space-xs": "0.25rem",
+          "space-lg": "1.5rem",
+          "gutter": "1.25rem",
+          "space-sm": "0.5rem",
+          "margin": "2rem",
+          "space-xl": "2.5rem",
+          "margin-mobile": "1rem"
+        },
+        "fontFamily": {
+          "headline-md": [
+            "Space Grotesk"
+          ],
+          "label-sm": [
+            "Space Grotesk"
+          ],
+          "headline-lg-mobile": [
+            "Space Grotesk"
+          ],
+          "body-sm": [
+            "Plus Jakarta Sans"
+          ],
+          "body-lg": [
+            "Plus Jakarta Sans"
+          ],
+          "headline-display-mobile": [
+            "Space Grotesk"
+          ],
+          "headline-sm": [
+            "Space Grotesk"
+          ],
+          "headline-display": [
+            "Space Grotesk"
+          ],
+          "body-md": [
+            "Plus Jakarta Sans"
+          ],
+          "label-lg": [
+            "Space Grotesk"
+          ],
+          "headline-lg": [
+            "Space Grotesk"
+          ],
+          "label-md": [
+            "Space Grotesk"
+          ]
+        },
+        "fontSize": {
+          "headline-md": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "600"
+            }
+          ],
+          "label-sm": [
+            "10px",
+            {
+              "lineHeight": "14px",
+              "letterSpacing": "0.06em",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-lg-mobile": [
+            "24px",
+            {
+              "lineHeight": "32px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-sm": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.01em",
+              "fontWeight": "400"
+            }
+          ],
+          "body-lg": [
+            "16px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "-0.01em",
+              "fontWeight": "500"
+            }
+          ],
+          "headline-display-mobile": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "headline-sm": [
+            "18px",
+            {
+              "lineHeight": "24px",
+              "letterSpacing": "0em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-display": [
+            "48px",
+            {
+              "lineHeight": "56px",
+              "letterSpacing": "-0.03em",
+              "fontWeight": "700"
+            }
+          ],
+          "body-md": [
+            "14px",
+            {
+              "lineHeight": "20px",
+              "letterSpacing": "0em",
+              "fontWeight": "400"
+            }
+          ],
+          "label-lg": [
+            "14px",
+            {
+              "lineHeight": "18px",
+              "letterSpacing": "0.02em",
+              "fontWeight": "600"
+            }
+          ],
+          "headline-lg": [
+            "32px",
+            {
+              "lineHeight": "40px",
+              "letterSpacing": "-0.02em",
+              "fontWeight": "700"
+            }
+          ],
+          "label-md": [
+            "12px",
+            {
+              "lineHeight": "16px",
+              "letterSpacing": "0.04em",
+              "fontWeight": "600"
+            }
+          ]
+        }
+      },
+    },
+  }
+</script><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head><body class="bg-surface text-on-surface font-body-md text-body-md flex flex-col min-h-screen"><header class="fixed top-0 inset-x-0 z-50 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] pt-safe"><div class="h-20 px-margin flex items-center justify-between gap-space-sm"><div class="flex items-center gap-space-sm min-w-0 flex-1"><div class="flex flex-col min-w-0"><div class="flex items-center gap-space-xs"><span class="font-headline-sm text-headline-sm text-primary font-bold tracking-tight truncate">Control de Asistencia</span><span class="inline-block w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></span></div><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Colegio Knowledge Quest - Puerta Principal</span></div></div><div class="flex items-center gap-space-sm flex-shrink-0"><span class="hidden">Historial Y Reportes</span></div></div></header><main class="flex flex-col relative w-full pt-20 pb-28 bg-surface"><div class="flex flex-col w-full">
+<!-- Status & Quick Export Header Banner -->
+<!-- KPI Bento Grid: Resumen Ejecutivo -->
+<section class="px-margin pt-space-md pb-space-xs"><div class="p-space-md rounded-2xl bg-surface-container-lowest shadow-sm flex items-center justify-between"><div class="flex items-center gap-space-md"><div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary"><span class="material-symbols-outlined text-[24px]">today</span></div><div><span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Resumen de Hoy</span><div class="flex items-baseline gap-space-sm mt-0.5"><span class="font-headline-md text-headline-md font-bold text-primary">584 <span class="font-body-sm text-body-sm font-semibold text-on-surface-variant">Entradas</span></span><span class="text-outline font-body-sm">•</span><span class="font-headline-md text-headline-md font-bold text-[#2563eb]">38 <span class="font-body-sm text-body-sm font-semibold text-on-surface-variant">Salidas</span></span></div></div></div><div class="text-right"><span class="font-headline-sm text-headline-sm text-primary font-bold">94.2%</span><p class="font-label-sm text-label-sm text-on-surface-variant">Asistencia</p></div></div></section>
+<!-- Control & Filter Section -->
+<section class="px-margin py-space-xs space-y-space-xs"><div class="relative w-full"><span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[20px] text-outline">search</span><input class="w-full h-11 pl-11 pr-4 rounded-xl bg-surface-container-lowest text-on-surface placeholder:text-outline font-body-md text-body-md focus:bg-surface-container-lowest focus:outline-none focus:ring-0 shadow-sm" id="history-search-input" placeholder="Buscar alumno o matrícula..." type="text"/></div><div class="flex items-center justify-between gap-2 pt-1"><div class="flex items-center gap-1.5"><button class="event-filter-pill px-3.5 py-1.5 rounded-full bg-primary text-on-primary font-label-sm text-label-sm font-bold shadow-sm transition-all" data-type="all">Todos (622)</button><button class="event-filter-pill px-3 py-1 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm font-semibold hover:bg-surface-container transition-all" data-type="entry">Entradas (584)</button><button class="event-filter-pill px-3 py-1 rounded-full bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm font-semibold hover:bg-surface-container transition-all" data-type="exit">Salidas (38)</button></div><div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl flex-shrink-0"><button class="date-chip px-2.5 py-1 rounded-lg bg-surface-container-lowest font-label-sm text-label-sm text-primary font-bold shadow-sm">Hoy</button><button class="date-chip px-2.5 py-1 rounded-lg text-on-surface-variant font-label-sm text-label-sm font-semibold hover:text-primary">Ayer</button></div></div></section>
+<!-- Detailed Timeline Feed -->
+<section class="px-margin space-y-space-xs mt-space-xs pb-space-sm"><div class="flex items-center justify-between px-1 py-1"><span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-bold">Registros recientes</span><span class="font-label-sm text-label-sm text-outline">Total: 5 registros</span></div><div class="space-y-space-xs"><article class="p-3 rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><img class="w-11 h-11 rounded-full object-cover shadow-sm flex-shrink-0" data-alt="Mateo Alejandro Morales" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgOkzBFNvM15_1fFqRj-yxpirImLbrFVzGslwPjbOgF7G6la4-j4KBxv5uDHsoIMDQ3g29xNY0zFDdn06Cowgq-rxauOyweWn5OBBQUUzKxe_50AZKg72F77qTuVM3RFnT7BN9Y0XBS_I3Gka6l5vLiKQZCJ2q6ablJLn9CsxRnyfPs9AGyNb7yAis81jOI8IQH229KvXZuUTnyz3zE9t6g9-k7BKzohxDQ661DO8"/><div class="min-w-0"><h3 class="font-headline-sm text-body-md font-bold text-on-surface truncate">Mateo Alejandro Morales</h3><p class="font-body-sm text-body-sm text-on-surface-variant truncate">4° Primaria B • #COL-4829</p></div></div><div class="flex flex-col items-end flex-shrink-0 gap-0.5"><span class="font-mono-metric text-[16px] font-bold text-primary">07:48 AM</span><span class="inline-flex items-center gap-0.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/50 font-label-sm text-label-sm font-bold"><span class="material-symbols-outlined text-[13px]">arrow_downward</span> Entrada</span></div></article><article class="p-3 rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><img class="w-11 h-11 rounded-full object-cover shadow-sm flex-shrink-0" data-alt="Valentina Paredes Ríos" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALvDccdSIqIkGEZEDaYETUGoz1aJ3-8r2UsW2OzCo3tS_c15VlHjJYRvY_hcCQtnbc0Bnqpl2hIjmojjLY9mYQGR0x6bg8zf451W43GFwXYZCZE0lYymLfX01kZZSCcvJfLOhqb07OP6l8ElqknuXXQYQOYWqkzbkKc3z0TO6h6IKOvJRHcQD5CmPnonQfQTJjxwYhLRrlQUQ9HN7KuCmOfGJ5yb1kWDi7of4tSpU"/><div class="min-w-0"><h3 class="font-headline-sm text-body-md font-bold text-on-surface truncate">Valentina Paredes Ríos</h3><p class="font-body-sm text-body-sm text-on-surface-variant truncate">2° Primaria A • #COL-3910</p></div></div><div class="flex flex-col items-end flex-shrink-0 gap-0.5"><span class="font-mono-metric text-[16px] font-bold text-primary">07:46 AM</span><span class="inline-flex items-center gap-0.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/50 font-label-sm text-label-sm font-bold"><span class="material-symbols-outlined text-[13px]">arrow_downward</span> Entrada</span></div></article><article class="p-3 rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><img class="w-11 h-11 rounded-full object-cover shadow-sm flex-shrink-0" data-alt="Santiago Gómez Cruz" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDwfXLmKo-rypmaRPbsfIg6VgJ9k_XuYQiCjQABH7NNKPTsQQh6ouRkrOGJnsyUvUYUE8XhZzHZZUtu_MH-vSFmYUP8yJzdZnB282jpllglkHAz5Q5TrlcNkEgmFl0dJLJF33nwuknrFYmuzZA_bxcQja0T7pFiHeUSPacF-wrIj8qc97bcBsSQCCMEvfSZS75IOCQtwOEwe1SmkwQmY37r_FNx45LQpo6HhQG-Gcc"/><div class="min-w-0"><h3 class="font-headline-sm text-body-md font-bold text-on-surface truncate">Santiago Gómez Cruz</h3><p class="font-body-sm text-body-sm text-on-surface-variant truncate">3° Secundaria C • #COL-5102</p></div></div><div class="flex flex-col items-end flex-shrink-0 gap-0.5"><span class="font-mono-metric text-[16px] font-bold text-amber-600">07:42 AM</span><span class="inline-flex items-center gap-0.5 px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200/50 font-label-sm text-label-sm font-bold"><span class="material-symbols-outlined text-[13px]">timer</span> Retardo</span></div></article><article class="p-3 rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><img class="w-11 h-11 rounded-full object-cover shadow-sm flex-shrink-0" data-alt="Joaquín Silva Navarro" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDI_kfBCotcyDjkhDHBGLk7ZSK-Kt7cfvj3YR-mbbYKWcKk8jlgVjqvdgyBD_6S2CIUI66NxlimwutvbhWVqSsgCFy3xNjxCsAuLMMrhamSlbwPgTi_o1rn_OQEmBEPFlztwVA_h3yuGR4egb-PqDcx_s6Fl8ep8Huf0M8z3H67pl5QTmzFSxZsnoDDs6fQckPU9Vg0HAJJ_43aFEvK02pkvI4QyjEdsV4IV4ByZdk"/><div class="min-w-0"><h3 class="font-headline-sm text-body-md font-bold text-on-surface truncate">Joaquín Silva Navarro</h3><p class="font-body-sm text-body-sm text-on-surface-variant truncate">5° Primaria B • #COL-7721</p></div></div><div class="flex flex-col items-end flex-shrink-0 gap-0.5"><span class="font-mono-metric text-[16px] font-bold text-primary">07:35 AM</span><span class="inline-flex items-center gap-0.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/50 font-label-sm text-label-sm font-bold"><span class="material-symbols-outlined text-[13px]">arrow_downward</span> Entrada</span></div></article><article class="p-3 rounded-xl bg-surface-container-lowest shadow-sm flex items-center justify-between gap-3"><div class="flex items-center gap-3 min-w-0"><img class="w-11 h-11 rounded-full object-cover shadow-sm flex-shrink-0" data-alt="Regina Domínguez Solís" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBdwhZIGm_annwkHTWP4E2PQsSCPzHY2BJKW0MUw0vZW52kfl8m0eK-vgU7Nw2kDAef5KdG8_5iRhgxBcgHjuD0NJapJAjPvUzkGwVU-t2dCW0wWWLMLFCmOwfhtDH0i7F88OM1DAJIP1735rVLoreBbqbPsV1aC9-xziMRz1O6cx64SZ1f-9MNbnxmP2wO_JekFsCpGSSEZwp8P-BcGNBqCz9Esr7zqO0vmSYM7dA"/><div class="min-w-0"><h3 class="font-headline-sm text-body-md font-bold text-on-surface truncate">Regina Domínguez Solís</h3><p class="font-body-sm text-body-sm text-on-surface-variant truncate">1° Preescolar • #COL-1893</p></div></div><div class="flex flex-col items-end flex-shrink-0 gap-0.5"><span class="font-mono-metric text-[16px] font-bold text-[#2563eb]">12:15 PM</span><span class="inline-flex items-center gap-0.5 px-2.5 py-0.5 rounded-full bg-blue-50 text-[#2563eb] border border-blue-200/50 font-label-sm text-label-sm font-bold"><span class="material-symbols-outlined text-[13px]">arrow_upward</span> Salida</span></div></article></div></section>
+<!-- Sticky Bottom Summary / Actions Card -->
+<section class="px-margin pt-space-xs pb-space-md"><button class="w-full h-12 px-4 rounded-xl bg-primary text-on-primary hover:bg-[#4338ca] font-label-md text-label-md font-bold flex items-center justify-center gap-2 transition-all active:scale-[0.98] shadow-md shadow-primary/20" id="btn-download-report"><span class="material-symbols-outlined text-[20px]">download</span><span class="">Descargar Reporte del Día</span></button></section>
+<!-- Export Options Modal (Overlay) -->
+<div class="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm hidden items-end justify-center p-4" id="export-modal">
+<div class="w-full max-w-md bg-surface-container-lowest rounded-2xl p-space-lg shadow-xl space-y-space-md transform transition-transform">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[24px] text-primary">file_download</span>
+<h3 class="font-headline-md text-headline-md text-on-surface">Opciones de Exportación</h3>
+</div>
+<button class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant" id="btn-close-modal">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+<div class="space-y-space-xs">
+<button class="w-full p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container flex items-center justify-between transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error text-[24px]">picture_as_pdf</span>
+<div class="text-left">
+<span class="font-label-lg text-label-lg text-on-surface block">Reporte Ejecutivo Diario (.PDF)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Gráficas, picos de horario y desglose oficial</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<button class="w-full p-3.5 rounded-xl bg-surface-container-low hover:bg-surface-container flex items-center justify-between transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary text-[24px]">table_view</span>
+<div class="text-left">
+<span class="font-label-lg text-label-lg text-on-surface block">Padrón de Movimientos (.XLSX)</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Datos crudos con timestamp e ID de NFC</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+</div>
+<button class="w-full h-12 rounded-xl bg-primary text-on-primary font-label-lg text-label-lg font-bold flex items-center justify-center gap-2 shadow-md shadow-primary/25" id="btn-action-send-report">
+<span class="material-symbols-outlined text-[20px]">mark_email_read</span>
+<span class="">Compartir Vía Correo Institucional</span>
+</button>
+</div>
+</div>
+<!-- Micro-interactions Script -->
+<script>
+    // Tab date chips selection
+    document.querySelectorAll('.date-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.date-chip').forEach(c => {
+          c.classList.remove('bg-surface-container-lowest', 'text-primary', 'font-bold', 'shadow-sm');
+          c.classList.add('text-on-surface-variant', 'font-semibold');
+        });
+        chip.classList.add('bg-surface-container-lowest', 'text-primary', 'font-bold', 'shadow-sm');
+        chip.classList.remove('text-on-surface-variant', 'font-semibold');
+      });
+    });
+
+    // Event type pills toggle
+    document.querySelectorAll('.event-filter-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.event-filter-pill').forEach(p => {
+          p.classList.remove('bg-primary', 'text-on-primary');
+          p.classList.add('bg-surface-container-lowest', 'text-on-surface-variant');
+        });
+        pill.classList.add('bg-primary', 'text-on-primary');
+        pill.classList.remove('bg-surface-container-lowest', 'text-on-surface-variant');
+      });
+    });
+
+    // Export Modal Controls
+    const exportBtn = document.getElementById('btn-export-options');
+    const downloadBtn = document.getElementById('btn-download-report');
+    const modal = document.getElementById('export-modal');
+    const closeModal = document.getElementById('btn-close-modal');
+    const sendReportBtn = document.getElementById('btn-action-send-report');
+
+    function openModal() {
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function hideModal() {
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    if (exportBtn) exportBtn.addEventListener('click', openModal);
+    if (downloadBtn) downloadBtn.addEventListener('click', openModal);
+    if (closeModal) closeModal.addEventListener('click', hideModal);
+
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) hideModal();
+    });
+
+    if (sendReportBtn) {
+      sendReportBtn.addEventListener('click', () => {
+        sendReportBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span><span>Enviando reporte...</span>';
+        setTimeout(() => {
+          sendReportBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">done</span><span>¡Reporte Enviado!</span>';
+          setTimeout(() => {
+            hideModal();
+            sendReportBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">mark_email_read</span><span>Compartir Vía Correo Institucional</span>';
+          }, 1200);
+        }, 1000);
+      });
+    }
+
+    // Quick NFC Search micro-trigger
+    const nfcBtn = document.getElementById('quick-nfc-lookup');
+    const searchInput = document.getElementById('history-search-input');
+    if (nfcBtn && searchInput) {
+      nfcBtn.addEventListener('click', () => {
+        nfcBtn.classList.add('scale-110');
+        searchInput.placeholder = 'Acerca la pulsera o credencial al teléfono...';
+        setTimeout(() => {
+          nfcBtn.classList.remove('scale-110');
+          searchInput.value = '#COL-4829';
+          searchInput.dispatchEvent(new Event('input'));
+        }, 1200);
+      });
+    }
+  </script>
+</div></main><nav class="fixed bottom-0 inset-x-0 z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.04)]" data-active-classes="text-primary bg-primary/10 font-label-md"><div class="flex items-center justify-around h-16 px-gutter"><a class="flex flex-col items-center justify-center min-w-[4.5rem] h-12 rounded-xl text-on-surface-variant hover:text-primary transition-all duration-150" data-path="escaneo-nfc" href="#"><span class="material-symbols-outlined text-[24px]">contactless</span><span class="font-label-sm text-label-sm">Escaneo NFC</span></a><a aria-current="page" class="flex flex-col items-center justify-center min-w-[4.5rem] h-12 rounded-xl transition-all duration-150 text-primary bg-primary/10 font-label-md font-bold" data-path="historial-y-reportes" href="#"><span class="material-symbols-outlined text-[24px]">history</span><span class="font-label-sm text-label-sm">Historial &amp; Reportes</span></a></div></nav>
+</body></html>

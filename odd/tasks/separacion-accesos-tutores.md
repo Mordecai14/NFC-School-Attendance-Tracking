@@ -1,0 +1,33 @@
+# Separación de identidad, acceso escolar y tutores
+Objetivo: migrar el modelo existente sin perder identidades, alumnos ni vínculos. Branch actual: `main`; sin commits, push ni cambios de historial por política del proyecto.
+Entrega: un incremento integrado, estimación de 550 líneas entre migración, tests y documentación. Runner: CLI de Supabase contra el proyecto confirmado; tests SQL transaccionales y checks existentes de la app.
+
+## Specs
+
+- S1. «puedes hacerlo, me parece bien»: implementar la propuesta aprobada de `profiles` como identidad común, `school_access` para acceso escolar y `student_tutors` para relaciones múltiples. Una persona puede ser personal y tutor, y vincularse con alumnos de distintas escuelas.
+- S2. «sin ampliar ahora el MVP escolar»: conservar tablas escolares y la consulta NFC existente; no implementar app de tutores ni login. Mantener permisos escolares por escuela y lectura de tutores únicamente sobre alumnos vinculados.
+- S3. «Está bien que modifiques datos existentes, hay que dejarlo listo para pruebas y si estorba, se va»: migrar los vínculos existentes, sin borrar datos que no interfieren. Conservar las seis identidades, diez alumnos, dos escuelas, dispositivos y pulsera original.
+- S4. Versionar migración, probar permisos y preservación antes de aplicar al proyecto confirmado `tjaofzevroceamukxsze`, y documentar el modelo y las limitaciones observadas. Las verificaciones no habilitan UI ni autenticación nuevas.
+
+## Tasks
+
+- [x] T1 — S1–S4 — inline: migración, tests y documentación del mismo comportamiento; sin trigger de writer. Risk: items 1, 2 y 3 (backfill, RLS y columnas existentes). Commit: no autorizado. Estado: preparado y validado transaccionalmente, sin aplicación persistente.
+- [x] T2 — S1–S4 — aplicación remota y validación desde la sesión principal por instrucción explícita del responsable. Commit: no autorizado. Estado: aplicada y registrada; cuatro conjuntos de tests SQL posteriores pasaron. No hubo ejecución independiente ni revisión nativa.
+
+## Log
+
+- L1. Solicitud original: «Crees que sea conveniente separar las tablas de padres/tutores y las que usan en las escuelas?»; autorización: «puedes hacerlo, me parece bien».
+- L2. Propuesta aprobada: identidad común en `profiles`, acceso del personal en `school_access`, relación muchos-a-muchos en `student_tutors`; sin duplicar alumnos, pulseras ni asistencias y sin ampliar el MVP de UI.
+- L3. Evidencia inicial: helpers `private.current_user_school_id()` y `private.current_user_role()` leen columnas de `profiles`; policies escolares y de tutor dependen de ellas y de `students.tutor_id`. La RPC temporal NFC no depende de esas columnas. Sin views ni triggers Auth observados.
+- L4. Baseline Git: `b63c4b845076994db1c9277b6296f31cc6d3128b`, worktree limpio. RDD encendido por defecto. No crear commits ni branches: la política local exige petición explícita.
+- L5. Las nuevas relaciones se administran de forma privilegiada, sin permitir autoasignarse permisos desde el cliente. Los tutores conservan lectura limitada, no administración escolar. No se cambia la integridad pendiente de asistencias ni la excepción temporal de consulta NFC.
+- L6. RED observado: el test nuevo falló con `42P01: relation "public.school_access" does not exist`. GREEN: migración + cuatro tests SQL en una transacción con rollback; igualdad de filas, vínculos y salida NFC confirmada. Tras rollback siguen seis perfiles, diez alumnos y una pulsera, sin tablas nuevas persistidas.
+- L7. `npx tsc --noEmit`: pasó. `node --test tests/*.test.mjs`: 10/10. `git diff --check`: pasó. `npm run lint`: falla en `src/hooks/use-color-scheme.web.ts:11`, regla `react-hooks/set-state-in-effect`; archivo idéntico a HEAD, pendiente reproducir en baseline aislado. No se corrige fuera de alcance.
+- L8. `supabase db push --linked --project-ref tjaofzevroceamukxsze --skip-vault --dry-run`: solo propone `20261110040000_separate_school_access_tutors.sql`, sin seeds ni roles. Aplicación pendiente de verificación independiente.
+- L9. Verificador independiente: sin blockers estáticos; lint reproducido en baseline aislado. Ejecución SQL no disponible: `AccessTokenRequiredError` al aislar HOME. El recheck confirmó la restricción y no ejecutó comandos. No se sustituye este resultado por un PASS ni se aplica la migración.
+- L10. Probes redactados por el verificador incorporados a `supabase/tests/school_access_independent.sql`: pasaron al ejecutarlos el parent con la sesión autorizada, incluyendo hashes invariables tras rechazos y FK/duplicados. Esto es comprobación funcional, no ejecución independiente. Rollback posterior confirmado: sin tablas nuevas persistidas, seis perfiles, diez alumnos y una pulsera.
+- L11. Falta autorización para habilitar una sesión temporal de Supabase dentro del entorno aislado del verificador, sin compartir tokens por chat. Una vez disponible la prueba requerida, aplicar solo la migración prevista y comprobar el estado persistente. RDD sigue encendido; no se inició review con la verificación pendiente. Scratch del verificador eliminado por el parent tras incorporar sus probes.
+- L12. En el último `git status` apareció `src/app/add.tsx` como archivo untracked ajeno a este trabajo. No se leyó, modificó ni eliminó. Los checks de la app registrados anteriormente no validan ese cambio concurrente.
+- L13. El responsable resolvió el bloqueo: «Hazlo desde aqui ya, que sea rapido». Se continuó desde la sesión principal autorizada, sin crear otra sesión ni delegar verificaciones adicionales. Esto sustituye el gate operativo de L11; no equivale a un PASS independiente.
+- L14. Primer intento real: `LOCK TABLE can only be used in transaction blocks`, antes de crear tablas. Se corrigió la suposición sobre el runner agregando `BEGIN/COMMIT` explícitos. La migración y los tests completos pasaron de nuevo con rollback antes de aplicar. El harness de preservación debe retirar la transacción exterior de la migración al ensamblarla.
+- L15. `supabase db push --linked --project-ref tjaofzevroceamukxsze --skip-vault --yes`: aplicada únicamente `20261110040000`, registrada en el historial. Tests posteriores `school_access_tutors`, `school_access_independent`, `school_bracelets` y `temporary_public_bracelet_lookup`: pasaron, con fixtures revertidas. Estado confirmado: dos escuelas, diez alumnos, seis perfiles, dos accesos escolares, diez vínculos de tutores, dos dispositivos, una pulsera, cero asistencias; la RPC devuelve el alumno de la pulsera original.

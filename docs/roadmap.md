@@ -70,7 +70,7 @@ Las etapas siguen el orden recomendado, pero se pueden ajustar si una prueba rev
 - [x] Definir las entidades mínimas: escuela, alumno, pulsera, tutor y evento de asistencia.
 - [x] Crear y versionar el esquema en Supabase (tablas, relaciones y restricciones).
 - [ ] Proteger el acceso a datos mediante políticas y permisos adecuados.
-- [ ] Cargar alumnos de prueba, por ejemplo mediante CSV.
+- [x] Cargar alumnos de prueba, por ejemplo mediante CSV.
 - [ ] Poder asignar una pulsera a un alumno y evitar asignaciones activas contradictorias.
 
 **Se considera terminada cuando:** existen alumnos de prueba con pulseras asignadas y los datos pueden consultarse de forma autorizada.

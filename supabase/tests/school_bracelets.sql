@@ -10,9 +10,12 @@ insert into public.schools (id, name, slug) values
   ('bf1f2000-0000-4000-8000-000000000001', 'Fixture A', 'fixture-bf1f-school-a'),
   ('bf1f2000-0000-4000-8000-000000000002', 'Fixture B', 'fixture-bf1f-school-b');
 
-insert into public.profiles (id, school_id, full_name, role) values
-  ('bf1f1000-0000-4000-8000-000000000001', 'bf1f2000-0000-4000-8000-000000000001', 'Fixture A', 'school'),
-  ('bf1f1000-0000-4000-8000-000000000002', 'bf1f2000-0000-4000-8000-000000000002', 'Fixture B', 'school');
+insert into public.profiles (id, full_name) values
+  ('bf1f1000-0000-4000-8000-000000000001', 'Fixture A'),
+  ('bf1f1000-0000-4000-8000-000000000002', 'Fixture B');
+insert into public.school_access (profile_id, school_id) values
+  ('bf1f1000-0000-4000-8000-000000000001', 'bf1f2000-0000-4000-8000-000000000001'),
+  ('bf1f1000-0000-4000-8000-000000000002', 'bf1f2000-0000-4000-8000-000000000002');
 
 insert into public.students (id, school_id, first_name, last_name) values
   ('bf1f3000-0000-4000-8000-000000000001', 'bf1f2000-0000-4000-8000-000000000001', 'Fixture', 'A'),
@@ -56,13 +59,14 @@ begin
   if not found then raise exception 'Own profile name update failed'; end if;
 
   begin
-    update public.profiles set school_id = 'bf1f2000-0000-4000-8000-000000000002' where id = 'bf1f1000-0000-4000-8000-000000000001';
-    raise exception 'School change was accepted';
+    insert into public.school_access (profile_id, school_id)
+    values ('bf1f1000-0000-4000-8000-000000000001', 'bf1f2000-0000-4000-8000-000000000002');
+    raise exception 'School access escalation was accepted';
   exception when insufficient_privilege then null;
   end;
   begin
-    update public.profiles set role = 'tutor' where id = 'bf1f1000-0000-4000-8000-000000000001';
-    raise exception 'Role change was accepted';
+    update public.profiles set id = 'bf1f1000-0000-4000-8000-000000000003' where id = 'bf1f1000-0000-4000-8000-000000000001';
+    raise exception 'Identity change was accepted';
   exception when insufficient_privilege then null;
   end;
 end $$;
