@@ -1,6 +1,6 @@
 # Asistencia escolar con NFC
 
-App Android con React Native, Expo y TypeScript. Hoy lee pulseras NFC; el acceso escolar con Supabase está en desarrollo. El registro de asistencias y la sincronización todavía no están implementados.
+App Android con React Native, Expo y TypeScript. Lee pulseras NFC y consulta alumnos en Supabase mediante un acceso anónimo temporal de desarrollo. El responsable confirmó el recorrido con una pulsera real en Android; faltan validar los demás casos, el acceso escolar, el registro de asistencias y la sincronización.
 
 ## Desarrollo
 
@@ -21,9 +21,11 @@ El último resultado registrado tiene un fallo de lint preexistente en `src/hook
 
 ## Supabase en la nube
 
-Se trabaja directamente con un proyecto hospedado, sin Docker ni base Supabase local. Crear o seleccionar un proyecto de desarrollo con datos ficticios; copiar su URL y publishable key del Dashboard a `.env.local` usando `.env.example` como referencia. No agregar claves secret/service-role a la app ni al repositorio.
+Se trabaja directamente con un proyecto hospedado, sin Docker ni base Supabase local. La app usa `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` del archivo `.env` existente mediante `app.config.js`. Reiniciar Expo después de cambiar esos valores. Solo se acepta una publishable key o la clave `anon` anterior; no agregar claves secret/service-role a la app ni al repositorio.
 
-La CLI se conserva para aplicar migraciones SQL versionadas al proyecto vinculado. El setup, los ajustes de Auth y las validaciones pendientes están en el [roadmap](docs/roadmap.md#03--acceso-escolar-y-datos-con-supabase). No ejecutar `supabase db reset` contra la nube ni cargar datos personales reales hasta definir retención. La creación/configuración del proyecto remoto sigue pendiente, no está hecha por actualizar estos archivos.
+**Acceso temporal:** `development_student_by_bracelet` permite consultar nombre, grado y grupo sin sesión a quien conozca un UID. No hay aislamiento por escuela en esta consulta. Usar únicamente datos ficticios y eliminar esta función antes de usar datos reales o llevar la app a producción.
+
+La CLI está vinculada al proyecto de desarrollo confirmado y aplica migraciones SQL versionadas. El schema remoto ya existía antes de la primera migración del repositorio; esta es incremental y no permite reconstruir por sí sola una base vacía. El setup, los ajustes de Auth y las validaciones pendientes están en el [roadmap](docs/roadmap.md#03--supabase-y-acceso-escolar). No ejecutar `supabase db reset` contra la nube ni cargar datos personales reales hasta definir retención.
 
 ## Dónde mirar
 

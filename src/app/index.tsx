@@ -1,10 +1,34 @@
+import { useEffect, useState } from 'react';
+import Constants from 'expo-constants';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useNfcReader } from '@/hooks/use-nfc-reader';
+import { lookupStudent, type Student } from '@/services/student-lookup';
 
 export default function HomeScreen() {
   const state = useNfcReader();
+  const { availability, current } = state;
+  const [lookup, setLookup] = useState<{
+    reading: typeof state.current;
+    student: Student | null;
+    error: boolean;
+  } | null>(null);
+
+  useEffect(() => {
+    const reading = current;
+    if (availability !== 'available' || reading.status !== 'detected') return;
+    let active = true;
+    void lookupStudent(
+      reading.identifier,
+      Constants.expoConfig?.extra?.supabaseUrl,
+      Constants.expoConfig?.extra?.supabasePublishableKey,
+    ).then(
+      (student) => { if (active) setLookup({ reading, student, error: false }); },
+      () => { if (active) setLookup({ reading, student: null, error: true }); },
+    );
+    return () => { active = false; };
+  }, [availability, current]);
 
   const currentLabel =
     state.availability === 'unavailable'
@@ -31,9 +55,24 @@ export default function HomeScreen() {
           <Text style={styles.sectionTitle}>Estado actual</Text>
           <Text style={styles.resultText}>{currentLabel}</Text>
           {state.availability === 'available' && state.current.status === 'detected' && (
-            <Text selectable style={styles.identifier}>
-              {state.current.identifier}
-            </Text>
+            <>
+              <Text selectable style={styles.identifier}>{state.current.identifier}</Text>
+              {lookup?.reading !== state.current ? (
+                <Text style={styles.secondaryText}>Buscando alumno…</Text>
+              ) : lookup.error ? (
+                <Text style={styles.resultText}>No se pudo consultar Supabase. Revisá la conexión y volvé a escanear.</Text>
+              ) : lookup.student ? (
+                <View style={styles.studentCard}>
+                  <Text style={styles.sectionTitle}>Alumno</Text>
+                  <Text style={styles.studentName}>{lookup.student.first_name} {lookup.student.last_name}</Text>
+                  <Text style={styles.secondaryText}>
+                    Grado: {lookup.student.grade ?? 'No registrado'} · Grupo: {lookup.student.group_name ?? 'No registrado'}
+                  </Text>
+                </View>
+              ) : (
+                <Text style={styles.resultText}>No hay un alumno activo asignado a esta pulsera.</Text>
+              )}
+            </>
           )}
         </View>
 
@@ -98,6 +137,17 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '700',
     letterSpacing: 1,
+  },
+  studentCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    padding: 16,
+    gap: 8,
+  },
+  studentName: {
+    color: '#17212b',
+    fontSize: 22,
+    fontWeight: '700',
   },
   historySection: {
     gap: 12,

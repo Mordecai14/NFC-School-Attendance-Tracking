@@ -4,6 +4,10 @@
 
 **Actualización 2026-11-08**: el responsable eligió desarrollar directamente con Supabase en la nube, sin Docker ni stack local. Esta decisión de entorno está aprobada; el schema, RLS y login siguen pendientes de implementación.
 
+**Estado posterior:** el proyecto confirmado ya tenía un schema con `profiles.school_id` vinculado a `auth.users`, en lugar de la FK desde `schools` propuesta abajo. Una migración incremental restringe los cambios del propio perfil y corrige restricciones de pulseras; el conjunto de políticas y el modelo completo siguen pendientes de revisión. La migración no es una referencia inicial reproducible del schema existente.
+
+**Excepción temporal aprobada:** para desarrollar la lectura NFC sin login, `development_student_by_bracelet` permite consultas anónimas por UID sin aislamiento escolar. Solo se permite con datos ficticios y debe eliminarse antes de producción o datos reales. La decisión de acceso autenticado permanece como objetivo para esa etapa.
+
 ## Contexto
 
 La aplicación necesita almacenar el modelo conceptual escolar y permitir acceso a personal mediante una única cuenta compartida por escuela. Los datos personales no deben cruzar escuelas. La aplicación es Expo/React Native y no debe incorporar una API backend o infraestructura compleja sin necesidad aprobada.

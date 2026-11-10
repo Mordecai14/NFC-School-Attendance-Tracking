@@ -4,7 +4,7 @@
 
 Este es el mapa de trabajo del proyecto, no una secuencia rígida. Cada bloque explica qué se busca, qué falta y cómo reconocer el resultado. Una casilla marcada indica que se comprobó, no solamente que se escribió código.
 
-Las tareas usan identificadores como `03-01`: el primer número indica el bloque y el segundo identifica la tarea. Conservar los identificadores existentes al actualizar el roadmap y asignar uno nuevo a cada tarea agregada.
+Las tareas usan identificadores como `03-01`: el primer número indica el bloque y el segundo identifica la tarea. Conservar los identificadores existentes aunque cambie el orden y asignar uno nuevo a cada tarea agregada.
 
 ## Vista general
 
@@ -12,13 +12,13 @@ Las tareas usan identificadores como `03-01`: el primer número indica el bloque
 |---|---|---|
 | 01 — Lectura NFC | Leer y distinguir pulseras en Android. | Completado con límites conocidos. |
 | 02 — Modelo conceptual | Definir entidades y reglas principales. | Completado; no implica tablas creadas. |
-| 03 — Acceso escolar y datos | Autenticarse y acceder solo a los datos autorizados de una escuela. | En curso; solo setup básico. |
-| 04 — Identificación | Mostrar el alumno asociado a una pulsera. | Pendiente. |
+| 03 — Supabase y acceso escolar | Preparar datos y acceso seguro; incorporar la pantalla de login más adelante. | En curso; proyecto vinculado y schema existente parcialmente corregido. |
+| 04 — Identificación y experiencia visual | Escanear una pulsera y mostrar su alumno desde Supabase en una pantalla cuidada. | En curso; recorrido con una pulsera real confirmado. |
 | 05 — Asistencia offline | Registrar entradas y salidas aunque no haya conexión. | Pendiente. |
 | 06 — Sincronización y duplicados | Enviar pendientes sin perderlos ni duplicarlos. | Pendiente. |
 | 07 — Jornada de prueba | Comprobar el recorrido completo en condiciones reales. | Pendiente. |
 
-**Siguiente paso:** avanzar en el bloque 03, confirmando primero el proyecto de Supabase Cloud que se usará para desarrollo. El orden puede ajustarse si se mantienen la seguridad y la confiabilidad.
+**Siguiente paso:** continuar el bloque 04: revisar la experiencia visual y los casos de pulsera desconocida y error de conexión. El recorrido con una pulsera vinculada ya fue confirmado en Android. La consulta usa acceso anónimo temporal; el login y el aislamiento se completan antes de producción o datos reales.
 
 ## Lo que existe hoy
 
@@ -32,45 +32,55 @@ La app detecta pulseras y muestra su identificador, el estado del lector y un hi
 
 Ya se definieron las entidades principales: escuela, alumno, pulsera, tutor y evento de asistencia. Un alumno pertenece a una escuela y no es un usuario autenticado; puede tener varios tutores y como máximo una pulsera activa. Una pulsera reemplazada se conserva en el historial. Los eventos pertenecen al alumno, son históricos y no deben sobrescribirse.
 
-El identificador de una pulsera debe ser único; el UID NFC por sí solo no garantiza protección contra clonación. Los eventos necesitan una identidad global estable entre reintentos. Esto es diseño conceptual: **todavía no hay tablas, restricciones ni políticas implementadas**.
+El identificador de una pulsera debe ser único; el UID NFC por sí solo no garantiza protección contra clonación. Los eventos necesitan una identidad global estable entre reintentos. El schema remoto existente implementa parte del modelo, pero aún requiere revisión y no coincide completamente con este diseño.
 
 ## Ahora
 
-### 03 — Acceso escolar y datos con Supabase
+### 03 — Supabase y acceso escolar
 
-**Resultado:** entrar con una cuenta escolar de prueba, conservar la sesión al reabrir, cerrar sesión y acceder únicamente a los datos de esa escuela. La base contiene datos ficticios suficientes para probar el aislamiento.
+**Resultado:** una base Supabase funcional y protegida para consultar los datos escolares; más adelante, una pantalla de login y sesión para el personal de la escuela.
 
-**Por qué sigue esto:** antes de mostrar alumnos en la app necesitamos una identidad autenticada y protección en la base, no solo filtros en la pantalla.
+**Orden:** por decisión del responsable, la primera consulta usa una función anónima temporal para avanzar sin pantalla de login ni sesión. Esta función no filtra por escuela: cualquier persona con el UID puede obtener nombre, grado y grupo. Debe eliminarse y sustituirse por acceso autenticado antes de producción o datos reales. No exponer claves privilegiadas en la app.
 
-**Ya preparado:** CLI de Supabase, ejemplo de variables de entorno y configuración básica del workspace. Eso no confirma que haya un proyecto remoto seleccionado, vinculado o validado.
+**Ya preparado:** CLI vinculada al proyecto confirmado `tjaofzevroceamukxsze` y schema remoto existente. Se corrigieron permisos de perfil y restricciones de pulseras; una función temporal permite consultar desde la app sin sesión. Las pruebas SQL usan fixtures transitorias y el responsable confirmó el recorrido con una pulsera real en Android.
 
-**Pendiente:**
+**Base necesaria ahora:**
 
-- [ ] **03-01** Confirmar o crear el proyecto de desarrollo en Supabase Cloud y verificar que es el destino correcto antes de cualquier cambio remoto.
+- [x] **03-01** Confirmar o crear el proyecto de desarrollo en Supabase Cloud y verificar que es el destino correcto antes de cualquier cambio remoto.
 - [ ] **03-02** Vincular la CLI y configurar localmente la URL y la publishable key; no incluir claves secretas en la app ni en Git.
-- [ ] **03-03** Configurar Auth en el Dashboard: cuentas creadas administrativamente, sin signup público; comprobar que signup se rechaza y que una cuenta autorizada puede iniciar sesión.
 - [ ] **03-04** Crear migraciones versionadas para las entidades, relaciones y restricciones necesarias, incluido el historial inmutable de eventos.
-- [ ] **03-05** Activar grants mínimos y RLS desde la creación de las tablas expuestas; cargar datos ficticios de al menos dos escuelas con las protecciones activas.
+- [ ] **03-05** Activar grants mínimos y RLS desde la creación de las tablas expuestas; cargar en Supabase los datos necesarios con las protecciones activas.
 - [ ] **03-06** Comprobar acceso propio y rechazo de acceso cruzado, anónimo y de usuarios sin escuela; incluir el caso de un tutor compartido sin exponer vínculos de otra escuela.
-- [ ] **03-07** Implementar login, sesión persistente, comprobación de asociación escolar y logout en la app, con errores comprensibles.
-- [ ] **03-08** Probar el recorrido en Android y ejecutar los checks pertinentes. No habilitar consultas escolares en la app antes de validar RLS.
 
-**Cómo saber que terminó:** una cuenta de prueba entra, reabre la app conservando la sesión y sale; las pruebas de base demuestran que no puede consultar datos de otra escuela. La [decisión de Supabase](decisions/supabase-auth-and-school-isolation.md) reúne el enfoque propuesto y sus límites.
+El responsable confirmó que no habrá datos reales durante el desarrollo. Antes de cargar datos reales de menores hay que definir retención y eliminación y retirar el acceso anónimo temporal.
+
+**Límite del schema:** la migración en el repositorio es incremental sobre una base creada previamente fuera de las migraciones. No reconstruye una base vacía; falta incorporar una referencia inicial revisada sin alterar el historial ni los datos remotos.
+
+**Interfaz de acceso, casi al final:**
+
+- [ ] **03-03** Configurar Auth en el Dashboard: cuentas creadas administrativamente, sin signup público; comprobar que signup se rechaza y que una cuenta autorizada puede iniciar sesión. Preparar antes lo mínimo necesario para el acceso seguro de desarrollo.
+- [ ] **03-07** Implementar login, sesión persistente, comprobación de asociación escolar y logout en la app, con errores comprensibles.
+- [ ] **03-08** Probar el recorrido en Android y ejecutar los checks pertinentes. Antes de datos reales, retirar la función anónima y validar el aislamiento autenticado.
+- [ ] **03-09** Eliminar `development_student_by_bracelet` y sustituir la consulta anónima por acceso autenticado con aislamiento escolar antes de producción o datos reales.
+
+**Cómo saber que terminó:** la app consulta Supabase con acceso autorizado; al incorporar el login, una cuenta escolar entra, reabre la app conservando la sesión y sale. Las pruebas de base demuestran que no puede consultar datos de otra escuela. La [decisión de Supabase](decisions/supabase-auth-and-school-isolation.md) reúne el enfoque propuesto y sus límites.
 
 **No incluye:** panel administrativo, API propia, registro de asistencias ni uso de datos reales. La configuración de Auth se realiza en el Dashboard remoto; `supabase/config.toml` no modifica el servicio hospedado. No ejecutar `supabase db reset` en la nube.
 
-## Después
+### 04 — Identificar al alumno y cuidar la experiencia visual
 
-### 04 — Identificar al alumno
-
-**Resultado:** acercar una pulsera registrada y ver el nombre, grado y grupo del alumno autorizado; una pulsera desconocida muestra un mensaje claro.
+**Resultado:** acercar una pulsera real, consultar Supabase y ver el nombre, grado y grupo del alumno asociado en una pantalla clara y cuidada; una pulsera desconocida muestra un mensaje claro.
 
 - [ ] **04-01** Consultar la pulsera activa y su alumno dentro de la escuela autorizada.
 - [ ] **04-02** Mostrar el resultado y distinguir una pulsera desconocida, inactiva o un error de consulta.
 - [ ] **04-03** Definir el alcance mínimo de alta y asignación antes de crear un flujo en la app; inicialmente los datos pueden cargarse administrativamente.
 - [ ] **04-04** Preparar la identificación offline con datos locales previamente autorizados cuando se desarrolle la captura sin conexión.
+- [ ] **04-05** Diseñar e implementar una pantalla cuidada para el estado del lector, la identificación y los errores; validar legibilidad y presentación en Android real.
+- [x] **04-06** Probar el recorrido completo con una pulsera real y un alumno cargado en Supabase, sin reemplazar la consulta por datos locales o simulados. Confirmado por el responsable.
 
-**Comprobar:** una pulsera conocida identifica al alumno correcto, una desconocida no lo inventa y una cuenta de otra escuela no accede a sus datos. Depende del acceso y aislamiento del bloque 03.
+**Comprobar ahora:** la pantalla muestra datos de Supabase al escanear la pulsera correcta y una desconocida no inventa un alumno. **Pendiente antes de datos reales:** demostrar el aislamiento entre escuelas tras retirar la consulta anónima. La identificación offline de **04-04** se desarrolla junto con la captura offline.
+
+## Después
 
 ### 05 — Registrar entrada y salida sin Internet
 
@@ -99,7 +109,7 @@ El identificador de una pulsera debe ser único; el UID NFC por sí solo no gara
 
 ### 07 — Prueba de jornada escolar
 
-**Resultado:** operar el recorrido completo con un Android y varias pulseras, sin pérdidas de asistencia.
+**Resultado:** operar el recorrido completo con un Android y varias pulseras, sin pérdidas de asistencia. Antes de esta jornada se completa la interfaz de login del bloque 03.
 
 - [ ] **07-01** Probar una secuencia rápida de entradas y salidas, pulseras desconocidas y lecturas repetidas.
 - [ ] **07-02** Repetir el recorrido con Internet estable, intermitente y ausente, y cerrar y reabrir la app con pendientes.
@@ -111,6 +121,7 @@ El identificador de una pulsera debe ser único; el UID NFC por sí solo no gara
 ## Riesgos y decisiones pendientes
 
 - **Privacidad:** no usar datos reales de menores en desarrollo ni exponerlos en logs. Antes de datos reales hay que definir retención y eliminación.
+- **Consulta anónima temporal:** con un UID conocido se pueden consultar los datos devueltos de cualquier escuela; eliminarla antes de producción o datos reales.
 - **Sin conexión:** resolver cómo almacenar, actualizar y proteger los datos mínimos autorizados para identificar alumnos offline.
 - **Duplicados:** una lectura repetida puede ser accidental, pero dos eventos distintos también pueden ser legítimos. Definir la regla cuando se implemente, sin descartar eventos silenciosamente.
 - **Pulseras:** faltan decisiones sobre reutilización de pulseras retiradas y transferencias entre escuelas.
