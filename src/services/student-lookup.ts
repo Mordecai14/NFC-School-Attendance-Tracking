@@ -9,13 +9,20 @@ export async function lookupStudent(
   uid: string,
   url: string | undefined,
   key: string | undefined,
+  getAccessToken: () => Promise<string>,
   request: typeof fetch = fetch,
 ): Promise<Student | null> {
   if (!url || !key) throw new Error('Supabase is not configured');
+  const accessToken = await getAccessToken();
+  if (!accessToken) throw new Error('School authentication is required');
 
-  const response = await request(`${url.replace(/\/$/, '')}/rest/v1/rpc/development_student_by_bracelet`, {
+  const response = await request(`${url.replace(/\/$/, '')}/rest/v1/rpc/student_by_bracelet`, {
     method: 'POST',
-    headers: { apikey: key, 'Content-Type': 'application/json' },
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
     body: JSON.stringify({ bracelet_uid: uid }),
   });
   if (!response.ok) throw new Error('Student lookup failed');

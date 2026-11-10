@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useNfcReader } from '@/hooks/use-nfc-reader';
+import { developmentAuth } from '@/hooks/use-development-login';
 import { lookupStudent, type Student } from '@/services/student-lookup';
 
 export default function HomeScreen() {
@@ -23,6 +24,7 @@ export default function HomeScreen() {
       reading.identifier,
       Constants.expoConfig?.extra?.supabaseUrl,
       Constants.expoConfig?.extra?.supabasePublishableKey,
+      developmentAuth.getAccessToken,
     ).then(
       (student) => { if (active) setLookup({ reading, student, error: false }); },
       () => { if (active) setLookup({ reading, student: null, error: true }); },
@@ -60,7 +62,7 @@ export default function HomeScreen() {
               {lookup?.reading !== state.current ? (
                 <Text style={styles.secondaryText}>Buscando alumno…</Text>
               ) : lookup.error ? (
-                <Text style={styles.resultText}>No se pudo consultar Supabase. Revisá la conexión y volvé a escanear.</Text>
+                <Text style={styles.resultText}>No se pudo consultar el alumno. Comprueba la sesión y la conexión, y vuelve a escanear.</Text>
               ) : lookup.student ? (
                 <View style={styles.studentCard}>
                   <Text style={styles.sectionTitle}>Alumno</Text>
