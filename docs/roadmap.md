@@ -1,132 +1,229 @@
-# Roadmap — Asistencia escolar NFC
+# Roadmap de desarrollo — Asistencia Escolar NFC
 
-**Meta del MVP:** registrar entradas y salidas con pulseras NFC desde Android, incluso sin Internet, y sincronizarlas después sin perder eventos.
+## 1. Qué estamos construyendo
 
-Este es el mapa de trabajo del proyecto, no una secuencia rígida. Cada bloque explica qué se busca, qué falta y cómo reconocer el resultado. Una casilla marcada indica que se comprobó, no solamente que se escribió código.
+Una aplicación para que el personal de una escuela registre **entradas y salidas** de alumnos al acercar sus pulseras NFC a un teléfono Android. Debe seguir funcionando durante una jornada completa sin internet y sincronizar los registros cuando vuelva la conexión.
 
-Las tareas usan identificadores como `03-01`: el primer número indica el bloque y el segundo identifica la tarea. Conservar los identificadores existentes aunque cambie el orden y asignar uno nuevo a cada tarea agregada.
+Posteriormente, una aplicación para tutores permitirá consultar los movimientos de sus hijos y recibir avisos.
 
-## Vista general
+**Meta de la primera entrega:** una escuela puede operar una jornada real de asistencia con un Android, sin perder registros por fallas de conexión.
 
-| Bloque | Resultado | Estado |
-|---|---|---|
-| 01 — Lectura NFC | Leer y distinguir pulseras en Android. | Completado con límites conocidos. |
-| 02 — Modelo conceptual | Definir entidades y reglas principales. | Completado; no implica tablas creadas. |
-| 03 — Supabase y acceso escolar | Preparar datos y acceso seguro; incorporar la pantalla de login más adelante. | En curso; proyecto vinculado y schema existente parcialmente corregido. |
-| 04 — Identificación y experiencia visual | Escanear una pulsera y mostrar su alumno desde Supabase en una pantalla cuidada. | En curso; recorrido con una pulsera real confirmado. |
-| 05 — Asistencia offline | Registrar entradas y salidas aunque no haya conexión. | Pendiente. |
-| 06 — Sincronización y duplicados | Enviar pendientes sin perderlos ni duplicarlos. | Pendiente. |
-| 07 — Jornada de prueba | Comprobar el recorrido completo en condiciones reales. | Pendiente. |
+**Leyenda:** `[x]` terminado y comprobado · `[~]` implementado pero pendiente de comprobar · `[ ]` pendiente. Los estados reflejan lo conversado, no una inspección del repositorio.
 
-**Siguiente paso:** continuar el bloque 04: revisar la experiencia visual y los casos de pulsera desconocida y error de conexión. El recorrido con una pulsera vinculada ya fue confirmado en Android. La consulta usa acceso anónimo temporal; el login y el aislamiento se completan antes de producción o datos reales.
+## 2. Mapa completo del producto
 
-## Lo que existe hoy
+```text
+APLICACIÓN ESCOLAR (MVP)
 
-### 01 — Lectura NFC
+01. Leer pulseras NFC
+         ↓
+02. Preparar alumnos, pulseras y base de datos
+         ↓
+03. Identificar al alumno al escanear
+         ↓
+04. Proteger el acceso del personal
+         ↓
+05. Registrar entradas y salidas
+         ↓
+06. Registrar sin internet
+         ↓
+07. Sincronizar y evitar duplicados
+         ↓
+08. Preparar y probar la operación escolar
+         ↓
+    ★ MVP ESCUELA LISTO ★
+         ↓
+APLICACIÓN PARA TUTORES (SEGUNDA ENTREGA)
 
-La app detecta pulseras y muestra su identificador, el estado del lector y un historial reciente. Se probó en un Android real con dos pulseras: el operador confirmó identificadores distintos y estables en lecturas repetidas, incluso después de reabrir la app. También confirmó la recuperación después de desactivar y reactivar NFC.
+09. Acceso y vinculación de tutores
+         ↓
+10. Consulta de asistencia e historial
+         ↓
+11. Notificaciones de entrada y salida
+```
 
-**Límites de esa prueba:** una exposición sostenida produjo una lectura duplicada; no se repitió en dos ensayos posteriores. El manejo de errores se comprobó con un estado controlado, no con una falla física de radio. La prevención de duplicados sigue pendiente y no debe confiarse solo al lector NFC.
+Las etapas siguen el orden recomendado, pero se pueden ajustar si una prueba revela dependencias nuevas. **No son sprints ni equivalen necesariamente a una sola spec.**
 
-### 02 — Modelo conceptual
+---
 
-Ya se definieron las entidades principales: escuela, alumno, pulsera, tutor y evento de asistencia. Un alumno pertenece a una escuela y no es un usuario autenticado; puede tener varios tutores y como máximo una pulsera activa. Una pulsera reemplazada se conserva en el historial. Los eventos pertenecen al alumno, son históricos y no deben sobrescribirse.
+## 3. Desarrollo de la aplicación escolar
 
-El identificador de una pulsera debe ser único; el UID NFC por sí solo no garantiza protección contra clonación. Los eventos necesitan una identidad global estable entre reintentos. El schema remoto existente implementa parte del modelo, pero aún requiere revisión y no coincide completamente con este diseño.
+### 01. Lectura de pulseras NFC
 
-## Ahora
+**Para qué sirve:** comprobar que el dispositivo puede leer las pulseras reales antes de desarrollar la lógica escolar.
 
-### 03 — Supabase y acceso escolar
+**Qué debe existir al terminar:** pantalla sencilla que detecte pulseras, muestre su identificador y permita seguir escaneando.
 
-**Resultado:** una base Supabase funcional y protegida para consultar los datos escolares; más adelante, una pantalla de login y sesión para el personal de la escuela.
+- [~] Implementación de `001-nfc-reading` terminada, según lo reportado.
+- [x] Confirmar pruebas con Android físico y las pulseras que se usarán.
+- [x] Confirmar que una misma pulsera conserva el identificador y que distintas pulseras se distinguen.
+- [x] Confirmar manejo de NFC apagado y errores de lectura.
 
-**Orden:** por decisión del responsable, la primera consulta usa una función anónima temporal para avanzar sin pantalla de login ni sesión. Esta función no filtra por escuela: cualquier persona con el UID puede obtener nombre, grado y grupo. Debe eliminarse y sustituirse por acceso autenticado antes de producción o datos reales. No exponer claves privilegiadas en la app.
+**Se considera terminada cuando:** las pruebas físicas funcionan, no sólo cuando compila.
 
-**Ya preparado:** CLI vinculada al proyecto confirmado `tjaofzevroceamukxsze` y schema remoto existente. Se corrigieron permisos de perfil y restricciones de pulseras; una función temporal permite consultar desde la app sin sesión. Las pruebas SQL usan fixtures transitorias y el responsable confirmó el recorrido con una pulsera real en Android.
+### 02. Datos de alumnos, pulseras y escuela
 
-**Base necesaria ahora:**
+**Para qué sirve:** tener información realista para que el sistema sepa quién es cada alumno.
 
-- [x] **03-01** Confirmar o crear el proyecto de desarrollo en Supabase Cloud y verificar que es el destino correcto antes de cualquier cambio remoto.
-- [ ] **03-02** Vincular la CLI y configurar localmente la URL y la publishable key; no incluir claves secretas en la app ni en Git.
-- [ ] **03-04** Crear migraciones versionadas para las entidades, relaciones y restricciones necesarias, incluido el historial inmutable de eventos.
-- [ ] **03-05** Activar grants mínimos y RLS desde la creación de las tablas expuestas; cargar en Supabase los datos necesarios con las protecciones activas.
-- [ ] **03-06** Comprobar acceso propio y rechazo de acceso cruzado, anónimo y de usuarios sin escuela; incluir el caso de un tutor compartido sin exponer vínculos de otra escuela.
+**Qué debe existir al terminar:** base de datos funcional con alumnos y pulseras relacionadas, usando inicialmente datos ficticios.
 
-El responsable confirmó que no habrá datos reales durante el desarrollo. Antes de cargar datos reales de menores hay que definir retención y eliminación y retirar el acceso anónimo temporal.
+- [x] Definir las entidades mínimas: escuela, alumno, pulsera, tutor y evento de asistencia.
+- [x] Crear y versionar el esquema en Supabase (tablas, relaciones y restricciones).
+- [ ] Proteger el acceso a datos mediante políticas y permisos adecuados.
+- [ ] Cargar alumnos de prueba, por ejemplo mediante CSV.
+- [ ] Poder asignar una pulsera a un alumno y evitar asignaciones activas contradictorias.
 
-**Límite del schema:** la migración en el repositorio es incremental sobre una base creada previamente fuera de las migraciones. No reconstruye una base vacía; falta incorporar una referencia inicial revisada sin alterar el historial ni los datos remotos.
+**Se considera terminada cuando:** existen alumnos de prueba con pulseras asignadas y los datos pueden consultarse de forma autorizada.
 
-**Interfaz de acceso, casi al final:**
+### 03. Identificación del alumno
 
-- [ ] **03-03** Configurar Auth en el Dashboard: cuentas creadas administrativamente, sin signup público; comprobar que signup se rechaza y que una cuenta autorizada puede iniciar sesión. Preparar antes lo mínimo necesario para el acceso seguro de desarrollo.
-- [ ] **03-07** Implementar login, sesión persistente, comprobación de asociación escolar y logout en la app, con errores comprensibles.
-- [ ] **03-08** Probar el recorrido en Android y ejecutar los checks pertinentes. Antes de datos reales, retirar la función anónima y validar el aislamiento autenticado.
-- [ ] **03-09** Eliminar `development_student_by_bracelet` y sustituir la consulta anónima por acceso autenticado con aislamiento escolar antes de producción o datos reales.
+**Para qué sirve:** convertir una lectura NFC en información útil para el operador.
 
-**Cómo saber que terminó:** la app consulta Supabase con acceso autorizado; al incorporar el login, una cuenta escolar entra, reabre la app conservando la sesión y sale. Las pruebas de base demuestran que no puede consultar datos de otra escuela. La [decisión de Supabase](decisions/supabase-auth-and-school-isolation.md) reúne el enfoque propuesto y sus límites.
+**Qué debe existir al terminar:** escanear una pulsera registrada y ver el alumno asociado.
 
-**No incluye:** panel administrativo, API propia, registro de asistencias ni uso de datos reales. La configuración de Auth se realiza en el Dashboard remoto; `supabase/config.toml` no modifica el servicio hospedado. No ejecutar `supabase db reset` en la nube.
+- [x] Buscar al alumno a partir del identificador de la pulsera.
+- [ ] Mostrar nombre, grado y grupo.
+- [ ] Mostrar un aviso claro si la pulsera no está registrada o está inactiva.
+- [ ] Permitir continuar con la siguiente pulsera sin reiniciar la aplicación.
 
-### 04 — Identificar al alumno y cuidar la experiencia visual
+**Se considera terminada cuando:** varias pulseras distintas muestran al alumno correcto y las desconocidas no producen falsos registros.
 
-**Resultado:** acercar una pulsera real, consultar Supabase y ver el nombre, grado y grupo del alumno asociado en una pantalla clara y cuidada; una pulsera desconocida muestra un mensaje claro.
+### 04. Acceso del personal escolar
 
-- [ ] **04-01** Consultar la pulsera activa y su alumno dentro de la escuela autorizada.
-- [ ] **04-02** Mostrar el resultado y distinguir una pulsera desconocida, inactiva o un error de consulta.
-- [ ] **04-03** Definir el alcance mínimo de alta y asignación antes de crear un flujo en la app; inicialmente los datos pueden cargarse administrativamente.
-- [ ] **04-04** Preparar la identificación offline con datos locales previamente autorizados cuando se desarrolle la captura sin conexión.
-- [ ] **04-05** Diseñar e implementar una pantalla cuidada para el estado del lector, la identificación y los errores; validar legibilidad y presentación en Android real.
-- [x] **04-06** Probar el recorrido completo con una pulsera real y un alumno cargado en Supabase, sin reemplazar la consulta por datos locales o simulados. Confirmado por el responsable.
+**Para qué sirve:** impedir que cualquiera con el dispositivo acceda a información o registre asistencias.
 
-**Comprobar ahora:** la pantalla muestra datos de Supabase al escanear la pulsera correcta y una desconocida no inventa un alumno. **Pendiente antes de datos reales:** demostrar el aislamiento entre escuelas tras retirar la consulta anónima. La identificación offline de **04-04** se desarrolla junto con la captura offline.
+**Qué debe existir al terminar:** acceso autenticado para personal autorizado.
 
-## Después
+- [ ] Iniciar y cerrar sesión.
+- [ ] Limitar acciones y consultas a la escuela y rol autorizados.
+- [ ] Definir cómo conservar una sesión operativa ante pérdida temporal de internet.
 
-### 05 — Registrar entrada y salida sin Internet
+**Se considera terminada cuando:** un operador autorizado puede trabajar y un usuario no autorizado no puede consultar alumnos ni registrar eventos.
 
-**Resultado:** el personal identifica a un alumno, registra una entrada o salida y recibe confirmación, aunque la conexión falle.
+### 05. Entrada y salida de alumnos
 
-- [ ] **05-01** Definir el flujo de entrada/salida y mostrar hora, resultado y errores recuperables.
-- [ ] **05-02** Guardar cada evento histórico con identidad y hora de ocurrencia estables, sin sobrescribir eventos anteriores.
-- [ ] **05-03** Persistir los eventos en el dispositivo, mantener una cola de pendientes y conservarla al cerrar y reabrir la app.
-- [ ] **05-04** Mostrar cuándo un evento está pendiente de sincronización y no descartarlo silenciosamente ante errores.
-- [ ] **05-05** Incorporar confirmación visual y feedback sonoro/háptico discreto.
-- [ ] **05-06** Permitir identificar offline con datos locales autorizados; resolver su actualización y protección antes de usar datos reales.
+**Para qué sirve:** completar el flujo principal que usará el personal todos los días.
 
-**Comprobar:** sin Internet se registran entradas y salidas, se confirma el resultado y los pendientes sobreviven al reinicio. La captura y la persistencia offline se entregan juntas si es necesario: no dar por terminado un registro que dependa de Internet.
+**Qué debe existir al terminar:** escanear → identificar alumno → registrar entrada/salida → confirmar → siguiente alumno.
 
-### 06 — Sincronización y duplicados
+- [ ] Registrar entrada o salida con hora y alumno correcto.
+- [ ] Conservar cada evento como parte del historial, sin sobrescribirlo.
+- [ ] Mostrar confirmación visible, sonora y/o háptica.
+- [ ] Distinguir claramente éxito, error y pulsera no registrada.
+- [ ] Tener una pantalla cómoda para registrar alumnos consecutivamente.
 
-**Resultado:** los eventos pendientes llegan a Supabase al recuperar conexión, incluso después de interrupciones o reintentos, sin pérdidas ni duplicados por sincronización.
+**Se considera terminada cuando:** se puede completar una secuencia de entradas y salidas con conexión y verificar cada evento en la base de datos.
 
-- [ ] **06-01** Enviar pendientes y reintentar de forma segura al volver la conexión.
-- [ ] **06-02** Usar la identidad estable del evento y operaciones idempotentes en backend.
-- [ ] **06-03** Distinguir eventos pendientes, confirmados y errores que requieran atención; conservar los que no se hayan confirmado.
-- [ ] **06-04** Prevenir lecturas accidentales repetidas en la app y aplicar protección adecuada también en backend, sin confundirlas con eventos reales distintos.
-- [ ] **06-05** Probar cortes durante el envío, respuestas inciertas, reintentos y sincronizaciones repetidas.
+### 06. Operación sin internet
 
-**Comprobar:** después de desconectar durante un envío y reintentar, cada evento confirmado aparece una sola vez y ningún pendiente desaparece silenciosamente. Depende de la persistencia del bloque 05.
+**Para qué sirve:** mantener el registro durante una caída de Wi-Fi o datos.
 
-### 07 — Prueba de jornada escolar
+**Qué debe existir al terminar:** la escuela sigue registrando y sabe qué movimientos están pendientes.
 
-**Resultado:** operar el recorrido completo con un Android y varias pulseras, sin pérdidas de asistencia. Antes de esta jornada se completa la interfaz de login del bloque 03.
+- [ ] Mantener en el dispositivo la información mínima autorizada para identificar alumnos sin conexión.
+- [ ] Guardar eventos localmente (SQLite) de manera persistente.
+- [ ] Conservar pendientes al cerrar y reabrir la app.
+- [ ] Indicar al operador cuando los registros todavía no se sincronizan.
+- [ ] Evitar pérdida silenciosa de registros.
 
-- [ ] **07-01** Probar una secuencia rápida de entradas y salidas, pulseras desconocidas y lecturas repetidas.
-- [ ] **07-02** Repetir el recorrido con Internet estable, intermitente y ausente, y cerrar y reabrir la app con pendientes.
-- [ ] **07-03** Verificar que los eventos locales llegan a Supabase sin pérdidas ni duplicados y que el aislamiento escolar se mantiene.
-- [ ] **07-04** Registrar y corregir los problemas bloqueantes descubiertos; repetir las comprobaciones afectadas.
+**Se considera terminada cuando:** con el dispositivo sin conexión se registran varias asistencias y todas siguen guardadas tras reiniciar la aplicación.
 
-**Comprobar:** una jornada de prueba con datos ficticios completa el recorrido y los registros esperados coinciden con los sincronizados.
+### 07. Sincronización y control de duplicados
 
-## Riesgos y decisiones pendientes
+**Para qué sirve:** entregar correctamente los eventos pendientes y evitar asistencias repetidas.
 
-- **Privacidad:** no usar datos reales de menores en desarrollo ni exponerlos en logs. Antes de datos reales hay que definir retención y eliminación.
-- **Consulta anónima temporal:** con un UID conocido se pueden consultar los datos devueltos de cualquier escuela; eliminarla antes de producción o datos reales.
-- **Sin conexión:** resolver cómo almacenar, actualizar y proteger los datos mínimos autorizados para identificar alumnos offline.
-- **Duplicados:** una lectura repetida puede ser accidental, pero dos eventos distintos también pueden ser legítimos. Definir la regla cuando se implemente, sin descartar eventos silenciosamente.
-- **Pulseras:** faltan decisiones sobre reutilización de pulseras retiradas y transferencias entre escuelas.
-- **Acceso:** la propuesta actual usa una cuenta compartida por escuela; el acceso de tutores queda fuera del MVP escolar.
+**Qué debe existir al terminar:** al recuperar conexión, los registros llegan a Supabase una sola vez en términos de efecto, incluso con reintentos.
 
-## Más adelante
+- [ ] Sincronizar automáticamente cuando sea posible.
+- [ ] Reintentar fallos sin perder eventos.
+- [ ] Utilizar identificadores únicos e inserciones idempotentes.
+- [ ] Ignorar escaneos accidentales repetidos dentro de una ventana definida.
+- [ ] Validar duplicados y conflictos también del lado del backend.
+- [ ] Mostrar pendientes o errores de sincronización que requieran atención.
 
-App para tutores con asociación a uno o varios alumnos, consulta del historial autorizado y notificaciones de eventos sincronizados. También quedan para después la administración avanzada de alumnos y dispositivos, los reportes, las métricas y un panel administrativo complejo. Nada de esto bloquea el MVP operativo de la escuela.
+**Se considera terminada cuando:** una conexión intermitente, reintentos y reinicios no provocan pérdidas ni registros duplicados.
+
+### 08. Preparación y prueba escolar
+
+**Para qué sirve:** pasar de una demo funcional a una herramienta que realmente se puede usar en la escuela.
+
+**Qué debe existir al terminar:** un flujo probado con una jornada simulada y los datos iniciales preparados.
+
+- [ ] Validar una secuencia representativa de alumnos y pulseras.
+- [ ] Probar entrada y salida, escaneo rápido, pulseras desconocidas y lectura doble.
+- [ ] Probar internet normal, sin internet y conexión intermitente.
+- [ ] Verificar el historial final contra los escaneos realizados.
+- [ ] Documentar un procedimiento simple de operación y recuperación ante errores.
+- [ ] Corregir errores que impidan la operación.
+
+**Se considera terminada cuando:** el personal puede realizar una jornada de prueba completa sin perder datos y sin depender de asistencia técnica continua.
+
+**Hito: MVP de la aplicación escolar listo para piloto.**
+
+---
+
+## 4. Segunda entrega — Aplicación para tutores
+
+Esta aplicación aprovecha los mismos alumnos y eventos registrados por la escuela. No es necesaria para validar el MVP operativo inicial.
+
+### 09. Acceso y vinculación de tutores
+
+- [ ] Autenticar al tutor.
+- [ ] Asociarlo exclusivamente con sus hijos autorizados.
+- [ ] Permitir que un tutor consulte a más de un hijo, cuando aplique.
+
+**Resultado:** el tutor inicia sesión y ve únicamente sus alumnos vinculados.
+
+### 10. Estado e historial de asistencia
+
+- [ ] Mostrar última entrada o salida registrada de cada hijo.
+- [ ] Consultar historial por fecha.
+- [ ] Diferenciar un evento sincronizado de uno todavía no disponible en el servidor.
+
+**Resultado:** el tutor puede comprobar cuándo quedó registrada la llegada o salida de su hijo.
+
+### 11. Notificaciones
+
+- [ ] Enviar aviso cuando el servidor confirme una entrada o salida.
+- [ ] Evitar avisos duplicados por reintentos de sincronización.
+- [ ] Permitir configurar permisos de notificación en el teléfono.
+
+**Resultado:** el tutor recibe avisos confiables sin asumir que un registro local pendiente ya llegó al servidor.
+
+**Hito: experiencia básica de tutores lista para piloto.**
+
+---
+
+## 5. Cómo usar este roadmap al desarrollar con IA
+
+Este documento responde **qué falta por construir**; `docs/product.md` describe el producto y `docs/architecture.md` explica cómo funciona el código actual.
+
+Para cada bloque:
+
+1. **Elegir un resultado concreto** del bloque, no necesariamente desarrollar toda la etapa en una sola sesión.
+2. **Pedir al agente un plan corto**: qué tocará, riesgos y cómo verificarlo. Reservar una spec formal para funcionalidades con reglas o riesgos que lo ameriten.
+3. **Implementar y comprobar** con lint, TypeScript, pruebas relevantes y validación manual cuando corresponda.
+4. **Revisar cambios y cerrar**: commit, actualizar documentación importante y marcar casillas sólo si se comprobaron.
+
+No es necesario generar `spec.md`, `plan.md` y `tasks.md` para cada ajuste visual, cambio pequeño o mejora aislada. Tampoco se deben saltar verificaciones de integridad, privacidad u operación offline por ahorrar pasos.
+
+### Prompt breve para OpenCode
+
+```text
+Vamos a trabajar en la etapa [NÚMERO] de docs/roadmap.md, específicamente en [RESULTADO O CHECKBOX].
+
+Lee AGENTS.md, docs/product.md, docs/architecture.md y esa sección del roadmap.
+Revisa primero el código existente y propón un plan breve con los cambios necesarios,
+riesgos y forma de comprobar el resultado. No agregues alcance ni documentación innecesaria.
+Espera mi aprobación antes de modificar código.
+Después implementa, ejecuta las validaciones pertinentes y reporta qué quedó
+comprobado y qué requiere prueba manual. No hagas commit.
+```
+
+## 6. Reglas para mantenerlo útil
+
+- Este roadmap es **del producto**, no un registro de comandos de Spec Kit.
+- Una etapa puede requerir varias sesiones o pequeñas implementaciones.
+- El orden puede cambiar por dependencias o resultados de pruebas: registra el motivo si ocurre.
+- Una casilla sólo se marca terminada si hay evidencia de que funciona.
+- No usar datos reales de menores en entornos de prueba ni exponerlos en registros.

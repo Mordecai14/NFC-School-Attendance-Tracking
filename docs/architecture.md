@@ -40,6 +40,10 @@ Todas las tablas siguientes están en `public`. Los campos `id` son UUID; salvo 
 - Las FK de `attendance` hacia escuela, alumno, pulsera y dispositivo son independientes: no se ha establecido con ellas que todos pertenezcan a la misma escuela. La FK de escuela usa `ON DELETE CASCADE`, por lo que no garantiza por sí sola la preservación histórica requerida. La integridad e inmutabilidad de asistencias siguen pendientes.
 - El schema remoto preexistía a las migraciones del repositorio. La migración actual es **incremental**, no un baseline reproducible desde una base vacía. Falta versionar una referencia inicial revisada sin reemplazar datos ni alterar por rutina el historial remoto.
 
+Para el acceso escolar se prevé autenticar al personal y derivar la escuela de la identidad verificada en la base, no de filtros de interfaz ni de `user_metadata`. El alta de cuentas sería administrativa, sin signup público; se propuso Expo SecureStore para la sesión nativa. La clave service-role no debe estar en la app. La consulta anónima temporal debe retirarse antes de producción o de usar datos reales.
+
+El modelo previsto contempla tutores compartibles entre escuelas, con acceso a vínculos filtrado por la escuela del alumno. El schema actual todavía no implementa ese modelo; su acceso, las escrituras de asistencia y la recuperación de contraseña quedan para desarrollos posteriores.
+
 ## Dirección planeada
 
 La arquitectura prevista actualmente para el MVP incluye:
@@ -49,7 +53,7 @@ La arquitectura prevista actualmente para el MVP incluye:
 - persistencia local para asistencias offline;
 - sincronización con Supabase hospedado.
 
-Estos componentes se incorporan progresivamente en incrementos observables dentro del alcance acordado. El [modelo conceptual resumido](roadmap.md#02--modelo-conceptual) y la [decisión de Supabase](decisions/supabase-auth-and-school-isolation.md) son referencias de diseño; el schema remoto existente difiere parcialmente de ellas.
+El [modelo conceptual resumido](roadmap.md#02--modelo-conceptual) es una referencia de producto; el schema remoto existente difiere parcialmente de él.
 
 ## Prioridades arquitectónicas
 
@@ -64,5 +68,3 @@ Estos componentes se incorporan progresivamente en incrementos observables dentr
 No introducir servicios backend ni infraestructura de forma prematura.
 
 Para nuevos datos de desarrollo usar únicamente datos ficticios; la naturaleza de los registros que ya existían no se ha comprobado. La elección de Supabase en la nube no reemplaza la persistencia local futura de asistencias en el dispositivo; son responsabilidades distintas.
-
-Las decisiones que afecten materialmente la arquitectura del sistema deben documentarse mediante ADRs dentro de `docs/decisions/`.

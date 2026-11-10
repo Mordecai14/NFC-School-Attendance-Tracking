@@ -32,6 +32,4 @@ La CLI está vinculada al proyecto de desarrollo confirmado y aplica migraciones
 - [Roadmap](docs/roadmap.md): estado y siguiente entregable.
 - [Producto](docs/product.md): propósito y límites del MVP.
 - [Arquitectura](docs/architecture.md): qué existe y qué está previsto.
-- [Decisión de Supabase](docs/decisions/supabase-auth-and-school-isolation.md): acceso y aislamiento propuestos.
-
-El roadmap concentra el avance y los próximos resultados; no se crean specs, planes ni archivos de tareas por rutina. Las instrucciones de colaboración están en [AGENTS.md](AGENTS.md).
+El roadmap es una guía flexible, no un requisito para desarrollar. Las instrucciones de colaboración están en [AGENTS.md](AGENTS.md).
