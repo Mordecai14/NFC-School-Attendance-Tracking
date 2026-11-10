@@ -24,3 +24,27 @@ test('passes existing public Supabase configuration to Expo', () => {
     else process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = previousKey;
   }
 });
+
+test('includes development login only with explicit opt-in and never in production', () => {
+  const names = ['NODE_ENV', 'NFC_DEV_AUTO_LOGIN', 'NFC_DEV_LOGIN_EMAIL', 'NFC_DEV_LOGIN_PASSWORD'];
+  const previous = Object.fromEntries(names.map(name => [name, process.env[name]]));
+  try {
+    process.env.NODE_ENV = 'development';
+    process.env.NFC_DEV_AUTO_LOGIN = 'true';
+    process.env.NFC_DEV_LOGIN_EMAIL = 'school@example.test';
+    process.env.NFC_DEV_LOGIN_PASSWORD = 'test-only-password';
+    assert.deepEqual(configure({ config: {} }).extra.developmentLogin, {
+      enabled: true, email: 'school@example.test', password: 'test-only-password',
+    });
+    process.env.NODE_ENV = 'production';
+    assert.equal(configure({ config: { extra: { developmentLogin: { password: 'stale' } } } }).extra.developmentLogin, undefined);
+    process.env.NODE_ENV = 'development';
+    delete process.env.NFC_DEV_AUTO_LOGIN;
+    assert.equal(configure({ config: {} }).extra.developmentLogin, undefined);
+  } finally {
+    for (const name of names) {
+      if (previous[name] === undefined) delete process.env[name];
+      else process.env[name] = previous[name];
+    }
+  }
+});

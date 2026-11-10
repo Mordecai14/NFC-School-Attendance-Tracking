@@ -4,7 +4,7 @@
 
 El proyecto actualmente es una aplicación React Native construida con Expo y TypeScript.
 
-La CLI de Supabase está vinculada al proyecto de desarrollo confirmado en la nube, sin Docker ni stack local. La base ya tenía tablas escolares y RLS antes de vincularla; una migración incremental corrigió permisos de perfil y restricciones de pulseras. La app consulta el alumno por UID mediante una función anónima temporal; el responsable confirmó el recorrido con una pulsera real en Android. El login aún no está implementado. El avance está en el [roadmap](roadmap.md).
+La CLI de Supabase está vinculada al proyecto de desarrollo confirmado en la nube, sin Docker ni stack local. La base ya tenía tablas escolares y RLS antes de vincularla; una migración incremental corrigió permisos de perfil y restricciones de pulseras. La app consulta el alumno por UID mediante una función anónima temporal; el responsable confirmó el recorrido con una pulsera real en Android. Hay un [login automático solo de desarrollo](specs/004-development-auto-login/spec.md), sin pantalla: autentica al arrancar, comprueba `school_access` y muestra una alerta. Requiere variables locales explícitas; su activación y comprobación visual siguen pendientes. El login de producción no está implementado. El avance general está en el [roadmap](roadmap.md).
 
 La lectura NFC en Android está implementada y validada con dos pulseras de muestra. El [roadmap](roadmap.md) resume la anomalía observada durante exposición sostenida y los límites de esa validación.
 
@@ -47,7 +47,7 @@ Todas las tablas siguientes están en `public`. Los campos `id` son UUID; salvo 
 
 Para el acceso escolar se prevé autenticar al personal y derivar la escuela de la identidad verificada en la base, no de filtros de interfaz ni de `user_metadata`. El alta de cuentas sería administrativa, sin signup público; se propuso Expo SecureStore para la sesión nativa. La clave service-role no debe estar en la app. La consulta anónima temporal debe retirarse antes de producción o de usar datos reales.
 
-El modelo permite tutores compartibles entre escuelas, con acceso escolar a los vínculos filtrado por la escuela del alumno. Esto no implementa una app de tutores. Los perfiles ficticios nuevos no tienen login configurado; las escrituras de asistencia desde la app y la recuperación de contraseña siguen pendientes.
+El modelo permite tutores compartibles entre escuelas, con acceso escolar a los vínculos filtrado por la escuela del alumno. Esto no implementa una app de tutores. Se configuraron contraseñas para las seis identidades de prueba y se verificó el login de la cuenta escolar original; no se debe asumir que los cuatro fixtures, sin correo confirmado ni identidades de proveedor, puedan iniciar sesión. Las escrituras de asistencia desde la app y la recuperación de contraseña siguen pendientes.
 
 ## Dirección planeada
 

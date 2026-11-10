@@ -201,11 +201,10 @@ Este documento responde **qué falta por construir**; `docs/product.md` describe
 Para cada bloque:
 
 1. **Elegir un resultado concreto** del bloque, no necesariamente desarrollar toda la etapa en una sola sesión.
-2. **Pedir al agente un plan corto**: qué tocará, riesgos y cómo verificarlo. Reservar una spec formal para funcionalidades con reglas o riesgos que lo ameriten.
+2. **Pedir al agente un plan corto**: qué tocará, riesgos y cómo verificarlo.
 3. **Implementar y comprobar** con lint, TypeScript, pruebas relevantes y validación manual cuando corresponda.
 4. **Revisar cambios y cerrar**: commit, actualizar documentación importante y marcar casillas sólo si se comprobaron.
 
-No es necesario generar `spec.md`, `plan.md` y `tasks.md` para cada ajuste visual, cambio pequeño o mejora aislada. Tampoco se deben saltar verificaciones de integridad, privacidad u operación offline por ahorrar pasos.
 
 ### Prompt breve para OpenCode
 

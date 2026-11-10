@@ -13,12 +13,19 @@ function isPublicSupabaseKey(key) {
 
 module.exports = ({ config }) => {
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  const developmentLoginEnabled = process.env.NODE_ENV === 'development' &&
+    process.env.NFC_DEV_AUTO_LOGIN === 'true';
   return {
     ...config,
     extra: {
       ...config.extra,
       supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,
       supabasePublishableKey: isPublicSupabaseKey(key) ? key : undefined,
+      developmentLogin: developmentLoginEnabled ? {
+        enabled: true,
+        email: process.env.NFC_DEV_LOGIN_EMAIL,
+        password: process.env.NFC_DEV_LOGIN_PASSWORD,
+      } : undefined,
     },
   };
 };

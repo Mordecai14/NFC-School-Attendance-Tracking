@@ -2,9 +2,6 @@
 Objetivo: migrar el modelo existente sin perder identidades, alumnos ni vínculos. Branch actual: `main`; sin commits, push ni cambios de historial por política del proyecto.
 Entrega: un incremento integrado, estimación de 550 líneas entre migración, tests y documentación. Runner: CLI de Supabase contra el proyecto confirmado; tests SQL transaccionales y checks existentes de la app.
 
-## Specs
-
-- S1. «puedes hacerlo, me parece bien»: implementar la propuesta aprobada de `profiles` como identidad común, `school_access` para acceso escolar y `student_tutors` para relaciones múltiples. Una persona puede ser personal y tutor, y vincularse con alumnos de distintas escuelas.
 - S2. «sin ampliar ahora el MVP escolar»: conservar tablas escolares y la consulta NFC existente; no implementar app de tutores ni login. Mantener permisos escolares por escuela y lectura de tutores únicamente sobre alumnos vinculados.
 - S3. «Está bien que modifiques datos existentes, hay que dejarlo listo para pruebas y si estorba, se va»: migrar los vínculos existentes, sin borrar datos que no interfieren. Conservar las seis identidades, diez alumnos, dos escuelas, dispositivos y pulsera original.
 - S4. Versionar migración, probar permisos y preservación antes de aplicar al proyecto confirmado `tjaofzevroceamukxsze`, y documentar el modelo y las limitaciones observadas. Las verificaciones no habilitan UI ni autenticación nuevas.
