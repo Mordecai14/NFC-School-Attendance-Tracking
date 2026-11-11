@@ -48,3 +48,9 @@ test('includes development login only with explicit opt-in and never in producti
     }
   }
 });
+
+test('adds the secure storage plugin without removing or duplicating existing plugins', () => {
+  const config = { plugins: ['expo-router', ['expo-secure-store', {}]] };
+  assert.deepEqual(configure({ config }).plugins, config.plugins);
+  assert.deepEqual(configure({ config: { plugins: ['expo-router'] } }).plugins, ['expo-router', 'expo-secure-store']);
+});

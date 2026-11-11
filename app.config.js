@@ -17,6 +17,9 @@ module.exports = ({ config }) => {
     process.env.NFC_DEV_AUTO_LOGIN === 'true';
   return {
     ...config,
+    plugins: (config.plugins ?? []).some(plugin =>
+      (Array.isArray(plugin) ? plugin[0] : plugin) === 'expo-secure-store')
+      ? config.plugins : [...(config.plugins ?? []), 'expo-secure-store'],
     extra: {
       ...config.extra,
       supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL,

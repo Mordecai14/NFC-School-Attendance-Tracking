@@ -16,7 +16,7 @@ const READER_MODE_FLAGS =
 
 const READ_ERROR = 'No se pudo leer la pulsera. Podés volver a intentar.';
 
-export function useNfcReader() {
+export function useNfcReader(onRead?: (identifier: string) => boolean) {
   const [state, dispatch] = useReducer(
     reduceNfcReaderState,
     undefined,
@@ -65,6 +65,8 @@ export function useNfcReader() {
     const onTagDiscovered = (tag: { id?: string }) => {
       if (!active || !appIsActive || !readerAvailable) return;
       if (typeof tag.id === 'string' && tag.id.trim().length > 0) {
+        // The scan workflow may be paused while a previous event is unresolved.
+        if (onRead && !onRead(tag.id)) return;
         dispatch({ type: 'success', identifier: tag.id });
       } else {
         dispatch({ type: 'success', identifier: '' });
@@ -135,7 +137,7 @@ export function useNfcReader() {
       NfcManager.setEventListener(NfcEvents.StateChanged, null);
       void stopReader();
     };
-  }, []);
+  }, [onRead]);
 
   return state;
 }

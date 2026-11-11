@@ -5,7 +5,7 @@ import { lookupStudent } from '../src/services/student-lookup.ts';
 const getAccessToken = async () => 'session-token';
 
 test('sends the scanned UID with the authenticated session and returns the student', async () => {
-  const student = { first_name: 'Ana', last_name: 'Ejemplo', grade: '3', group_name: 'A' };
+  const student = { id: 'student-id', school_id: 'school-id', bracelet_id: 'bracelet-id', first_name: 'Ana', last_name: 'Ejemplo', grade: '3', group_name: 'A' };
   const result = await lookupStudent('UID', 'https://example.test/', 'public-key', getAccessToken, async (url, options) => {
     assert.equal(url, 'https://example.test/rest/v1/rpc/student_by_bracelet');
     assert.equal(options.headers.apikey, 'public-key');

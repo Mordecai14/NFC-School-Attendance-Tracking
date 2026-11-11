@@ -1,4 +1,7 @@
 export type Student = {
+  id: string;
+  school_id: string;
+  bracelet_id: string;
   first_name: string;
   last_name: string;
   grade: string | null;
@@ -32,6 +35,9 @@ export async function lookupStudent(
   const student: unknown = data[0];
   if (
     !student || typeof student !== 'object' ||
+    !('id' in student) || typeof student.id !== 'string' || !student.id ||
+    !('school_id' in student) || typeof student.school_id !== 'string' || !student.school_id ||
+    !('bracelet_id' in student) || typeof student.bracelet_id !== 'string' || !student.bracelet_id ||
     !('first_name' in student) || typeof student.first_name !== 'string' ||
     !('last_name' in student) || typeof student.last_name !== 'string' ||
     !('grade' in student) || (student.grade !== null && typeof student.grade !== 'string') ||

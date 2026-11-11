@@ -32,9 +32,17 @@ insert into public.student_tutors values
  ('de030000-0000-4000-8000-000000000001','de010000-0000-4000-8000-000000000002'),
  ('de030000-0000-4000-8000-000000000002','de010000-0000-4000-8000-000000000002'),
  ('de030000-0000-4000-8000-000000000002','de010000-0000-4000-8000-000000000001');
-insert into public.attendance(school_id,student_id,type,occurred_at)
-select school_id,id,'entry',now() from public.students
+insert into public.devices(school_id,name,platform)
+select id,'Independent device','android' from public.schools
+where id in ('de020000-0000-4000-8000-000000000001','de020000-0000-4000-8000-000000000002');
+insert into public.bracelets(school_id,student_id,uid)
+select school_id,id,'independent-'||id::text from public.students
 where id in ('de030000-0000-4000-8000-000000000001','de030000-0000-4000-8000-000000000002');
+insert into public.attendance(school_id,student_id,bracelet_id,device_id,type,occurred_at)
+select s.school_id,s.id,b.id,d.id,'entry',now() from public.students s
+join public.bracelets b on b.student_id=s.id
+join public.devices d on d.school_id=s.school_id
+where s.id in ('de030000-0000-4000-8000-000000000001','de030000-0000-4000-8000-000000000002');
 set local role authenticated;
 select set_config('request.jwt.claim.sub','de010000-0000-4000-8000-000000000002',true);
 do $$ declare before_hash text := pg_temp.state_hash(); cmd text;

@@ -31,10 +31,14 @@ insert into public.devices (school_id, name, platform) values
  ('af020000-0000-4000-8000-000000000002', 'Fixture B device', 'android');
 insert into public.bracelets (school_id, student_id, uid) values
  ('af020000-0000-4000-8000-000000000001', 'af030000-0000-4000-8000-000000000001', 'fixture-access-a'),
- ('af020000-0000-4000-8000-000000000002', 'af030000-0000-4000-8000-000000000003', 'fixture-access-b');
-insert into public.attendance (school_id, student_id, type, occurred_at)
-select school_id, id, 'entry', now() from public.students
-where id between 'af030000-0000-4000-8000-000000000001' and 'af030000-0000-4000-8000-000000000004';
+ ('af020000-0000-4000-8000-000000000002', 'af030000-0000-4000-8000-000000000003', 'fixture-access-b'),
+ ('af020000-0000-4000-8000-000000000001', 'af030000-0000-4000-8000-000000000002', 'fixture-access-a2'),
+ ('af020000-0000-4000-8000-000000000002', 'af030000-0000-4000-8000-000000000004', 'fixture-access-b2');
+insert into public.attendance (school_id, student_id, bracelet_id, device_id, type, occurred_at)
+select s.school_id, s.id, b.id, d.id, 'entry', now() from public.students s
+join public.bracelets b on b.student_id=s.id
+join public.devices d on d.school_id=s.school_id
+where s.id between 'af030000-0000-4000-8000-000000000001' and 'af030000-0000-4000-8000-000000000004';
 
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'af010000-0000-4000-8000-000000000003', true);
@@ -74,7 +78,7 @@ do $$ begin
     or (select count(*) from public.student_tutors) <> 3
     or (select count(*) from public.schools) <> 1
     or (select count(*) from public.devices) <> 1
-    or (select count(*) from public.bracelets) <> 1
+    or (select count(*) from public.bracelets) <> 2
     or (select count(*) from public.profiles) <> 3 then
    raise exception 'Staff/tutor identity lost access or gained unrelated access';
  end if;
@@ -106,7 +110,7 @@ select set_config('request.jwt.claim.sub', 'af010000-0000-4000-8000-000000000002
 do $$ begin
  if (select count(*) from public.students) <> 2 or (select count(*) from public.attendance) <> 2
     or (select count(*) from public.student_tutors) <> 2
-    or (select count(*) from public.devices) <> 1 or (select count(*) from public.bracelets) <> 1 then
+    or (select count(*) from public.devices) <> 1 or (select count(*) from public.bracelets) <> 2 then
    raise exception 'School B isolation failed';
  end if;
 end $$;
