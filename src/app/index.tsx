@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { Image } from 'expo-image';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
@@ -202,8 +203,10 @@ export default function HomeScreen() {
         )}
 
         <View style={styles.historySection}>
-          <Text style={styles.historyTitle}>Lecturas recientes</Text>
-          <Text style={styles.secondaryText}>Últimas lecturas de esta sesión</Text>
+          <View style={styles.historyHeading}>
+            <Text accessibilityRole="header" style={styles.historyTitle}>Lecturas recientes</Text>
+            <Text style={styles.historyCaption}>Esta sesión</Text>
+          </View>
           {state.history.length === 0 ? (
             <View style={styles.emptyCard}>
               <Text style={styles.sectionTitle}>Todavía no hay lecturas.</Text>
@@ -212,10 +215,21 @@ export default function HomeScreen() {
           ) : (
             state.history.map((identifier, index) => (
               <View key={`${index}-${identifier}`} style={styles.historyRow}>
-                <Text style={styles.historyLabel}>Lectura {index + 1}</Text>
-                <Text selectable style={styles.historyIdentifier}>
-                  {identifier}
-                </Text>
+                <Image
+                  source={require('../../assets/images/student-placeholder.svg')}
+                  style={styles.historyAvatar}
+                  contentFit="cover"
+                  accessible={false}
+                />
+                <View style={styles.historyDetails}>
+                  <Text selectable style={styles.historyIdentifier}>
+                    {identifier}
+                  </Text>
+                  <Text style={styles.historyLabel}>Lectura {index + 1}</Text>
+                </View>
+                <View style={styles.historyBadge}>
+                  <Text style={styles.historyBadgeText}>NFC</Text>
+                </View>
               </View>
             ))
           )}
@@ -400,6 +414,21 @@ const styles = StyleSheet.create({
     gap: 8,
     marginTop: 4,
   },
+  historyHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 4,
+    paddingHorizontal: 2,
+  },
+  historyCaption: {
+    color: '#464555',
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 0.4,
+  },
   historyTitle: {
     color: '#131b2e',
     fontSize: 22,
@@ -424,12 +453,39 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   historyRow: {
-    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    minHeight: 72,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#eeedf4',
     backgroundColor: '#ffffff',
-    gap: 6,
+    gap: 12,
+  },
+  historyAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#eaedff',
+    flexShrink: 0,
+  },
+  historyDetails: {
+    flex: 1,
+    minWidth: 0,
+    gap: 4,
+  },
+  historyBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+    backgroundColor: '#eeecff',
+    flexShrink: 0,
+  },
+  historyBadgeText: {
+    color: '#4f46e5',
+    fontSize: 11,
+    fontWeight: '700',
   },
   historyLabel: {
     color: '#464555',
@@ -439,5 +495,6 @@ const styles = StyleSheet.create({
     color: '#131b2e',
     fontSize: 16,
     fontWeight: '600',
+    lineHeight: 22,
   },
 });
