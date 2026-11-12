@@ -1,8 +1,8 @@
 import { useCallback, useState, useSyncExternalStore } from 'react';
 import Constants from 'expo-constants';
 import { useFocusEffect } from 'expo-router';
-import { Image } from 'expo-image';
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -18,16 +18,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNfcReader } from '@/hooks/use-nfc-reader';
 import { developmentAuth } from '@/hooks/use-development-login';
 import { braceletExists, createBraceletRegistrationCheck } from '@/services/bracelet-registration-check';
+import { useStudentRegistration } from '@/hooks/use-student-registration';
+import type { StudentDraft } from '@/services/student-registration';
 
-const emptyForm = {
-  name: '',
-  enrollment: '',
+const emptyForm: StudentDraft = {
+  first_name: '',
+  last_name: '',
+  student_number: '',
   grade: '',
-  group: '',
-  guardianName: '',
-  guardianPhone: '',
-  secondaryGuardianName: '',
-  secondaryGuardianPhone: '',
+  group_name: '',
 };
 
 function FormField({ label, ...props }: TextInputProps & { label: string }) {
@@ -47,6 +46,7 @@ function FormField({ label, ...props }: TextInputProps & { label: string }) {
 
 export default function RegisterStudentScreen() {
   const [form, setForm] = useState(emptyForm);
+  const { state: registration, getState, register, retry, clear } = useStudentRegistration();
   const [check] = useState(() => createBraceletRegistrationCheck(uid => {
     const extra = Constants.expoConfig?.extra;
     return braceletExists(uid, extra?.supabaseUrl, extra?.supabasePublishableKey, developmentAuth.getAccessToken);
@@ -54,12 +54,22 @@ export default function RegisterStudentScreen() {
   const verification = useSyncExternalStore(check.subscribe, check.getState, check.getState);
   useFocusEffect(useCallback(() => () => { check.clear(); }, [check]));
   const captureBracelet = useCallback((uid: string) => {
+    if (!['idle', 'rejected'].includes(getState().status)) return false;
     const accepted = check.scan(uid);
     if (accepted) setForm(emptyForm);
     return accepted;
-  }, [check]);
+  }, [check, getState]);
   const nfc = useNfcReader(captureBracelet);
-  const braceletId = verification.uid;
+  const braceletId = registration.attempt?.bracelet_uid ?? verification.uid;
+  const showForm = verification.status === 'available' &&
+    ['idle', 'rejected'].includes(registration.status) && registration.error !== 'conflict';
+  const saving = ['preparing', 'saving'].includes(registration.status);
+  const canClear = ['idle', 'saved', 'rejected'].includes(registration.status);
+  const startAnother = () => {
+    if (!clear()) return;
+    setForm(emptyForm);
+    check.clear();
+  };
   const update = (field: keyof typeof emptyForm) => (value: string) => {
     setForm((previous) => ({ ...previous, [field]: value }));
   };
@@ -78,10 +88,14 @@ export default function RegisterStudentScreen() {
             <View style={styles.cardHeading}>
               <Text style={styles.sectionTitle}>Pulsera NFC</Text>
               <Text style={styles.pendingBadge}>
-                {verification.status === 'checking' ? 'Verificando'
-                  : verification.status === 'exists' ? 'Ya registrada'
-                    : verification.status === 'available' ? 'Disponible'
-                      : verification.status === 'error' ? 'Sin verificar' : 'Pendiente'}
+                {registration.status === 'saved' ? 'Vinculada'
+                  : registration.status === 'pending' ? 'Por confirmar'
+                    : saving ? 'Guardando'
+                      : registration.error === 'conflict' ? 'Conflicto'
+                        : verification.status === 'checking' ? 'Verificando'
+                          : verification.status === 'exists' ? 'Ya registrada'
+                            : verification.status === 'available' ? 'Disponible'
+                              : verification.status === 'error' ? 'Sin verificar' : 'Pendiente'}
               </Text>
             </View>
             <Text style={styles.description} accessibilityLiveRegion="polite">
@@ -89,63 +103,83 @@ export default function RegisterStudentScreen() {
                 ? 'NFC no disponible. Activa NFC para leer una pulsera.'
                 : nfc.current.status === 'error'
                   ? nfc.current.message
-                  : verification.status === 'checking' ? 'Verificando si la pulsera existe en Supabase…'
+                  : registration.status === 'saved' ? 'Alumno guardado y pulsera vinculada. Ya puedes utilizarla en Escaneo NFC.'
+                    : registration.status === 'pending' ? 'Hay un alta pendiente de confirmación. Reintenta el mismo guardado antes de registrar otro alumno.'
+                      : saving ? 'Guardando alumno y vinculando su pulsera…'
+                        : verification.status === 'checking' ? 'Verificando si la pulsera existe en Supabase…'
                     : verification.status === 'exists' ? 'Esta pulsera ya está registrada. No se permite un nuevo registro; acerca otra pulsera.'
                       : verification.status === 'error' ? 'No se pudo verificar la pulsera. Comprueba la conexión y vuelve a escanear. El formulario permanece bloqueado.'
-                        : verification.status === 'available' ? 'Supabase confirmó que la pulsera no existe. Puedes completar el formulario; todavía no se ha guardado ni vinculado.'
+                        : verification.status === 'available' ? 'La pulsera está disponible. Completa los datos y confirma el guardado.'
                           : 'Acerca una pulsera para comprobar si está disponible.'}
             </Text>
             {braceletId && <Text selectable style={styles.description}>Identificador: {braceletId}</Text>}
           </View>
 
-          {verification.status === 'available' && <>
-          <View style={[styles.card, styles.photoRow]}>
-            <Image
-              source={require('../../assets/images/student-placeholder.svg')}
-              style={styles.photo}
-              contentFit="cover"
-              accessible={false}
-            />
-            <View style={[styles.field, styles.flex]}>
-              <Text style={styles.sectionTitle}>Fotografía escolar</Text>
-              <Text style={styles.description}>Imagen de ejemplo. Carga de fotografía pendiente.</Text>
-            </View>
-          </View>
-
-          <View style={styles.card}>
-            <FormField label="Nombre completo del alumno" placeholder="Ej. Diego Ramírez Castro" value={form.name} onChangeText={update('name')} />
-            <FormField label="Matrícula" placeholder="Ej. KQ-2025-084" autoCapitalize="characters" autoCorrect={false} value={form.enrollment} onChangeText={update('enrollment')} />
-            <View style={styles.fieldsRow}>
-              <View style={styles.flex}>
-                <FormField label="Grado" placeholder="Ej. 3° Primaria" value={form.grade} onChangeText={update('grade')} />
+          {showForm && (
+            <>
+              <View style={styles.card}>
+                <FormField label="Nombre(s) del alumno *" maxLength={100} placeholder="Ej. Diego" value={form.first_name} onChangeText={update('first_name')} />
+                <FormField label="Apellidos del alumno *" maxLength={100} placeholder="Ej. Ramírez Castro" value={form.last_name} onChangeText={update('last_name')} />
+                <FormField label="Matrícula (opcional)" maxLength={60} placeholder="Ej. KQ-2025-084" autoCapitalize="characters" autoCorrect={false} value={form.student_number} onChangeText={update('student_number')} />
+                <View style={styles.fieldsRow}>
+                  <View style={styles.flex}>
+                    <FormField label="Grado (opcional)" maxLength={40} placeholder="Ej. 3° Primaria" value={form.grade} onChangeText={update('grade')} />
+                  </View>
+                  <View style={styles.flex}>
+                    <FormField label="Grupo (opcional)" maxLength={40} placeholder="Ej. B" autoCapitalize="characters" autoCorrect={false} value={form.group_name} onChangeText={update('group_name')} />
+                  </View>
+                </View>
+                <Text style={styles.description}>* Campos obligatorios. Por ahora solo se guardan los datos del alumno y su pulsera.</Text>
               </View>
-              <View style={styles.flex}>
-                <FormField label="Grupo" placeholder="Ej. B" autoCapitalize="characters" autoCorrect={false} value={form.group} onChangeText={update('group')} />
-              </View>
-            </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityState={{ disabled: !form.first_name.trim() || !form.last_name.trim() }}
+                disabled={!form.first_name.trim() || !form.last_name.trim()}
+                onPress={() => { if (verification.uid) void register(form, verification.uid); }}
+                style={[styles.saveButton, (!form.first_name.trim() || !form.last_name.trim()) && styles.disabledButton]}
+              >
+                <Text style={styles.saveText}>Vincular y guardar alumno</Text>
+              </Pressable>
+            </>
+          )}
 
-            <Text accessibilityRole="header" style={styles.sectionTitle}>Padres o tutores</Text>
-            <View style={styles.guardianCard}>
-              <Text style={styles.guardianTitle}>Tutor principal</Text>
-              <FormField label="Nombre del tutor principal" placeholder="Nombre completo" value={form.guardianName} onChangeText={update('guardianName')} />
-              <FormField label="Teléfono del tutor principal" placeholder="Número de teléfono" keyboardType="phone-pad" value={form.guardianPhone} onChangeText={update('guardianPhone')} />
+          {(registration.status !== 'idle' || registration.error) && (
+            <View style={styles.card} accessibilityLiveRegion="polite">
+              <Text style={styles.sectionTitle}>
+                {registration.status === 'saved' ? 'Alumno registrado'
+                  : registration.status === 'pending' ? 'Alta pendiente de confirmación'
+                    : registration.status === 'loading' ? 'Comprobando altas pendientes'
+                      : saving ? 'Guardando alumno…' : 'No se completó el alta'}
+              </Text>
+              {registration.attempt && <Text style={styles.description}>
+                {registration.attempt.first_name} {registration.attempt.last_name}
+              </Text>}
+              {(saving || registration.status === 'loading') && <ActivityIndicator color="#4f46e5" />}
+              {registration.status === 'saved' && <Text style={styles.description}>Supabase confirmó el alumno y la pulsera en la misma operación.</Text>}
+              {registration.status === 'pending' && (
+                <>
+                  <Text style={styles.description}>Se conserva el mismo intento. No borres los datos de la app. Al reintentar no se creará otro alumno.</Text>
+                  <Pressable accessibilityRole="button" onPress={() => { void retry(); }} style={styles.saveButton}>
+                    <Text style={styles.saveText}>Reintentar guardado</Text>
+                  </Pressable>
+                </>
+              )}
+              {registration.error && <Text style={styles.description}>
+                {registration.error === 'conflict' ? 'La pulsera ya fue registrada o el intento tiene un conflicto. No se creó un alumno adicional; inicia otra alta con una pulsera nueva.'
+                  : registration.error === 'invalid' ? 'Revisa los nombres, apellidos y la longitud de los datos.'
+                    : registration.error === 'forbidden' ? 'La sesión no tiene permiso para confirmar esta alta. Recupera el acceso escolar antes de reintentar.'
+                      : registration.error === 'prepare' ? 'No se envió el alta. Comprueba la sesión y que la cuenta tenga una única escuela autorizada.'
+                        : registration.error === 'storage' ? 'No se pudo completar el almacenamiento local. Conserva los datos de la app y reintenta; si el problema persiste, solicita ayuda.'
+                          : 'No se confirmó el guardado. Comprueba la conexión y reintenta el mismo intento.'}
+              </Text>}
+              {registration.status === 'blocked' && <Text style={styles.description}>No se pudo recuperar el alta pendiente. No borres los datos de la app; solicita ayuda para recuperarlos.</Text>}
             </View>
-            <View style={styles.guardianCard}>
-              <Text style={styles.guardianTitle}>Tutor secundario (opcional)</Text>
-              <FormField label="Nombre del tutor secundario" placeholder="Nombre completo" value={form.secondaryGuardianName} onChangeText={update('secondaryGuardianName')} />
-              <FormField label="Teléfono del tutor secundario" placeholder="Número de teléfono" keyboardType="phone-pad" value={form.secondaryGuardianPhone} onChangeText={update('secondaryGuardianPhone')} />
-            </View>
-          </View>
-
-          <Text style={styles.description}>Base del formulario: los datos permanecen solo en esta pantalla y todavía no se guardan.</Text>
-          <Pressable disabled accessibilityRole="button" accessibilityState={{ disabled: true }} style={styles.saveButton}>
-            <Text style={styles.saveText}>Vincular y guardar alumno</Text>
-          </Pressable>
-          </>}
-          {braceletId && <Pressable accessibilityRole="button" onPress={() => { setForm(emptyForm); check.clear(); }} style={styles.clearButton}>
-            <Text style={styles.clearText}>Limpiar y usar otra pulsera</Text>
-          </Pressable>
-          }
+          )}
+          {canClear && (braceletId || registration.status === 'saved') && (
+            <Pressable accessibilityRole="button" onPress={startAnother} style={styles.clearButton}>
+              <Text style={styles.clearText}>{registration.status === 'saved' ? 'Registrar otro alumno' : 'Limpiar y usar otra pulsera'}</Text>
+            </Pressable>
+          )}
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -179,8 +213,6 @@ const styles = StyleSheet.create({
   cardHeading: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: 12, justifyContent: 'space-between' },
   sectionTitle: { color: '#131b2e', fontSize: 17, fontWeight: '600' },
   pendingBadge: { color: '#4f46e5', backgroundColor: '#eeecff', paddingHorizontal: 10, paddingVertical: 5, borderRadius: 12, fontSize: 12 },
-  photoRow: { flexDirection: 'row', alignItems: 'center' },
-  photo: { width: 64, height: 64, borderRadius: 12, backgroundColor: '#eaedff' },
   field: { gap: 8, minWidth: 0 },
   label: { color: '#464555', fontSize: 12, fontWeight: '600' },
   input: {
@@ -195,9 +227,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
   fieldsRow: { flexDirection: 'row', gap: 12 },
-  guardianCard: { backgroundColor: '#f7f7ff', padding: 12, borderRadius: 12, borderWidth: 1, borderColor: '#e2dfff', gap: 12 },
-  guardianTitle: { color: '#4f46e5', fontSize: 14, fontWeight: '600' },
-  saveButton: { backgroundColor: '#4f46e5', opacity: 0.45, padding: 16, borderRadius: 12, alignItems: 'center' },
+  saveButton: { backgroundColor: '#4f46e5', padding: 16, borderRadius: 12, alignItems: 'center' },
+  disabledButton: { opacity: 0.45 },
   saveText: { color: '#ffffff', fontSize: 16, fontWeight: '600', textAlign: 'center' },
   clearButton: { padding: 12, alignItems: 'center' },
   clearText: { color: '#464555', fontSize: 14, fontWeight: '600' },
