@@ -14,5 +14,12 @@ const scanner = createAttendanceScanner({
 
 export function useAttendanceScanner() {
   const state = useSyncExternalStore(scanner.subscribe, scanner.getState, scanner.getState);
-  return { state, scan: scanner.scan, selectMode: scanner.selectMode };
+  return {
+    state,
+    scan: scanner.scan,
+    selectMode: scanner.selectMode,
+    retry: scanner.retry,
+    confirmRepeat: scanner.confirmRepeat,
+    cancelRepeat: scanner.cancelRepeat,
+  };
 }

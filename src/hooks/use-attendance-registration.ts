@@ -20,5 +20,11 @@ export const attendanceRecorder = createAttendanceRecorder({
 export function useAttendanceRegistration() {
   const state = useSyncExternalStore(attendanceRecorder.subscribe, attendanceRecorder.getState, attendanceRecorder.getState);
   useEffect(() => { void attendanceRecorder.initialize(); }, []);
-  return { state, record: attendanceRecorder.record, retry: attendanceRecorder.retry };
+  return {
+    state,
+    record: attendanceRecorder.record,
+    retry: attendanceRecorder.retry,
+    confirmRepeat: attendanceRecorder.confirmRepeat,
+    cancelRepeat: attendanceRecorder.cancelRepeat,
+  };
 }

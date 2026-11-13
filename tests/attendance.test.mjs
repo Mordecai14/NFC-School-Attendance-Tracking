@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createAttendanceApi } from '../src/services/attendance.ts';
+import { AttendanceRejection, createAttendanceApi } from '../src/services/attendance.ts';
 import { createAttendanceRecorder } from '../src/services/attendance-recorder.ts';
 
 const uuid = n => `ab000000-0000-4000-8000-${String(n).padStart(12, '0')}`;
@@ -139,4 +139,78 @@ test('API rejects ambiguous devices, mismatched confirmations, authorization and
   await assert.rejects(denied.send(event), /authentication/);
   const failed = createAttendanceApi('https://example.test', 'key', async () => 'jwt', async () => new Response('', { status: 403 }));
   await assert.rejects(failed.send(event), /failed/);
+});
+
+test('API maps the daily-rule error codes to typed rejections and only sends the confirmation when asked', async () => {
+  const bodies = [];
+  const reject = code => createAttendanceApi('https://example.test', 'key', async () => 'jwt',
+    async () => new Response(JSON.stringify({ code, message: 'x' }), { status: 400 }));
+  await assert.rejects(reject('AT001').send(event), error => error instanceof AttendanceRejection && error.kind === 'duplicate');
+  await assert.rejects(reject('AT002').send(event), error => error instanceof AttendanceRejection && error.kind === 'confirmation-required');
+  await assert.rejects(reject('42501').send(event), error => !(error instanceof AttendanceRejection) && /failed/.test(error.message));
+  const api = createAttendanceApi('https://example.test', 'key', async () => 'jwt', async (url, options) => {
+    bodies.push(JSON.parse(options.body));
+    return response([receipt(event)]);
+  });
+  await api.send(event);
+  await api.send(event, { confirmed: true });
+  assert.equal('event_confirmed' in bodies[0], false);
+  assert.equal(bodies[1].event_confirmed, true);
+});
+
+test('a duplicate rejection stores nothing, clears the journal and lets the next scan proceed', async () => {
+  const fixture = setup({ async send() { throw new AttendanceRejection('duplicate'); } });
+  await fixture.recorder.initialize();
+  await fixture.recorder.record(student, 'entry');
+  const state = fixture.recorder.getState();
+  assert.equal(state.status, 'idle');
+  assert.equal(state.error, 'duplicate');
+  assert.equal(state.pending, null);
+  assert.equal(fixture.getStored(), null);
+  await fixture.recorder.record(student, 'entry');
+  assert.equal(fixture.recorder.getState().error, 'duplicate');
+});
+
+test('a confirmation request keeps the journal and resends the same event once the teacher accepts', async () => {
+  const sent = [];
+  const fixture = setup({
+    async send(event, options) {
+      sent.push({ id: event.id, confirmed: options?.confirmed === true });
+      if (!options?.confirmed) throw new AttendanceRejection('confirmation-required');
+      return receipt(event);
+    },
+  });
+  await fixture.recorder.initialize();
+  await fixture.recorder.record(student, 'entry');
+  assert.equal(fixture.recorder.getState().status, 'confirm');
+  assert.equal(fixture.recorder.getState().pending.event.type, 'entry');
+  assert.ok(fixture.getStored(), 'The event must stay journaled while waiting for the teacher');
+  await fixture.recorder.record(student, 'exit'); // ignored while a confirmation is open
+  assert.equal(sent.length, 1);
+
+  await fixture.recorder.confirmRepeat();
+  assert.deepEqual(sent, [{ id: uuid(5), confirmed: false }, { id: uuid(5), confirmed: true }]);
+  assert.equal(fixture.recorder.getState().status, 'saved');
+  assert.equal(fixture.recorder.getState().confirmed.event.id, uuid(5));
+  assert.equal(fixture.getStored(), null);
+});
+
+test('declining a confirmation clears the journal without storing anything; a restart asks again', async () => {
+  const reject = async () => { throw new AttendanceRejection('confirmation-required'); };
+  const fixture = setup({ send: reject });
+  await fixture.recorder.initialize();
+  await fixture.recorder.record(student, 'entry');
+  await fixture.recorder.cancelRepeat();
+  assert.equal(fixture.recorder.getState().status, 'idle');
+  assert.equal(fixture.recorder.getState().pending, null);
+  assert.equal(fixture.getStored(), null);
+
+  const again = setup({ send: reject });
+  await again.recorder.initialize();
+  await again.recorder.record(student, 'entry');
+  const restarted = createAttendanceRecorder({ ...again.options });
+  await restarted.initialize();
+  assert.equal(restarted.getState().status, 'pending');
+  await restarted.retry();
+  assert.equal(restarted.getState().status, 'confirm');
 });

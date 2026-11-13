@@ -1,5 +1,5 @@
 import type { Student } from './student-lookup';
-import type { AttendanceEvent, AttendanceReceipt, AttendanceType } from './attendance';
+import type { AttendanceEvent, AttendanceReceipt, AttendanceRejectionKind, AttendanceType } from './attendance';
 
 export type PendingAttendance = { version: 1; event: AttendanceEvent; studentName: string };
 export type AttendanceStorage = {
@@ -8,11 +8,19 @@ export type AttendanceStorage = {
   removeItem(): Promise<void>;
 };
 type RecorderState = {
-  status: 'loading' | 'idle' | 'saving' | 'pending' | 'saved' | 'blocked';
+  // 'confirm': the server asked for an explicit confirmation of an additional movement.
+  status: 'loading' | 'idle' | 'saving' | 'pending' | 'confirm' | 'saved' | 'blocked';
   pending: PendingAttendance | null;
   confirmed: PendingAttendance | null;
-  error: 'prepare' | 'storage' | 'network' | null;
+  // 'duplicate': the server rejected the event as a repeat of the last movement; nothing was stored.
+  error: 'prepare' | 'storage' | 'network' | 'duplicate' | null;
 };
+
+// Type-only import of the error class keeps this module loadable by the Node test runner.
+function rejectionKind(error: unknown): AttendanceRejectionKind | null {
+  const { name, kind } = (error ?? {}) as { name?: unknown; kind?: unknown };
+  return name === 'AttendanceRejection' && (kind === 'duplicate' || kind === 'confirmation-required') ? kind : null;
+}
 
 function restore(value: string): PendingAttendance {
   const data = JSON.parse(value);
@@ -31,7 +39,7 @@ function restore(value: string): PendingAttendance {
 export function createAttendanceRecorder(options: {
   storage: AttendanceStorage;
   getDeviceId(student: Student): Promise<string>;
-  send(event: AttendanceEvent): Promise<AttendanceReceipt>;
+  send(event: AttendanceEvent, options?: { confirmed?: boolean }): Promise<AttendanceReceipt>;
   newId(): string;
   now(): string;
 }) {
@@ -44,7 +52,7 @@ export function createAttendanceRecorder(options: {
     listeners.forEach(listener => listener());
   };
 
-  async function commit(pending: PendingAttendance) {
+  async function commit(pending: PendingAttendance, confirmed = false) {
     update({ ...state, status: 'saving', pending, error: null });
     try {
       // Never send an event unless its stable ID and payload survived a local write.
@@ -54,8 +62,25 @@ export function createAttendanceRecorder(options: {
       return;
     }
     try {
-      await options.send(pending.event);
-    } catch {
+      await options.send(pending.event, confirmed ? { confirmed: true } : undefined);
+    } catch (error) {
+      const rejection = rejectionKind(error);
+      if (rejection === 'confirmation-required') {
+        // Keep the journal: if the app closes, the same question is asked again.
+        update({ ...state, status: 'confirm', pending, error: null });
+        return;
+      }
+      if (rejection) {
+        // The server stored nothing, so the local journal no longer protects any event.
+        try {
+          await options.storage.removeItem();
+        } catch {
+          update({ ...state, status: 'pending', error: 'storage' });
+          return;
+        }
+        update({ ...state, status: 'idle', pending: null, error: 'duplicate' });
+        return;
+      }
       update({ ...state, status: 'pending', error: 'network' });
       return;
     }
@@ -111,6 +136,25 @@ export function createAttendanceRecorder(options: {
       if (busy || state.status !== 'pending' || !state.pending) return;
       busy = true;
       try { await commit(state.pending); } finally { busy = false; }
+    },
+    // The teacher accepted the additional movement: resend the same event with the confirmation.
+    async confirmRepeat(): Promise<void> {
+      if (busy || state.status !== 'confirm' || !state.pending) return;
+      busy = true;
+      try { await commit(state.pending, true); } finally { busy = false; }
+    },
+    // The teacher declined: the event was never stored, so the local journal can be dropped.
+    async cancelRepeat(): Promise<void> {
+      if (busy || state.status !== 'confirm') return;
+      busy = true;
+      try {
+        await options.storage.removeItem();
+        update({ ...state, status: 'idle', pending: null, error: null });
+      } catch {
+        update({ ...state, status: 'confirm', error: 'storage' });
+      } finally {
+        busy = false;
+      }
     },
   };
 }

@@ -69,12 +69,17 @@ export default function HomeScreen() {
   // Solo se muestra el registro del modo activo; el del otro modo se conserva pero queda oculto.
   const lastEvent = registration.status === 'saved' ? registration.confirmed : registration.pending;
   const displayedEvent = lastEvent?.event.type === mode ? lastEvent : null;
-  const showRegistrationCard = !!registration.error ||
+  // Un rechazo por duplicado se muestra en un aviso destacado (venga de un escaneo, un reintento o una confirmación).
+  const duplicateHere = (lookup.status === 'duplicate' || registration.error === 'duplicate') &&
+    (lookup.readingMode === null || lookup.readingMode === mode);
+  const showRegistrationCard = (!!registration.error && registration.error !== 'duplicate') ||
     (registration.status !== 'idle' && (registration.status !== 'saved' || !!displayedEvent));
   // La lectura detectada pertenece al modo con el que se escaneó.
   const detectedHere = current.status === 'detected' && lookup.readingMode === mode;
   const view = MODE_VIEW[mode];
   const otherMode = mode === 'entry' ? 'exit' : 'entry';
+  const confirming = registration.status === 'confirm' ? registration.pending : null;
+  const confirmingLabel = confirming?.event.type === 'exit' ? 'salida' : 'entrada';
   const otherView = MODE_VIEW[otherMode];
   const recent = lookup.recent[mode];
 
@@ -126,6 +131,39 @@ export default function HomeScreen() {
         <Modal
           transparent
           animationType="fade"
+          visible={!!confirming}
+          // Back must not silently discard the event: the teacher answers with Confirmar or Cancelar.
+          onRequestClose={() => {}}
+        >
+          <View style={styles.modalBackdrop}>
+            <View accessibilityViewIsModal style={styles.modalCard}>
+              <Text accessibilityRole="header" style={styles.modalTitle}>¿Registrar otra {confirmingLabel}?</Text>
+              <Text style={styles.secondaryText}>
+                {confirming?.studentName} ya tiene movimientos registrados hoy. Confirma solo si la {confirmingLabel} adicional es real (por ejemplo, salió a una cita y regresó).
+              </Text>
+              <View style={styles.modalActions}>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => { void scanner.cancelRepeat(); }}
+                  style={({ pressed }) => [styles.modalButton, styles.modalCancel, pressed && styles.pressedButton]}
+                >
+                  <Text style={styles.modalCancelText}>Cancelar</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => { void scanner.confirmRepeat(); }}
+                  style={({ pressed }) => [styles.modalButton, { backgroundColor: view.color }, pressed && styles.pressedButton]}
+                >
+                  <Text style={styles.entryButtonText}>Confirmar</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
+        <Modal
+          transparent
+          animationType="fade"
           visible={switchOpen}
           onRequestClose={() => setSwitchOpen(false)}
         >
@@ -157,6 +195,21 @@ export default function HomeScreen() {
             </View>
           </View>
         </Modal>
+
+        {duplicateHere && (
+          <View accessibilityRole="alert" accessibilityLiveRegion="assertive" style={styles.duplicateAlert}>
+            <Text style={styles.duplicateIcon}>⚠</Text>
+            <View style={styles.duplicateBody}>
+              <Text style={styles.duplicateTitle}>
+                {mode === 'exit' ? 'Salida ya registrada' : 'Entrada ya registrada'}
+              </Text>
+              <Text style={styles.duplicateText}>
+                {lookup.student ? `${lookup.student.first_name} ${lookup.student.last_name} ya tiene` : 'Este alumno ya tiene'} {mode === 'exit' ? 'una salida' : 'una entrada'} como último movimiento de hoy. No se guardó otra.{' '}
+                {mode === 'exit' ? 'Cambia a Entrada si el alumno regresó.' : 'Cambia a Salida para registrar su salida.'}
+              </Text>
+            </View>
+          </View>
+        )}
 
         <View
           accessibilityLiveRegion="polite"
@@ -211,7 +264,7 @@ export default function HomeScreen() {
             )}
             <Text style={styles.disclaimer}>
               {lookup.status === 'duplicate'
-                ? 'La última asistencia de esta pulsera ya está confirmada en este modo. Para repetirla intencionalmente, selecciona de nuevo el modo y vuelve a acercar la pulsera.'
+                ? 'No se guardó otro registro.'
                 : currentConfirmed
                 ? 'Registro confirmado. Selecciona el modo antes de acercar la siguiente pulsera.'
                 : 'El movimiento usa el modo seleccionado al leer la pulsera. Espera la confirmación de guardado.'}
@@ -237,6 +290,7 @@ export default function HomeScreen() {
                   {registration.status === 'saved' ? 'Último registro confirmado'
                     : registration.status === 'saving' ? 'Guardando asistencia…'
                     : registration.status === 'pending' ? 'Registro pendiente de confirmación'
+                    : registration.status === 'confirm' ? 'Se requiere tu confirmación'
                       : registration.status === 'loading' ? 'Comprobando registros pendientes…'
                       : 'No se puede registrar todavía'}
                 </Text>
@@ -288,7 +342,7 @@ export default function HomeScreen() {
                 </Text>
                 <Pressable
                   accessibilityRole="button"
-                  onPress={() => { void attendance.retry(); }}
+                  onPress={() => { void scanner.retry(); }}
                   style={({ pressed }) => [styles.attendanceButton, styles.entryButton, pressed && styles.pressedButton]}
                 >
                   <Text style={styles.entryButtonText}>Reintentar guardado</Text>
@@ -574,6 +628,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   modeSwitchText: { fontSize: 14, fontWeight: '700' },
+  duplicateAlert: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: '#d97706',
+    backgroundColor: '#fff3d6',
+  },
+  duplicateIcon: { color: '#b45309', fontSize: 32, fontWeight: '800' },
+  duplicateBody: { flex: 1, gap: 4 },
+  duplicateTitle: { color: '#92400e', fontSize: 20, fontWeight: '800' },
+  duplicateText: { color: '#5b3a0b', fontSize: 15, lineHeight: 22, fontWeight: '600' },
   modalBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(19, 27, 46, 0.55)',

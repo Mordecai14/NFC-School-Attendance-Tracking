@@ -21,13 +21,13 @@ const student = {
 
 function renderScreen({
   status = 'idle', lookupStatus = 'ready', detected = false, available = true,
-  mode = 'entry', readingMode = mode, switchOpen = false, recent = { entry: [], exit: [] },
+  mode = 'entry', readingMode = mode, switchOpen = false, regError = null, recent = { entry: [], exit: [] },
 } = {}) {
-  const actions = { retries: 0, modes: [], switchOpen: [] };
+  const actions = { retries: 0, modes: [], switchOpen: [], confirms: 0, cancels: 0 };
   const registration = {
-    status, error: null,
+    status, error: regError,
     confirmed: status === 'saved' ? { event, studentName: 'Alumno Prueba' } : null,
-    pending: ['pending', 'saving'].includes(status) ? { event, studentName: 'Alumno Prueba' } : null,
+    pending: ['pending', 'saving', 'confirm'].includes(status) ? { event, studentName: 'Alumno Prueba' } : null,
   };
   const jsx = (type, props) => ({ type, props: props ?? {} });
   const native = Object.fromEntries([
@@ -61,7 +61,8 @@ function renderScreen({
           status: lookupStatus, mode, readingMode, recent,
           student: ['identified', 'duplicate'].includes(lookupStatus) ? student : null,
         },
-        scan() {}, selectMode(mode) { actions.modes.push(mode); },
+        scan() {}, selectMode(mode) { actions.modes.push(mode); }, async retry() { actions.retries += 1; },
+        async confirmRepeat() { actions.confirms += 1; }, async cancelRepeat() { actions.cancels += 1; },
       }),
     },
   };
@@ -187,7 +188,7 @@ test('lookup failure and duplicate confirmation retain their recovery instructio
   assert.match(renderScreen({ detected: true, lookupStatus: 'error' }).text, /No se pudo consultar el alumno/);
   assert.match(
     renderScreen({ status: 'saved', detected: true, lookupStatus: 'duplicate' }).text,
-    /Para repetirla intencionalmente, selecciona de nuevo el modo/,
+    /No se guardó otro registro/,
   );
 });
 
@@ -203,4 +204,34 @@ test('switching mode hides the other mode\'s last confirmation and detected brac
   assert.doesNotMatch(exit.text, /Última pulsera detectada|04:A3:89 /);
   assert.match(exit.text, /Acerca la pulsera al dispositivo/);
   assert.match(exit.text, /Salidas/);
+});
+
+test('the server asks for confirmation through a modal; Confirmar and Cancelar call the scanner', () => {
+  const open = renderScreen({ status: 'confirm', lookupStatus: 'identified', detected: true });
+  assert.match(open.text, /¿Registrar otra\s+entrada\s*\?/);
+  assert.match(open.text, /Alumno Prueba\s+ya tiene movimientos registrados hoy/);
+  const press = label => open.nodes.find(node => node.type === 'Pressable' &&
+    [node.props.children].flat(Infinity).some(child => child?.props?.children === label));
+  press('Confirmar').props.onPress();
+  press('Cancelar').props.onPress();
+  assert.equal(open.actions.confirms, 1);
+  assert.equal(open.actions.cancels, 1);
+  assert.doesNotMatch(renderScreen({ status: 'saved', lookupStatus: 'identified', detected: true }).text, /¿Registrar otra/);
+});
+
+test('a duplicate rejection is explained without an alarming empty registration card', () => {
+  const { text } = renderScreen({ detected: true, lookupStatus: 'duplicate', regError: 'duplicate' });
+  assert.match(text, /Entrada ya registrada/);
+  assert.match(text, /Alumno Prueba\s+ya tiene\s+una entrada/);
+  assert.match(text, /No se guardó otra/);
+  assert.doesNotMatch(text, /No se puede registrar todavía/);
+  // Prominent: an assertive alert, not small print inside another card.
+  const alert = renderScreen({ detected: true, lookupStatus: 'duplicate' }).nodes.find(node => node.props?.accessibilityRole === 'alert');
+  assert.equal(alert.props.accessibilityLiveRegion, 'assertive');
+  // Also visible when the rejection arrives from a retry, with no scanner duplicate status.
+  assert.match(renderScreen({ regError: 'duplicate' }).text, /Entrada ya registrada/);
+  assert.match(renderScreen({ regError: 'duplicate', mode: 'exit', readingMode: 'exit' }).text, /Salida ya registrada/);
+  // It does not leak into the other mode, nor appear without a duplicate.
+  assert.doesNotMatch(renderScreen({ lookupStatus: 'duplicate', mode: 'exit', readingMode: 'entry' }).text, /ya registrada/);
+  assert.doesNotMatch(renderScreen().text, /ya registrada/);
 });

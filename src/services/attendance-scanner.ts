@@ -18,11 +18,10 @@ type ScanState = {
 
 export function createAttendanceScanner(options: {
   lookup(identifier: string): Promise<Student | null>;
-  recorder: Pick<ReturnType<typeof createAttendanceRecorder>, 'getState' | 'record'>;
+  recorder: Pick<ReturnType<typeof createAttendanceRecorder>, 'getState' | 'record' | 'retry' | 'confirmRepeat' | 'cancelRepeat'>;
 }) {
   let state: ScanState = { mode: 'entry', recent: { entry: [], exit: [] }, readingMode: null, identifier: null, student: null, status: 'ready' };
   let busy = false;
-  let rearmedConfirmationId: string | null = null;
   const listeners = new Set<() => void>();
   const update = (next: ScanState) => {
     state = next;
@@ -32,8 +31,8 @@ export function createAttendanceScanner(options: {
 
   function remember(student: Student, mode: AttendanceType) {
     const registration = options.recorder.getState();
-    const saved = registration.status === 'saved' ? registration.confirmed : registration.status === 'pending' ? registration.pending : null;
-    const event = saved?.event;
+    // Only movements the server acknowledged are listed; pending ones show in the registration card.
+    const event = registration.status === 'saved' ? registration.confirmed?.event : null;
     if (!event || event.student_id !== student.id || event.type !== mode) return;
     if (state.recent[mode].some(item => item.id === event.id)) return;
     const recent = [{ id: event.id, student, occurred_at: event.occurred_at }, ...state.recent[mode]].slice(0, MAX_RECENT);
@@ -47,23 +46,28 @@ export function createAttendanceScanner(options: {
       if (!student) {
         result = { student: null, status: 'unknown' };
       } else {
-        const confirmed = options.recorder.getState().confirmed?.event;
-        if (confirmed?.bracelet_id === student.bracelet_id && confirmed.student_id === student.id &&
-            confirmed.school_id === student.school_id && confirmed.type === mode &&
-            confirmed.id !== rearmedConfirmationId) {
-          // A repeated callback for the last confirmed bracelet is not a new movement.
-          result = { student, status: 'duplicate' };
-        } else {
-          await options.recorder.record(student, mode);
-          remember(student, mode);
-          result = { student, status: 'identified' };
-        }
+        // The daily rule is enforced by the server (ADR 002); the recorder reports its verdict.
+        await options.recorder.record(student, mode);
+        remember(student, mode);
+        result = { student, status: options.recorder.getState().error === 'duplicate' ? 'duplicate' : 'identified' };
       }
     } catch {
       result = { student: null, status: 'error' };
     } finally {
       busy = false;
       update({ ...state, ...result });
+    }
+  }
+
+  async function resolve(action: () => Promise<void>, type: AttendanceType | undefined) {
+    const { student } = state;
+    busy = true;
+    try {
+      await action();
+      if (student && type) remember(student, type);
+    } finally {
+      busy = false;
+      update(options.recorder.getState().error === 'duplicate' ? { ...state, status: 'duplicate' } : { ...state });
     }
   }
 
@@ -75,10 +79,27 @@ export function createAttendanceScanner(options: {
     },
     selectMode(mode: AttendanceType): boolean {
       if (!available()) return false;
-      // An explicit selection can arm an intentional repeat, but never replays an old read.
-      rearmedConfirmationId = options.recorder.getState().confirmed?.event.id ?? null;
       if (state.mode !== mode) update({ ...state, mode });
       return true;
+    },
+    // The teacher accepted the additional movement the server asked to confirm.
+    async confirmRepeat(): Promise<void> {
+      if (busy || options.recorder.getState().status !== 'confirm') return;
+      await resolve(() => options.recorder.confirmRepeat(), options.recorder.getState().pending?.event.type);
+    },
+    // Retrying a pending event can also end in a server verdict, so it goes through the same path.
+    async retry(): Promise<void> {
+      if (busy || options.recorder.getState().status !== 'pending') return;
+      await resolve(() => options.recorder.retry(), options.recorder.getState().pending?.event.type);
+    },
+    async cancelRepeat(): Promise<void> {
+      await options.recorder.cancelRepeat();
+      if (options.recorder.getState().status === 'idle') {
+        // The teacher declined: leave no stale "waiting for confirmation" reading behind.
+        update({ ...state, status: 'ready', readingMode: null, identifier: null, student: null });
+      } else {
+        update({ ...state });
+      }
     },
     scan(identifier: string): boolean {
       if (!available() || !identifier.trim()) return false;

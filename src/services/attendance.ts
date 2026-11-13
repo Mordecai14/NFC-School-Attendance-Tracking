@@ -12,6 +12,21 @@ export type AttendanceEvent = {
 };
 export type AttendanceReceipt = Pick<AttendanceEvent, 'id' | 'type' | 'occurred_at'>;
 
+// Server-side daily rule (ADR 002): the event was rejected, nothing was stored.
+export type AttendanceRejectionKind = 'duplicate' | 'confirmation-required';
+export class AttendanceRejection extends Error {
+  readonly kind: AttendanceRejectionKind;
+  constructor(kind: AttendanceRejectionKind) {
+    super(`Attendance rejected: ${kind}`);
+    this.name = 'AttendanceRejection';
+    this.kind = kind;
+  }
+}
+const REJECTION_CODES: Record<string, AttendanceRejectionKind> = {
+  AT001: 'duplicate',
+  AT002: 'confirmation-required',
+};
+
 export function createAttendanceApi(
   url: string | undefined,
   key: string | undefined,
@@ -31,7 +46,11 @@ export function createAttendanceApi(
         body: body === undefined ? undefined : JSON.stringify(body),
         signal: controller.signal,
       });
-      if (!response.ok) throw new Error('Attendance request failed');
+      if (!response.ok) {
+        const code: unknown = await response.json().then(body => body?.code, () => null);
+        const kind = typeof code === 'string' ? REJECTION_CODES[code] : undefined;
+        throw kind ? new AttendanceRejection(kind) : new Error('Attendance request failed');
+      }
       return await response.json();
     } finally {
       clearTimeout(timeout);
@@ -48,7 +67,7 @@ export function createAttendanceApi(
       }
       return devices[0].id;
     },
-    async send(event: AttendanceEvent): Promise<AttendanceReceipt> {
+    async send(event: AttendanceEvent, options?: { confirmed?: boolean }): Promise<AttendanceReceipt> {
       const result = await json('rpc/record_attendance', {
         event_id: event.id,
         event_school_id: event.school_id,
@@ -57,6 +76,8 @@ export function createAttendanceApi(
         event_device_id: event.device_id,
         event_type: event.type,
         event_occurred_at: event.occurred_at,
+        // Only sent when true, so the call stays compatible with the previous RPC signature.
+        ...(options?.confirmed ? { event_confirmed: true } : {}),
       });
       if (!Array.isArray(result) || result.length !== 1) throw new Error('Missing attendance confirmation');
       const receipt = result[0];
