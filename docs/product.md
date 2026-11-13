@@ -25,9 +25,20 @@ El MVP debe permitir:
 - leer pulseras NFC desde Android;
 - registrar eventos de entrada;
 - registrar eventos de salida;
-- evitar escaneos duplicados accidentales;
+- evitar escaneos duplicados accidentales y aplicar la regla de asistencia diaria;
 - operar sin conexión a Internet durante la jornada escolar;
 - sincronizar automáticamente asistencias pendientes cuando vuelva la conexión.
+
+## Regla de asistencia diaria
+
+Cada alumno tiene **un solo par entrada/salida por día escolar**, definido por la fecha local en la zona horaria de la escuela. El servidor aplica la regla comparando el movimiento nuevo con el último del día:
+
+- La primera entrada y la primera salida del día se registran sin preguntas.
+- Repetir el mismo tipo de movimiento seguido (entrada tras entrada, salida tras salida) se rechaza como duplicado y no se guarda.
+- Una **salida y un reingreso por motivos personales o ajenos** (por ejemplo, un tutor recoge al alumno para una cita médica y luego regresa) son válidos: el personal ve una alerta y debe aceptarla. Al aceptar se registra el movimiento adicional, marcado como excepción confirmada. Al cancelar no se guarda nada.
+- Una salida sin entrada previa ese día se permite.
+
+El motivo de la excepción no se registra. El detalle y las alternativas descartadas están en [la decisión 002](decisions/002-regla-asistencia-diaria.md).
 
 ## Modelo de dominio
 

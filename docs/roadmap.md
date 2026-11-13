@@ -163,11 +163,11 @@ La prueba física del recorrido escolar usó una pulsera registrada. Sigue pendi
 - [ ] Sincronizar automáticamente cuando sea posible.
 - [~] Reintentar fallos sin perder eventos: reintento manual del mismo intento implementado y probado; falta aplicarlo a una cola offline.
 - [x] Utilizar identificadores únicos e inserciones idempotentes, conservando ID, hora y contenido en los reintentos.
-- [x] Ignorar callbacks repetidos del último alumno/pulsera/escuela/tipo confirmado; una selección explícita del modo rearma una nueva lectura intencional.
+- [x] Aplicar la regla de asistencia diaria en el backend: un par entrada/salida por alumno y día, duplicados rechazados y movimientos adicionales solo con confirmación del personal ([decisión 002](decisions/002-regla-asistencia-diaria.md)). Sustituye el filtro de callbacks repetidos del cliente.
 - [x] Validar reintentos y conflictos de ID/contenido también del lado del backend, junto con la integridad de las relaciones escolares.
 - [~] Mostrar pendientes o errores de sincronización que requieran atención: disponible para un intento; falta seguimiento de múltiples eventos.
 
-No se ha definido una ventana temporal ni una regla de asistencia diaria. La protección actual de callbacks no sustituye la idempotencia del backend ni establece esas reglas de producto.
+La regla de asistencia diaria está definida y aplicada (día escolar según la zona horaria de la escuela). Sigue sin definirse una ventana temporal para eventos diferidos: una cola offline futura deberá decidir cómo tratar los rechazos `AT001`/`AT002` al sincronizar y cómo ordenar eventos tardíos.
 
 **Se considera terminada cuando:** una conexión intermitente, reintentos y reinicios no provocan pérdidas ni registros duplicados.
 

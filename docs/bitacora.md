@@ -84,3 +84,24 @@ Validación:
 - Una prueba HTTP real verificó reintentos concurrentes, respuesta perdida y recuperación desde un journal de archivo sin duplicar alumno ni pulsera. También comprobó conflictos, consulta del nuevo alumno desde el flujo de asistencia y rechazo anónimo `401`. Se eliminaron únicamente el alumno, la pulsera y el recibo de esa fixture mediante sus IDs exactos; se cerró la sesión de prueba y no se modificaron asistencias.
 - Lint conserva el fallo preexistente en `src/hooks/use-color-scheme.web.ts:11`. No se agregaron dependencias ni se requiere rebuild del APK.
 - El Android dejó de estar conectado al intentar la revisión visual final del agente. Posteriormente, el responsable confirmó que el registro funciona y que también funcionan la entrada y salida del alumno nuevo. Queda validado por el responsable el recorrido de alta del alumno, vinculación de pulsera y registro de ambos movimientos. Sigue pendiente comprobar la recuperación de un alta tras cierre físico en Android.
+
+## Regla de asistencia diaria
+
+Un alumno tenía dos entradas en la base al escanear dos veces con ENTRADA. Se definió y aplicó la regla de un par entrada/salida por alumno y día, con la excepción confirmada de salida y reingreso; el razonamiento, los supuestos y las alternativas están en la [decisión 002](decisions/002-regla-asistencia-diaria.md).
+
+Con confirmación del responsable de que el proyecto Supabase vinculado (`tjaofzevroceamukxsze`) es de pruebas y no productivo, se aplicó `20261112080000_daily_attendance_rule.sql` con `supabase db push`, tras un `--dry-run` que listaba solo esa migración. Agrega `schools.timezone`, `attendance.confirmed_repeat`, un índice por alumno y fecha, el trigger `attendance_validate_rule` y la nueva firma de `record_attendance`. No se usó `db reset`: el esquema remoto es anterior a las migraciones y no hay baseline que lo recree.
+
+En la app, el servidor es ahora la única fuente de la regla. Un duplicado se informa al personal sin guardar nada; un movimiento adicional abre una alerta con Confirmar y Cancelar y conserva el journal local mientras espera la respuesta.
+
+Validación:
+
+- 76 tests del cliente, TypeScript y ESLint de los archivos modificados pasaron. Se agregaron tests de errores tipados, estados `confirm` y `duplicate`, journal conservado o limpio, y alerta de confirmación.
+- `supabase/tests/attendance.sql` pasó contra el proyecto de pruebas (transacción revertida) con los casos nuevos: secuencias, confirmación y su auditoría, idempotencia, frontera de día en `America/Mexico_City` y `insert` directo. Las demás suites SQL se ejecutaron sin errores, salvo `school_access_migration.sql`, que ya fallaba antes de este cambio porque consulta `profiles.role`, una columna retirada por una migración anterior.
+- Una verificación independiente de solo lectura confirmó la regla SQL (borde de medianoche local, `insert` directo, `confirmed_repeat` falsificado, códigos de error previos) y encontró tres defectos del cliente: un `AT001` recibido tras reintentar o confirmar se descartaba sin aviso y la lista reciente podía mostrar un movimiento no guardado. Se corrigieron y se cubrieron con tests que usan el recorder real. El botón Atrás ya no cancela la alerta en silencio.
+- `npm run lint` completo conserva el fallo preexistente en `src/hooks/use-color-scheme.web.ts:11`.
+
+Para probar desde cero se vació `attendance` en el proyecto de pruebas (15 eventos ficticios) con `TRUNCATE`, porque el trigger de inmutabilidad bloquea `DELETE`; alumnos y pulseras no se modificaron y los triggers siguieron activos. Con la primera prueba física se hizo más visible el rechazo por duplicado: ahora es una tarjeta de alerta destacada («Entrada ya registrada» / «Salida ya registrada») en lugar de texto pequeño dentro de otras tarjetas.
+
+Validación física: el responsable confirmó en el dispositivo que la implementación funciona como se espera, incluido el rechazo del reintento del mismo tipo y su aviso.
+
+Pendiente: la concurrencia entre dos dispositivos (sin prueba automatizada) y el tratamiento de estos rechazos en la futura cola offline. El enlace de `architecture.md` a `decisions/001-identidad-accesos-tutores.md` sigue roto porque ese archivo no existe; no se corrigió en este cambio.
