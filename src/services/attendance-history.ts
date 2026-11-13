@@ -100,7 +100,7 @@ export function createAttendanceHistoryApi(
       const token = await getAccessToken();
       if (!token) throw new Error('School authentication is required');
       const query =
-        'attendance?select=id,type,occurred_at,students(first_name,last_name,grade,group_name)' +
+        'attendance?select=id,type,occurred_at,students!attendance_student_id_fkey(first_name,last_name,grade,group_name)' +
         `&occurred_at=gte.${encodeURIComponent(range.from)}&occurred_at=lt.${encodeURIComponent(range.to)}` +
         '&order=occurred_at.desc';
       const controller = new AbortController();

@@ -17,7 +17,7 @@ test('queries attendance with the student embedded, newest first, using the sess
   const api = createAttendanceHistoryApi('https://example.test/', 'public-key', getAccessToken, async (url, options) => {
     const parsed = new URL(url);
     assert.equal(parsed.origin + parsed.pathname, 'https://example.test/rest/v1/attendance');
-    assert.equal(parsed.searchParams.get('select'), 'id,type,occurred_at,students(first_name,last_name,grade,group_name)');
+    assert.equal(parsed.searchParams.get('select'), 'id,type,occurred_at,students!attendance_student_id_fkey(first_name,last_name,grade,group_name)');
     assert.equal(parsed.searchParams.get('order'), 'occurred_at.desc');
     assert.deepEqual(parsed.searchParams.getAll('occurred_at'), ['gte.2026-11-12T06:00:00.000Z', 'lt.2026-11-13T06:00:00.000Z']);
     assert.equal(options.headers.apikey, 'public-key');
