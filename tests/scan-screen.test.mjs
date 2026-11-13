@@ -21,7 +21,7 @@ const student = {
 
 function renderScreen({
   status = 'idle', lookupStatus = 'ready', detected = false, available = true,
-  mode = 'entry', readingMode = mode, switchOpen = false, regError = null, recent = { entry: [], exit: [] },
+  schoolName = null, mode = 'entry', readingMode = mode, switchOpen = false, regError = null, recent = { entry: [], exit: [] },
 } = {}) {
   const actions = { retries: 0, modes: [], switchOpen: [], confirms: 0, cancels: 0 };
   const registration = {
@@ -52,6 +52,7 @@ function renderScreen({
         current: detected ? { status: 'detected', identifier: '04:A3:89' } : { status: 'waiting' },
       }),
     },
+    '@/hooks/use-school-name': { useSchoolName: () => schoolName },
     '@/hooks/use-attendance-registration': {
       useAttendanceRegistration: () => ({ state: registration, retry() { actions.retries += 1; } }),
     },
@@ -234,4 +235,11 @@ test('a duplicate rejection is explained without an alarming empty registration 
   // It does not leak into the other mode, nor appear without a duplicate.
   assert.doesNotMatch(renderScreen({ lookupStatus: 'duplicate', mode: 'exit', readingMode: 'entry' }).text, /ya registrada/);
   assert.doesNotMatch(renderScreen().text, /ya registrada/);
+});
+
+test('the header shows the school name and falls back to the neutral title while it is unknown', () => {
+  const named = renderScreen({ schoolName: 'Colegio Fixture' });
+  assert.match(named.text, /Colegio Fixture/);
+  assert.doesNotMatch(named.text, /Escaneo NFC/);
+  assert.match(renderScreen().text, /Escaneo NFC/);
 });

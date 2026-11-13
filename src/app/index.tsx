@@ -14,6 +14,7 @@ import Animated, {
 import { useNfcReader } from '@/hooks/use-nfc-reader';
 import { useAttendanceRegistration } from '@/hooks/use-attendance-registration';
 import { useAttendanceScanner } from '@/hooks/use-attendance-scanner';
+import { useSchoolName } from '@/hooks/use-school-name';
 
 function NfcSensorIndicator({ active, color }: { active: boolean; color: string }) {
   const reduceMotion = useReducedMotion();
@@ -59,6 +60,7 @@ const MODE_VIEW = {
 export default function HomeScreen() {
   const attendance = useAttendanceRegistration();
   const scanner = useAttendanceScanner();
+  const schoolName = useSchoolName();
   const lookup = scanner.state;
   const registration = attendance.state;
   const mode = registration.pending?.event.type ?? lookup.mode;
@@ -108,7 +110,7 @@ export default function HomeScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
           <Text style={styles.title}>Control de Asistencia</Text>
-          <Text style={styles.secondaryText}>Escaneo NFC</Text>
+          <Text style={styles.secondaryText}>{schoolName ?? 'Escaneo NFC'}</Text>
         </View>
 
         <View style={[styles.modeBanner, { backgroundColor: view.color, borderColor: view.dark }]}>
