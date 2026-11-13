@@ -105,3 +105,11 @@ Para probar desde cero se vació `attendance` en el proyecto de pruebas (15 even
 Validación física: el responsable confirmó en el dispositivo que la implementación funciona como se espera, incluido el rechazo del reintento del mismo tipo y su aviso.
 
 Pendiente: la concurrencia entre dos dispositivos (sin prueba automatizada) y el tratamiento de estos rechazos en la futura cola offline. El enlace de `architecture.md` a `decisions/001-identidad-accesos-tutores.md` sigue roto porque ese archivo no existe; no se corrigió en este cambio.
+
+## Pantalla de Historial
+
+Se recreó el diseño `design/stitch/control-escolar-nfc/attendance-history.png` con los datos existentes: resumen de entradas y salidas del día, búsqueda por nombre, filtros Todos/Entradas/Salidas, selector Hoy/Ayer y lista con avatar de iniciales, hora y badge. Lee `attendance` con `students` embebido bajo RLS (sin migraciones ni dependencias) mediante `src/services/attendance-history.ts`; el día se calcula en `America/Mexico_City`, igual que la regla diaria.
+
+Validación: tests nuevos en `tests/attendance-history.test.mjs`, suite completa (80 tests) y TypeScript pasaron; lint conserva únicamente el error preexistente en `src/hooks/use-color-scheme.web.ts:11`. No se validó visualmente en dispositivo ni emulador.
+
+Pendiente (el diseño lo muestra, pero no hay datos que lo respalden): estado Retardo, porcentaje de asistencia (falta el total de alumnos), fotos, matrícula y «Descargar Reporte del Día». Tampoco distingue eventos aún pendientes de sincronizar.
