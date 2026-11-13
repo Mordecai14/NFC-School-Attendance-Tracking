@@ -6,13 +6,14 @@ language sql immutable as $$
 $$;
 create function pg_temp.record_test(
   n integer, school integer default 1, student integer default 1,
-  bracelet integer default 1, device integer default 1, kind text default 'entry'
+  bracelet integer default 1, device integer default 1, kind text default 'entry',
+  at text default '2026-11-10T12:00:00Z', confirmed boolean default false
 ) returns void language plpgsql security invoker as $$
 begin
   perform * from public.record_attendance(
     pg_temp.fixture_id(6,n), pg_temp.fixture_id(2,school), pg_temp.fixture_id(3,student),
     pg_temp.fixture_id(4,bracelet), pg_temp.fixture_id(5,device),
-    kind::public.attendance_type, '2026-11-10T12:00:00Z'
+    kind::public.attendance_type, at::timestamptz, confirmed
   );
 end $$;
 create function pg_temp.expect_rejection(statement text, expected_state text)
@@ -84,6 +85,44 @@ select pg_temp.expect_rejection(format(
  'insert into public.attendance(school_id,student_id,type,occurred_at) values (%L,%L,''entry'',now())',
  pg_temp.fixture_id(2,1),pg_temp.fixture_id(3,1)),'23514');
 
+-- Daily rule (ADR 002). School timezone is America/Mexico_City (UTC-6), student 2 is used.
+-- Entry, then a duplicate entry is blocked (AT001); first exit is accepted; a second exit is blocked.
+select pg_temp.record_test(30,1,2,2,1,'entry','2026-11-10T14:00:00Z');
+select pg_temp.expect_rejection('select pg_temp.record_test(31,1,2,2,1,''entry'',''2026-11-10T14:05:00Z'')','AT001');
+select pg_temp.expect_rejection('select pg_temp.record_test(31,1,2,2,1,''entry'',''2026-11-10T14:05:00Z'',true)','AT001');
+select pg_temp.record_test(32,1,2,2,1,'exit','2026-11-10T20:00:00Z');
+select pg_temp.expect_rejection('select pg_temp.record_test(33,1,2,2,1,''exit'',''2026-11-10T20:05:00Z'')','AT001');
+-- Re-entry needs explicit confirmation and is audited; a confirmed duplicate of the last type stays blocked.
+select pg_temp.expect_rejection('select pg_temp.record_test(34,1,2,2,1,''entry'',''2026-11-10T21:00:00Z'')','AT002');
+select pg_temp.record_test(34,1,2,2,1,'entry','2026-11-10T21:00:00Z',true);
+select pg_temp.expect_rejection('select pg_temp.record_test(35,1,2,2,1,''entry'',''2026-11-10T22:00:00Z'',true)','AT001');
+-- A second exit of the day also needs confirmation.
+select pg_temp.expect_rejection('select pg_temp.record_test(36,1,2,2,1,''exit'',''2026-11-10T23:00:00Z'')','AT002');
+select pg_temp.record_test(36,1,2,2,1,'exit','2026-11-10T23:00:00Z',true);
+-- Retrying a stored event is idempotent and never re-evaluates the rule or the confirmation flag.
+select pg_temp.record_test(34,1,2,2,1,'entry','2026-11-10T21:00:00Z');
+select pg_temp.record_test(36,1,2,2,1,'exit','2026-11-10T23:00:00Z',true);
+do $$ begin
+ if (select count(*) from public.attendance where student_id=pg_temp.fixture_id(3,2))<>4 then
+   raise exception 'Rejected or retried events changed the stored history';
+ end if;
+ if (select count(*) from public.attendance where student_id=pg_temp.fixture_id(3,2) and confirmed_repeat)<>2 then
+   raise exception 'Only confirmed exceptions must be flagged';
+ end if;
+ if exists (select 1 from public.attendance where id in (pg_temp.fixture_id(6,30),pg_temp.fixture_id(6,32)) and confirmed_repeat) then
+   raise exception 'First entry and first exit must not be flagged';
+ end if;
+end $$;
+-- The day follows the school timezone, not UTC: 05:30Z is still Nov 10 locally, 06:30Z starts Nov 11.
+select pg_temp.expect_rejection('select pg_temp.record_test(37,1,2,2,1,''entry'',''2026-11-11T05:30:00Z'')','AT002');
+select pg_temp.record_test(38,1,2,2,1,'entry','2026-11-11T06:30:00Z');
+-- Direct table writes cannot bypass the rule either.
+select pg_temp.expect_rejection(format(
+ 'insert into public.attendance(school_id,student_id,bracelet_id,device_id,type,occurred_at) values (%L,%L,%L,%L,''entry'',''2026-11-11T07:00:00Z'')',
+ pg_temp.fixture_id(2,1),pg_temp.fixture_id(3,2),pg_temp.fixture_id(4,2),pg_temp.fixture_id(5,1)),'AT001');
+-- An exit with no entry that day is accepted (assumption 1 of ADR 002).
+select pg_temp.record_test(39,1,1,1,1,'exit','2026-11-12T15:00:00Z');
+
 select set_config('request.jwt.claim.sub',pg_temp.fixture_id(1,2)::text,true);
 select pg_temp.record_test(3,2,3,3,2);
 select pg_temp.expect_rejection('select pg_temp.record_test(20)','42501');
@@ -115,5 +154,5 @@ select set_config('request.jwt.claim.sub',pg_temp.fixture_id(1,1)::text,true);
 select pg_temp.record_test(1);
 select pg_temp.expect_rejection('select pg_temp.record_test(24)','23514');
 reset role;
-select 'Attendance integrity, isolation, immutable history and idempotency passed' as result;
+select 'Attendance integrity, isolation, immutable history, idempotency and daily rule passed' as result;
 rollback;
