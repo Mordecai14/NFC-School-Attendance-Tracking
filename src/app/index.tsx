@@ -62,15 +62,21 @@ export default function HomeScreen() {
   const lookup = scanner.state;
   const registration = attendance.state;
   const mode = registration.pending?.event.type ?? lookup.mode;
-  const state = useNfcReader(scanner.scan, mode);
+  const state = useNfcReader(scanner.scan);
   const { availability, current } = state;
   const [switchOpen, setSwitchOpen] = useState(false);
   const canScan = ['idle', 'saved'].includes(registration.status) && lookup.status !== 'looking-up';
-  const displayedEvent = registration.status === 'saved' ? registration.confirmed : registration.pending;
+  // Solo se muestra el registro del modo activo; el del otro modo se conserva pero queda oculto.
+  const lastEvent = registration.status === 'saved' ? registration.confirmed : registration.pending;
+  const displayedEvent = lastEvent?.event.type === mode ? lastEvent : null;
+  const showRegistrationCard = !!registration.error ||
+    (registration.status !== 'idle' && (registration.status !== 'saved' || !!displayedEvent));
+  // La lectura detectada pertenece al modo con el que se escaneó.
+  const detectedHere = current.status === 'detected' && lookup.readingMode === mode;
   const view = MODE_VIEW[mode];
   const otherMode = mode === 'entry' ? 'exit' : 'entry';
   const otherView = MODE_VIEW[otherMode];
-  const history = state.history[mode];
+  const recent = lookup.recent[mode];
 
   const currentConfirmed = registration.status === 'saved' && !!lookup.student &&
     registration.confirmed?.event.bracelet_id === lookup.student.bracelet_id &&
@@ -86,7 +92,7 @@ export default function HomeScreen() {
       ? 'No es posible escanear. Activá NFC para continuar.'
       : !canScan
         ? lookup.status === 'looking-up' ? 'Identificando al alumno y procesando el movimiento…' : 'Resuelve el registro pendiente antes de continuar.'
-        : state.current.status === 'waiting'
+        : state.current.status === 'waiting' || (state.current.status === 'detected' && !detectedHere)
         ? 'Acerca la pulsera al dispositivo'
         : state.current.status === 'detected'
           ? 'Pulsera detectada'
@@ -173,7 +179,7 @@ export default function HomeScreen() {
           <Text style={styles.resultText}>{currentLabel}</Text>
         </View>
 
-        {availability === 'available' && current.status === 'detected' &&
+        {availability === 'available' && current.status === 'detected' && detectedHere &&
           (!currentConfirmed || !displayedStudent || lookup.status === 'duplicate') && (
           <View accessibilityLiveRegion="polite" style={styles.resultCard}>
             <View style={styles.cardHeading}>
@@ -213,7 +219,7 @@ export default function HomeScreen() {
           </View>
         )}
 
-        {(registration.status !== 'idle' || registration.error) && (
+        {showRegistrationCard && (
           <View
             accessibilityLiveRegion="polite"
             style={[
@@ -307,14 +313,14 @@ export default function HomeScreen() {
             <Text accessibilityRole="header" style={styles.historyTitle}>Lecturas de {view.title.toLowerCase()}</Text>
             <Text style={styles.historyCaption}>Esta sesión</Text>
           </View>
-          {history.length === 0 ? (
+          {recent.length === 0 ? (
             <View style={styles.emptyCard}>
               <Text style={styles.sectionTitle}>Todavía no hay lecturas.</Text>
-              <Text style={styles.secondaryText}>Las pulseras detectadas aparecerán aquí.</Text>
+              <Text style={styles.secondaryText}>Los alumnos registrados aparecerán aquí.</Text>
             </View>
           ) : (
-            history.map((identifier, index) => (
-              <View key={`${index}-${identifier}`} style={styles.historyRow}>
+            recent.map(item => (
+              <View key={item.id} style={styles.historyRow}>
                 <Image
                   source={require('../../assets/images/student-placeholder.svg')}
                   style={styles.historyAvatar}
@@ -322,10 +328,12 @@ export default function HomeScreen() {
                   accessible={false}
                 />
                 <View style={styles.historyDetails}>
-                  <Text selectable style={styles.historyIdentifier}>
-                    {identifier}
+                  <Text style={styles.historyIdentifier}>
+                    {item.student.first_name} {item.student.last_name}
                   </Text>
-                  <Text style={styles.historyLabel}>Lectura {index + 1}</Text>
+                  <Text style={styles.historyLabel}>
+                    {item.student.grade ?? '-'} · {item.student.group_name ?? '-'} · {new Date(item.occurred_at).toLocaleTimeString()}
+                  </Text>
                 </View>
                 <View style={[styles.historyBadge, { backgroundColor: view.soft }]}>
                   <Text style={[styles.historyBadgeText, { color: view.dark }]}>{view.label}</Text>
@@ -366,13 +374,13 @@ const styles = StyleSheet.create({
   },
   sensorCard: {
     alignItems: 'center',
-    paddingHorizontal: 24,
-    paddingVertical: 24,
+    paddingHorizontal: 20,
+    paddingVertical: 16,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#eeedf4',
     backgroundColor: '#ffffff',
-    gap: 8,
+    gap: 6,
     shadowColor: '#131b2e',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -380,29 +388,29 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   sensorRing: {
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     borderWidth: 4,
     borderColor: '#dedbfc',
     backgroundColor: '#eeecff',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   sensorIcon: {
-    width: 58,
-    height: 58,
-    borderRadius: 29,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: '#4f46e5',
     alignItems: 'center',
     justifyContent: 'center',
   },
   sensorHalo: {
     position: 'absolute',
-    width: 88,
-    height: 88,
-    borderRadius: 44,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     borderWidth: 2,
     borderColor: '#4f46e5',
   },
@@ -413,23 +421,23 @@ const styles = StyleSheet.create({
     borderRightColor: '#ffffff',
   },
   signalArcOuter: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
   },
   signalArcMiddle: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
   },
   signalArcInner: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
+    width: 12,
+    height: 12,
+    borderRadius: 6,
   },
   sensorTitle: {
     color: '#131b2e',
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '700',
     textAlign: 'center',
   },
@@ -550,16 +558,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 12,
-    padding: 16,
+    padding: 12,
     borderRadius: 16,
     borderWidth: 1,
   },
   modeBannerText: { flex: 1, gap: 2 },
-  modeBannerCaption: { color: '#ffffffcc', fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
-  modeBannerTitle: { color: '#ffffff', fontSize: 24, fontWeight: '800' },
+  modeBannerCaption: { color: '#ffffffcc', fontSize: 11, fontWeight: '600', letterSpacing: 0.5 },
+  modeBannerTitle: { color: '#ffffff', fontSize: 20, fontWeight: '800' },
   modeSwitchButton: {
     minHeight: 44,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     borderRadius: 10,
     backgroundColor: '#ffffff',
     alignItems: 'center',

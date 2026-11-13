@@ -13,7 +13,7 @@ function setup(lookup = async () => student) {
       records.push({ student, type });
       registration = { status: 'saved', confirmed: { event: {
         id: `event-${records.length}`, student_id: student.id, school_id: student.school_id,
-        bracelet_id: student.bracelet_id, type,
+        bracelet_id: student.bracelet_id, type, occurred_at: '2026-11-11T07:48:12Z',
       } } };
     },
   };
@@ -123,4 +123,39 @@ test('a recovered confirmation also protects against a repeated scan after retry
   await scanAndWait(fixture.scanner, 'uid-a');
   assert.equal(fixture.records.length, 0);
   assert.equal(fixture.scanner.getState().status, 'duplicate');
+});
+
+test('keeps the registered student per mode, newest first, capped at five; switching mode keeps both lists', async () => {
+  const { scanner, setRegistration } = setup();
+  await scanAndWait(scanner, 'uid-a');
+  scanner.selectMode('exit');
+  await scanAndWait(scanner, 'uid-b');
+  scanner.selectMode('entry');
+  for (let index = 0; index < 6; index += 1) {
+    setRegistration({ status: 'idle', confirmed: null });
+    scanner.selectMode('entry');
+    await scanAndWait(scanner, `uid-${index}`);
+  }
+
+  const { recent } = scanner.getState();
+  assert.equal(recent.exit.length, 1);
+  assert.equal(recent.exit[0].student.first_name, 'Ana');
+  assert.equal(recent.exit[0].occurred_at, '2026-11-11T07:48:12Z');
+  assert.equal(recent.entry.length, 5);
+  assert.equal(new Set(recent.entry.map(item => item.id)).size, 5);
+});
+
+test('unknown bracelets, errors and repeated callbacks add no recent movement', async () => {
+  const unknown = setup(async () => null);
+  await scanAndWait(unknown.scanner, 'uid-x');
+  const failing = setup(async () => { throw new Error('offline'); });
+  await scanAndWait(failing.scanner, 'uid-y');
+  const repeated = setup();
+  await scanAndWait(repeated.scanner, 'uid-a');
+  await scanAndWait(repeated.scanner, 'uid-a');
+
+  assert.deepEqual(unknown.scanner.getState().recent, { entry: [], exit: [] });
+  assert.deepEqual(failing.scanner.getState().recent, { entry: [], exit: [] });
+  assert.equal(repeated.scanner.getState().status, 'duplicate');
+  assert.equal(repeated.scanner.getState().recent.entry.length, 1);
 });

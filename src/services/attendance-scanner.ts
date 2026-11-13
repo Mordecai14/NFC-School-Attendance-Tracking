@@ -2,8 +2,14 @@ import type { Student } from './student-lookup';
 import type { AttendanceType } from './attendance';
 import type { createAttendanceRecorder } from './attendance-recorder';
 
+export type RecentMovement = { id: string; student: Student; occurred_at: string };
+
+const MAX_RECENT = 5;
+
 type ScanState = {
   mode: AttendanceType;
+  // Movimientos recientes por modo; cambiar de modo nunca borra el otro.
+  recent: Record<AttendanceType, RecentMovement[]>;
   readingMode: AttendanceType | null;
   identifier: string | null;
   student: Student | null;
@@ -14,7 +20,7 @@ export function createAttendanceScanner(options: {
   lookup(identifier: string): Promise<Student | null>;
   recorder: Pick<ReturnType<typeof createAttendanceRecorder>, 'getState' | 'record'>;
 }) {
-  let state: ScanState = { mode: 'entry', readingMode: null, identifier: null, student: null, status: 'ready' };
+  let state: ScanState = { mode: 'entry', recent: { entry: [], exit: [] }, readingMode: null, identifier: null, student: null, status: 'ready' };
   let busy = false;
   let rearmedConfirmationId: string | null = null;
   const listeners = new Set<() => void>();
@@ -23,6 +29,16 @@ export function createAttendanceScanner(options: {
     listeners.forEach(listener => listener());
   };
   const available = () => !busy && ['idle', 'saved'].includes(options.recorder.getState().status);
+
+  function remember(student: Student, mode: AttendanceType) {
+    const registration = options.recorder.getState();
+    const saved = registration.status === 'saved' ? registration.confirmed : registration.status === 'pending' ? registration.pending : null;
+    const event = saved?.event;
+    if (!event || event.student_id !== student.id || event.type !== mode) return;
+    if (state.recent[mode].some(item => item.id === event.id)) return;
+    const recent = [{ id: event.id, student, occurred_at: event.occurred_at }, ...state.recent[mode]].slice(0, MAX_RECENT);
+    state = { ...state, recent: { ...state.recent, [mode]: recent } };
+  }
 
   async function process(identifier: string, mode: AttendanceType) {
     let result: Pick<ScanState, 'student' | 'status'> = { student: null, status: 'error' };
@@ -39,6 +55,7 @@ export function createAttendanceScanner(options: {
           result = { student, status: 'duplicate' };
         } else {
           await options.recorder.record(student, mode);
+          remember(student, mode);
           result = { student, status: 'identified' };
         }
       }

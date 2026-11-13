@@ -5,29 +5,23 @@ export type NfcCurrentResult =
   | { status: 'detected'; identifier: string }
   | { status: 'error'; message: string };
 
-export type NfcReadMode = 'entry' | 'exit';
-
 export type NfcReaderState = {
   availability: NfcAvailability;
   current: NfcCurrentResult;
-  // Cada modo conserva su propio historial; cambiar de modo nunca lo borra.
-  history: Record<NfcReadMode, string[]>;
 };
 
 export type NfcReaderAction =
-  | { type: 'success'; identifier: string; mode: NfcReadMode }
+  | { type: 'success'; identifier: string }
   | { type: 'error'; message: string }
   | { type: 'availability'; available: boolean }
   | { type: 'no-event' };
 
-const MAX_HISTORY = 5;
 const EMPTY_IDENTIFIER_MESSAGE = 'No se pudo leer el identificador de la pulsera.';
 
 export function createInitialNfcReaderState(): NfcReaderState {
   return {
     availability: 'available',
     current: { status: 'waiting' },
-    history: { entry: [], exit: [] },
   };
 }
 
@@ -47,10 +41,6 @@ export function reduceNfcReaderState(
       return {
         ...state,
         current: { status: 'detected', identifier: action.identifier },
-        history: {
-          ...state.history,
-          [action.mode]: [...state.history[action.mode], action.identifier].slice(-MAX_HISTORY),
-        },
       };
     }
     case 'error':

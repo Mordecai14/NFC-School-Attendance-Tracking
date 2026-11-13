@@ -21,7 +21,7 @@ const student = {
 
 function renderScreen({
   status = 'idle', lookupStatus = 'ready', detected = false, available = true,
-  mode = 'entry', switchOpen = false, history = { entry: [], exit: [] },
+  mode = 'entry', readingMode = mode, switchOpen = false, recent = { entry: [], exit: [] },
 } = {}) {
   const actions = { retries: 0, modes: [], switchOpen: [] };
   const registration = {
@@ -50,7 +50,6 @@ function renderScreen({
       useNfcReader: () => ({
         availability: available ? 'available' : 'unavailable',
         current: detected ? { status: 'detected', identifier: '04:A3:89' } : { status: 'waiting' },
-        history: detected && !history.entry.length ? { entry: ['04:A3:89'], exit: [] } : history,
       }),
     },
     '@/hooks/use-attendance-registration': {
@@ -59,7 +58,7 @@ function renderScreen({
     '@/hooks/use-attendance-scanner': {
       useAttendanceScanner: () => ({
         state: {
-          status: lookupStatus, mode, readingMode: mode,
+          status: lookupStatus, mode, readingMode, recent,
           student: ['identified', 'duplicate'].includes(lookupStatus) ? student : null,
         },
         scan() {}, selectMode(mode) { actions.modes.push(mode); },
@@ -93,7 +92,7 @@ test('a confirmed movement uses one hero card with a dummy photo and its real ti
   assert.match(text, /Alumno Prueba/);
   assert.ok(text.includes(new Date(event.occurred_at).toLocaleTimeString()));
   assert.doesNotMatch(text, /Última pulsera detectada/);
-  assert.equal(nodes.filter(node => node.type === 'Image').length, 2);
+  assert.equal(nodes.filter(node => node.type === 'Image').length, 1);
 });
 
 test('the idle sensor invites scanning without inventing confirmed attendance', () => {
@@ -151,16 +150,23 @@ test('changing mode requires opening the modal and confirming; cancel changes no
   assert.deepEqual(modal.actions.switchOpen, [false, false]);
 });
 
-test('each mode shows its own view and its own readings', () => {
-  const history = { entry: ['ENTRY-1'], exit: ['EXIT-1', 'EXIT-2'] };
-  const entry = renderScreen({ mode: 'entry', history });
-  const exit = renderScreen({ mode: 'exit', history });
+test('each mode shows its own view and its students, never the bracelet UUID', () => {
+  const movement = (id, first_name, type) => ({
+    id, occurred_at: event.occurred_at, student: { ...student, first_name, last_name: type, grade: '5°', group_name: 'C' },
+  });
+  const recent = { entry: [movement('e1', 'Ana', 'Entrada')], exit: [movement('x1', 'Beto', 'Salida'), movement('x2', 'Carla', 'Salida')] };
+  const entry = renderScreen({ mode: 'entry', recent, detected: true });
+  const exit = renderScreen({ mode: 'exit', recent });
   assert.match(entry.text, /Entradas/);
-  assert.match(entry.text, /ENTRY-1/);
-  assert.doesNotMatch(entry.text, /EXIT-1/);
+  assert.match(entry.text, /Ana\s+Entrada/);
+  assert.match(entry.text, /5°\s+·\s+C/);
+  assert.doesNotMatch(entry.text, /Beto/);
   assert.match(exit.text, /Salidas/);
-  assert.match(exit.text, /EXIT-1/);
-  assert.doesNotMatch(exit.text, /ENTRY-1/);
+  assert.match(exit.text, /Beto/);
+  assert.match(exit.text, /Carla/);
+  assert.doesNotMatch(exit.text, /Ana/);
+  const list = entry.text.slice(entry.text.indexOf('Lecturas de entradas'));
+  assert.doesNotMatch(list, /04:A3:89/);
   assert.ok(exit.nodes.some(node => node.props?.accessibilityLabel === 'Cambiar a ENTRADA'));
   assert.match(renderScreen({ available: false }).text, /NFC no disponible/);
 });
@@ -183,4 +189,18 @@ test('lookup failure and duplicate confirmation retain their recovery instructio
     renderScreen({ status: 'saved', detected: true, lookupStatus: 'duplicate' }).text,
     /Para repetirla intencionalmente, selecciona de nuevo el modo/,
   );
+});
+
+test('switching mode hides the other mode\'s last confirmation and detected bracelet', () => {
+  const entry = renderScreen({ status: 'saved', lookupStatus: 'identified', detected: true, mode: 'entry' });
+  assert.match(entry.text, /Último registro confirmado/);
+
+  const exit = renderScreen({
+    status: 'saved', lookupStatus: 'identified', detected: true, mode: 'exit', readingMode: 'entry',
+  });
+  assert.doesNotMatch(exit.text, /Último registro confirmado/);
+  assert.doesNotMatch(exit.text, /Alumno Prueba/);
+  assert.doesNotMatch(exit.text, /Última pulsera detectada|04:A3:89 /);
+  assert.match(exit.text, /Acerca la pulsera al dispositivo/);
+  assert.match(exit.text, /Salidas/);
 });
