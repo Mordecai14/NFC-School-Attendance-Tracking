@@ -1,4 +1,4 @@
-import { useCallback, useReducer } from 'react';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { useFocusEffect } from 'expo-router';
 import { AppState } from 'react-native';
 import NfcManager, { NfcAdapter, NfcEvents } from 'react-native-nfc-manager';
@@ -7,6 +7,7 @@ import { createNfcReaderSession } from '../services/nfc-reader-session';
 import {
   createInitialNfcReaderState,
   reduceNfcReaderState,
+  type NfcReadMode,
 } from './nfc-reader-state';
 
 const READER_MODE_FLAGS =
@@ -29,15 +30,20 @@ const reader = createNfcReaderSession({
   listenState: listener => NfcManager.setEventListener(NfcEvents.StateChanged, listener),
 });
 
-export function useNfcReader(onRead?: (identifier: string) => boolean) {
+export function useNfcReader(onRead?: (identifier: string) => boolean, mode: NfcReadMode = 'entry') {
   const [state, dispatch] = useReducer(reduceNfcReaderState, undefined, createInitialNfcReaderState);
+  // Ref para no reabrir la sesión NFC cada vez que cambia el modo.
+  const modeRef = useRef(mode);
+  useEffect(() => {
+    modeRef.current = mode;
+  }, [mode]);
 
   useFocusEffect(useCallback(() => {
     const session = reader.acquire({
       onTag(tag) {
         const identifier = typeof tag.id === 'string' ? tag.id : '';
         if (identifier.trim() && onRead && !onRead(identifier)) return;
-        dispatch({ type: 'success', identifier });
+        dispatch({ type: 'success', identifier, mode: modeRef.current });
       },
       onAvailability: available => dispatch({ type: 'availability', available }),
       onError: () => dispatch({ type: 'error', message: 'No se pudo leer la pulsera. Puedes volver a intentar.' }),

@@ -1,21 +1,21 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Image } from 'expo-image';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, {
-  cancelAnimation,
-  useAnimatedStyle,
-  useReducedMotion,
-  useSharedValue,
-  withRepeat,
-  withTiming,
+   cancelAnimation,
+   useAnimatedStyle,
+   useReducedMotion,
+   useSharedValue,
+   withRepeat,
+   withTiming,
 } from 'react-native-reanimated';
 
 import { useNfcReader } from '@/hooks/use-nfc-reader';
 import { useAttendanceRegistration } from '@/hooks/use-attendance-registration';
 import { useAttendanceScanner } from '@/hooks/use-attendance-scanner';
 
-function NfcSensorIndicator({ active }: { active: boolean }) {
+function NfcSensorIndicator({ active, color }: { active: boolean; color: string }) {
   const reduceMotion = useReducedMotion();
   const pulse = useSharedValue(0);
   const animated = active && !reduceMotion;
@@ -41,8 +41,8 @@ function NfcSensorIndicator({ active }: { active: boolean }) {
       importantForAccessibility="no-hide-descendants"
       style={styles.sensorRing}
     >
-      <Animated.View pointerEvents="none" style={[styles.sensorHalo, haloStyle]} />
-      <View style={styles.sensorIcon}>
+      <Animated.View pointerEvents="none" style={[styles.sensorHalo, { borderColor: color }, haloStyle]} />
+      <View style={[styles.sensorIcon, { backgroundColor: color }]}>
         <View style={[styles.signalArc, styles.signalArcOuter]} />
         <View style={[styles.signalArc, styles.signalArcMiddle]} />
         <View style={[styles.signalArc, styles.signalArcInner]} />
@@ -51,19 +51,35 @@ function NfcSensorIndicator({ active }: { active: boolean }) {
   );
 }
 
+const MODE_VIEW = {
+  entry: { label: 'ENTRADA', title: 'Entradas', arrow: '↘', color: '#047857', soft: '#d1fae5', dark: '#065f46' },
+  exit: { label: 'SALIDA', title: 'Salidas', arrow: '↗', color: '#b45309', soft: '#fef3c7', dark: '#92400e' },
+} as const;
+
 export default function HomeScreen() {
   const attendance = useAttendanceRegistration();
   const scanner = useAttendanceScanner();
-  const state = useNfcReader(scanner.scan);
-  const { availability, current } = state;
   const lookup = scanner.state;
   const registration = attendance.state;
-  const canScan = ['idle', 'saved'].includes(registration.status) && lookup.status !== 'looking-up';
   const mode = registration.pending?.event.type ?? lookup.mode;
+  const state = useNfcReader(scanner.scan, mode);
+  const { availability, current } = state;
+  const [switchOpen, setSwitchOpen] = useState(false);
+  const canScan = ['idle', 'saved'].includes(registration.status) && lookup.status !== 'looking-up';
   const displayedEvent = registration.status === 'saved' ? registration.confirmed : registration.pending;
+  const view = MODE_VIEW[mode];
+  const otherMode = mode === 'entry' ? 'exit' : 'entry';
+  const otherView = MODE_VIEW[otherMode];
+  const history = state.history[mode];
+
   const currentConfirmed = registration.status === 'saved' && !!lookup.student &&
     registration.confirmed?.event.bracelet_id === lookup.student.bracelet_id &&
     registration.confirmed?.event.type === lookup.readingMode;
+  const displayedStudent = displayedEvent && lookup.student &&
+    displayedEvent.event.student_id === lookup.student.id &&
+    displayedEvent.event.school_id === lookup.student.school_id &&
+    displayedEvent.event.bracelet_id === lookup.student.bracelet_id
+    ? lookup.student : null;
 
   const currentLabel =
     state.availability === 'unavailable'
@@ -71,7 +87,7 @@ export default function HomeScreen() {
       : !canScan
         ? lookup.status === 'looking-up' ? 'Identificando al alumno y procesando el movimiento…' : 'Resuelve el registro pendiente antes de continuar.'
         : state.current.status === 'waiting'
-        ? 'Esperando una pulsera…'
+        ? 'Acerca la pulsera al dispositivo'
         : state.current.status === 'detected'
           ? 'Pulsera detectada'
           : state.current.message;
@@ -83,28 +99,59 @@ export default function HomeScreen() {
           <Text style={styles.title}>Control de Asistencia</Text>
           <Text style={styles.secondaryText}>Escaneo NFC</Text>
         </View>
-        <View accessibilityRole="radiogroup" accessibilityLabel="Modo de registro de asistencia" style={styles.modeSelector}>
+
+        <View style={[styles.modeBanner, { backgroundColor: view.color, borderColor: view.dark }]}>
+          <View style={styles.modeBannerText}>
+            <Text style={styles.modeBannerCaption}>Modo actual</Text>
+            <Text accessibilityRole="header" style={styles.modeBannerTitle}>{view.arrow} {view.title}</Text>
+          </View>
           <Pressable
-            accessibilityRole="radio"
-            accessibilityLabel="Entrada"
-            accessibilityState={{ checked: mode === 'entry', selected: mode === 'entry', disabled: !canScan }}
+            accessibilityRole="button"
+            accessibilityLabel={`Cambiar a ${otherView.label}`}
+            accessibilityState={{ disabled: !canScan }}
             disabled={!canScan}
-            onPress={() => scanner.selectMode('entry')}
-            style={({ pressed }) => [styles.modeOption, mode === 'entry' && styles.modeEntrySelected, !canScan && styles.disabledButton, pressed && styles.pressedButton]}
+            onPress={() => setSwitchOpen(true)}
+            style={({ pressed }) => [styles.modeSwitchButton, !canScan && styles.disabledButton, pressed && styles.pressedButton]}
           >
-            <Text style={[styles.modeText, mode === 'entry' && styles.modeSelectedText]}>↘ ENTRADA</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="radio"
-            accessibilityLabel="Salida"
-            accessibilityState={{ checked: mode === 'exit', selected: mode === 'exit', disabled: !canScan }}
-            disabled={!canScan}
-            onPress={() => scanner.selectMode('exit')}
-            style={({ pressed }) => [styles.modeOption, mode === 'exit' && styles.modeExitSelected, !canScan && styles.disabledButton, pressed && styles.pressedButton]}
-          >
-            <Text style={[styles.modeText, mode === 'exit' && styles.modeSelectedText]}>↗ SALIDA</Text>
+            <Text style={[styles.modeSwitchText, { color: view.dark }]}>Cambiar</Text>
           </Pressable>
         </View>
+
+        <Modal
+          transparent
+          animationType="fade"
+          visible={switchOpen}
+          onRequestClose={() => setSwitchOpen(false)}
+        >
+          <View style={styles.modalBackdrop}>
+            <View accessibilityViewIsModal style={styles.modalCard}>
+              <Text accessibilityRole="header" style={styles.modalTitle}>¿Cambiar a {otherView.label}?</Text>
+              <Text style={styles.secondaryText}>
+                Las próximas pulseras se registrarán como {otherView.label.toLowerCase()}. Los registros de {view.label.toLowerCase()} se conservan y volverás a verlos al regresar.
+              </Text>
+              <View style={styles.modalActions}>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => setSwitchOpen(false)}
+                  style={({ pressed }) => [styles.modalButton, styles.modalCancel, pressed && styles.pressedButton]}
+                >
+                  <Text style={styles.modalCancelText}>Cancelar</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => {
+                    scanner.selectMode(otherMode);
+                    setSwitchOpen(false);
+                  }}
+                  style={({ pressed }) => [styles.modalButton, { backgroundColor: otherView.color }, pressed && styles.pressedButton]}
+                >
+                  <Text style={styles.entryButtonText}>Confirmar</Text>
+                </Pressable>
+              </View>
+            </View>
+          </View>
+        </Modal>
+
         <View
           accessibilityLiveRegion="polite"
           style={[
@@ -113,19 +160,21 @@ export default function HomeScreen() {
             state.availability === 'unavailable' && styles.unavailableCard,
           ]}
         >
-          <NfcSensorIndicator active={canScan && availability === 'available' && current.status !== 'error'} />
+          <NfcSensorIndicator color={view.color} active={canScan && availability === 'available' && current.status !== 'error'} />
           <Text style={styles.sensorTitle}>
             {availability === 'unavailable'
               ? 'NFC no disponible'
               : current.status === 'error'
-                ? 'Error de lectura'
-                : !canScan ? 'Espera la confirmación'
-                  : mode === 'entry' ? 'Sensor NFC Activo (Entradas)' : 'Sensor NFC Activo (Salidas)'}
+              ? 'Error de lectura'
+              : !canScan
+              ? 'Espera la confirmación'
+              : 'Sensor NFC Activo'}
           </Text>
           <Text style={styles.resultText}>{currentLabel}</Text>
         </View>
 
-        {availability === 'available' && current.status === 'detected' && (
+        {availability === 'available' && current.status === 'detected' &&
+          (!currentConfirmed || !displayedStudent || lookup.status === 'duplicate') && (
           <View accessibilityLiveRegion="polite" style={styles.resultCard}>
             <View style={styles.cardHeading}>
               <Text style={styles.sectionTitle}>Última pulsera detectada</Text>
@@ -138,11 +187,18 @@ export default function HomeScreen() {
               <Text style={styles.errorText}>No se pudo consultar el alumno. Comprueba la sesión y la conexión, y vuelve a escanear.</Text>
             ) : lookup.student ? (
               <View style={styles.studentCard}>
-                <Text style={styles.sectionTitle}>Alumno</Text>
-                <Text style={styles.studentName}>{lookup.student.first_name} {lookup.student.last_name}</Text>
-                <Text style={styles.secondaryText}>
-                  Grado: {lookup.student.grade ?? 'No registrado'} · Grupo: {lookup.student.group_name ?? 'No registrado'}
-                </Text>
+                <Image
+                  source={require('../../assets/images/student-placeholder.svg')}
+                  style={styles.studentAvatar}
+                  contentFit="cover"
+                  accessible={false}
+                />
+                <View style={styles.studentDetails}>
+                  <Text style={styles.studentName}>{lookup.student.first_name} {lookup.student.last_name}</Text>
+                  <Text style={styles.secondaryText}>
+                    Grado: {lookup.student.grade ?? 'No registrado'} · Grupo: {lookup.student.group_name ?? 'No registrado'}
+                  </Text>
+                </View>
               </View>
             ) : (
               <Text style={styles.secondaryText}>No hay un alumno activo asignado a esta pulsera.</Text>
@@ -151,8 +207,8 @@ export default function HomeScreen() {
               {lookup.status === 'duplicate'
                 ? 'La última asistencia de esta pulsera ya está confirmada en este modo. Para repetirla intencionalmente, selecciona de nuevo el modo y vuelve a acercar la pulsera.'
                 : currentConfirmed
-                  ? 'Registro confirmado. Selecciona el modo antes de acercar la siguiente pulsera.'
-                  : 'El movimiento usa el modo seleccionado al leer la pulsera. Espera la confirmación de guardado.'}
+                ? 'Registro confirmado. Selecciona el modo antes de acercar la siguiente pulsera.'
+                : 'El movimiento usa el modo seleccionado al leer la pulsera. Espera la confirmación de guardado.'}
             </Text>
           </View>
         )}
@@ -160,25 +216,65 @@ export default function HomeScreen() {
         {(registration.status !== 'idle' || registration.error) && (
           <View
             accessibilityLiveRegion="polite"
-            style={[styles.resultCard, registration.status === 'saved' && styles.confirmedCard]}
+            style={[
+              styles.resultCard,
+              registration.status === 'pending' && styles.unavailableCard,
+              registration.status === 'blocked' && styles.errorCard,
+            ]}
           >
-            <Text style={styles.sectionTitle}>
-              {registration.status === 'saved' ? 'Último registro confirmado'
-                : registration.status === 'saving' ? 'Guardando asistencia…'
-                  : registration.status === 'pending' ? 'Registro pendiente de confirmación'
-                    : registration.status === 'loading' ? 'Comprobando registros pendientes…'
+            <View style={[styles.cardHeading, styles.confirmationHeading]}>
+              <View style={styles.confirmationLabel}>
+                {registration.status === 'saved' && (
+                  <Text accessible={false} style={styles.confirmationIcon}>✓</Text>
+                )}
+                <Text style={[styles.sectionTitle, registration.status === 'saved' && styles.confirmedText]}>
+                  {registration.status === 'saved' ? 'Último registro confirmado'
+                    : registration.status === 'saving' ? 'Guardando asistencia…'
+                    : registration.status === 'pending' ? 'Registro pendiente de confirmación'
+                      : registration.status === 'loading' ? 'Comprobando registros pendientes…'
                       : 'No se puede registrar todavía'}
-            </Text>
-            {displayedEvent && (
-              <>
-                <Text style={styles.studentName}>{displayedEvent.studentName}</Text>
-                <Text style={styles.secondaryText}>
-                  {displayedEvent.event.type === 'entry' ? 'Entrada' : 'Salida'} · {new Date(displayedEvent.event.occurred_at).toLocaleTimeString()}
                 </Text>
-              </>
+              </View>
+              {displayedEvent && (
+                <Text style={styles.eventTime}>{new Date(displayedEvent.event.occurred_at).toLocaleTimeString()}</Text>
+              )}
+            </View>
+            {displayedEvent && (
+              <View style={styles.studentCard}>
+                <Image
+                  source={require('../../assets/images/student-placeholder.svg')}
+                  style={styles.studentAvatar}
+                  contentFit="cover"
+                  accessible={false}
+                />
+                <View style={styles.studentDetails}>
+                  <Text style={styles.studentName}>{displayedEvent.studentName}</Text>
+                  <View style={styles.studentMeta}>
+                    {displayedStudent && (
+                      <Text style={styles.secondaryText}>
+                        {displayedStudent.grade ?? '-'} · {displayedStudent.group_name ?? '-'}
+                      </Text>
+                    )}
+                    <View style={[
+                      styles.movementBadge,
+                      registration.status === 'saved'
+                        ? displayedEvent.event.type === 'entry' ? styles.entryBadge : styles.exitBadge
+                        : styles.pendingBadge,
+                    ]}>
+                      <Text style={[
+                        styles.movementText,
+                        registration.status === 'saved'
+                          ? displayedEvent.event.type === 'entry' ? styles.entryBadgeText : styles.exitBadgeText
+                          : styles.pendingBadgeText,
+                      ]}>
+                        {displayedEvent.event.type === 'entry' ? 'Entrada' : 'Salida'}
+                      </Text>
+                    </View>
+                  </View>
+                </View>
+              </View>
             )}
             {['loading', 'saving'].includes(registration.status) && <ActivityIndicator color="#4f46e5" />}
-            {registration.status === 'saved' && <Text style={styles.confirmedText}>El evento se guardó en Supabase.</Text>}
             {registration.status === 'pending' && (
               <>
                 <Text style={styles.errorText}>
@@ -194,26 +290,30 @@ export default function HomeScreen() {
               </>
             )}
             {registration.status === 'blocked' && (
-              <Text style={styles.errorText}>No se pudo recuperar el almacenamiento local. No borres los datos de la app; reiníciala y comprueba el registro pendiente antes de continuar.</Text>
+              <Text style={styles.errorText}>
+                No se pudo recuperar el almacenamiento local. No borres los datos de la app; reiníciala y comprueba el registro pendiente antes de continuar.
+              </Text>
             )}
             {registration.error === 'prepare' && (
-              <Text style={styles.errorText}>No se envió ningún evento. Comprueba la sesión, la conexión y que la escuela tenga un único dispositivo activo; vuelve a acercar la pulsera.</Text>
+              <Text style={styles.errorText}>
+                No se envió ningún evento. Comprueba la sesión, la conexión y que la escuela tenga un único dispositivo activo; vuelve a acercar la pulsera.
+              </Text>
             )}
           </View>
         )}
 
         <View style={styles.historySection}>
           <View style={styles.historyHeading}>
-            <Text accessibilityRole="header" style={styles.historyTitle}>Lecturas recientes</Text>
+            <Text accessibilityRole="header" style={styles.historyTitle}>Lecturas de {view.title.toLowerCase()}</Text>
             <Text style={styles.historyCaption}>Esta sesión</Text>
           </View>
-          {state.history.length === 0 ? (
+          {history.length === 0 ? (
             <View style={styles.emptyCard}>
               <Text style={styles.sectionTitle}>Todavía no hay lecturas.</Text>
               <Text style={styles.secondaryText}>Las pulseras detectadas aparecerán aquí.</Text>
             </View>
           ) : (
-            state.history.map((identifier, index) => (
+            history.map((identifier, index) => (
               <View key={`${index}-${identifier}`} style={styles.historyRow}>
                 <Image
                   source={require('../../assets/images/student-placeholder.svg')}
@@ -227,8 +327,8 @@ export default function HomeScreen() {
                   </Text>
                   <Text style={styles.historyLabel}>Lectura {index + 1}</Text>
                 </View>
-                <View style={styles.historyBadge}>
-                  <Text style={styles.historyBadgeText}>NFC</Text>
+                <View style={[styles.historyBadge, { backgroundColor: view.soft }]}>
+                  <Text style={[styles.historyBadgeText, { color: view.dark }]}>{view.label}</Text>
                 </View>
               </View>
             ))
@@ -247,32 +347,37 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     paddingHorizontal: 20,
-    paddingTop: 24,
+    paddingTop: 20,
     paddingBottom: 32,
-    gap: 20,
+    gap: 16,
     width: '100%',
     maxWidth: 600,
     alignSelf: 'center',
   },
   header: {
     gap: 4,
-    marginBottom: 4,
+    marginBottom: 8,
   },
   title: {
     color: '#4f46e5',
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '700',
     letterSpacing: -0.5,
   },
   sensorCard: {
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingVertical: 24,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#eeedf4',
     backgroundColor: '#ffffff',
     gap: 8,
+    shadowColor: '#131b2e',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
   sensorRing: {
     width: 88,
@@ -324,12 +429,12 @@ const styles = StyleSheet.create({
   },
   sensorTitle: {
     color: '#131b2e',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
     textAlign: 'center',
   },
   resultCard: {
-    padding: 20,
+    padding: 16,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: '#eeedf4',
@@ -341,6 +446,30 @@ const styles = StyleSheet.create({
     borderBottomColor: '#eaedff',
     paddingBottom: 12,
     marginBottom: 4,
+  },
+  confirmationHeading: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  confirmationLabel: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 1,
+  },
+  confirmationIcon: {
+    color: '#00976b',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  eventTime: {
+    color: '#4f46e5',
+    fontSize: 18,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
   errorCard: {
     backgroundColor: '#fff0ee',
@@ -374,28 +503,96 @@ const styles = StyleSheet.create({
     flexShrink: 1,
   },
   studentCard: {
-    gap: 8,
-    paddingVertical: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingVertical: 4,
   },
+  studentAvatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 2,
+    borderColor: '#e2dfff',
+    backgroundColor: '#eaedff',
+    flexShrink: 0,
+  },
+  studentDetails: {
+    flex: 1,
+    minWidth: 0,
+    gap: 6,
+  },
+  studentMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  movementBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  movementText: { fontSize: 12, fontWeight: '700' },
+  entryBadge: { backgroundColor: '#d1fae5' },
+  entryBadgeText: { color: '#065f46' },
+  exitBadge: { backgroundColor: '#fef3c7' },
+  exitBadgeText: { color: '#92400e' },
+  pendingBadge: { backgroundColor: '#eaedff' },
+  pendingBadgeText: { color: '#464555' },
   studentName: {
     color: '#131b2e',
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '700',
   },
-  modeSelector: {
+  modeBanner: {
     flexDirection: 'row',
-    gap: 4,
-    padding: 4,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+    padding: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#dedbfc',
-    backgroundColor: '#eaedff',
   },
-  modeOption: { flex: 1, minHeight: 52, borderRadius: 12, padding: 12, alignItems: 'center', justifyContent: 'center' },
-  modeText: { color: '#464555', fontSize: 16, fontWeight: '700', textAlign: 'center', letterSpacing: 0.5 },
-  modeSelectedText: { color: '#ffffff' },
-  modeEntrySelected: { backgroundColor: '#047857' },
-  modeExitSelected: { backgroundColor: '#b45309' },
+  modeBannerText: { flex: 1, gap: 2 },
+  modeBannerCaption: { color: '#ffffffcc', fontSize: 12, fontWeight: '600', letterSpacing: 0.5 },
+  modeBannerTitle: { color: '#ffffff', fontSize: 24, fontWeight: '800' },
+  modeSwitchButton: {
+    minHeight: 44,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modeSwitchText: { fontSize: 14, fontWeight: '700' },
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(19, 27, 46, 0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 420,
+    padding: 20,
+    borderRadius: 16,
+    backgroundColor: '#ffffff',
+    gap: 12,
+  },
+  modalTitle: { color: '#131b2e', fontSize: 20, fontWeight: '700' },
+  modalActions: { flexDirection: 'row', gap: 12, marginTop: 4 },
+  modalButton: {
+    flex: 1,
+    minHeight: 48,
+    borderRadius: 12,
+    padding: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalCancel: { backgroundColor: '#eaedff' },
+  modalCancelText: { color: '#464555', fontSize: 14, fontWeight: '700' },
   attendanceButton: {
     flex: 1,
     minHeight: 52,
@@ -408,8 +605,7 @@ const styles = StyleSheet.create({
   entryButtonText: { color: '#ffffff', fontSize: 14, fontWeight: '700', textAlign: 'center' },
   disabledButton: { opacity: 0.45 },
   pressedButton: { opacity: 0.8 },
-  confirmedCard: { backgroundColor: '#eefbf3', borderColor: '#b4dec3' },
-  confirmedText: { color: '#176b38', fontSize: 15, fontWeight: '600' },
+  confirmedText: { color: '#008f68', fontSize: 12, fontWeight: '700', letterSpacing: 0.3 },
   historySection: {
     gap: 8,
     marginTop: 4,
@@ -431,7 +627,7 @@ const styles = StyleSheet.create({
   },
   historyTitle: {
     color: '#131b2e',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
   },
   secondaryText: {

@@ -5,14 +5,17 @@ export type NfcCurrentResult =
   | { status: 'detected'; identifier: string }
   | { status: 'error'; message: string };
 
+export type NfcReadMode = 'entry' | 'exit';
+
 export type NfcReaderState = {
   availability: NfcAvailability;
   current: NfcCurrentResult;
-  history: string[];
+  // Cada modo conserva su propio historial; cambiar de modo nunca lo borra.
+  history: Record<NfcReadMode, string[]>;
 };
 
 export type NfcReaderAction =
-  | { type: 'success'; identifier: string }
+  | { type: 'success'; identifier: string; mode: NfcReadMode }
   | { type: 'error'; message: string }
   | { type: 'availability'; available: boolean }
   | { type: 'no-event' };
@@ -24,7 +27,7 @@ export function createInitialNfcReaderState(): NfcReaderState {
   return {
     availability: 'available',
     current: { status: 'waiting' },
-    history: [],
+    history: { entry: [], exit: [] },
   };
 }
 
@@ -44,7 +47,10 @@ export function reduceNfcReaderState(
       return {
         ...state,
         current: { status: 'detected', identifier: action.identifier },
-        history: [...state.history, action.identifier].slice(-MAX_HISTORY),
+        history: {
+          ...state.history,
+          [action.mode]: [...state.history[action.mode], action.identifier].slice(-MAX_HISTORY),
+        },
       };
     }
     case 'error':
